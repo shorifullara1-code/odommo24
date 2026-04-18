@@ -74,6 +74,14 @@ const HomeOverview = () => {
     ];
   }, [siteSettings?.hero_images]);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     fetch('/api/health').then(r => r.json()).then(d => console.log('API Status:', d)).catch(e => console.error('API Unreachable:', e));
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
@@ -120,14 +128,23 @@ const HomeOverview = () => {
          <AnimatePresence mode="wait">
             <motion.div 
                key={currentImgIdx}
-               initial={{ opacity: 0, scale: 1.1 }}
-               animate={{ opacity: 0.4, scale: 1 }}
+               initial={{ opacity: 0, scale: 1.05 }}
+               animate={{ opacity: 1, scale: 1 }}
                exit={{ opacity: 0, scale: 0.95 }}
                transition={{ duration: 1.5 }}
-               className="absolute inset-0 z-0"
+               className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
             >
-               <img src={heroImages[currentImgIdx]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-               <div className="absolute inset-0 bg-gradient-to-r from-bento-dark via-bento-dark/80 to-transparent"></div>
+               <img 
+                 src={heroImages[currentImgIdx]} 
+                 className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-20 md:hidden scale-110" 
+                 referrerPolicy="no-referrer" 
+               />
+               <img 
+                 src={heroImages[currentImgIdx]} 
+                 className={`w-full h-full object-contain md:object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-30' : 'opacity-60 md:opacity-40'}`}
+                 referrerPolicy="no-referrer" 
+               />
+               <div className="absolute inset-0 bg-gradient-to-b from-bento-dark/80 via-transparent to-bento-dark md:bg-gradient-to-r md:from-bento-dark md:via-bento-dark/80 md:to-transparent"></div>
             </motion.div>
          </AnimatePresence>
 

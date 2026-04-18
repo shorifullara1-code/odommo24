@@ -15,37 +15,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'odommo24-secret-key-change-me';
+const app = express();
+const PORT = 3000;
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
 
-  app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
-  app.use(cookieParser());
+// --- API Routes ---
 
-  // --- API Routes ---
+// Auth Middleware
+const authenticateToken = (req: any, res: any, next: any) => {
+  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
 
-  // Auth Middleware
-  const authenticateToken = (req: any, res: any, next: any) => {
-    const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Access denied' });
-
-    try {
-      const verified = jwt.verify(token, JWT_SECRET);
-      req.user = verified;
-      next();
-    } catch (err) {
-      res.status(400).json({ error: 'Invalid token' });
-    }
-  };
-
-  const isAdmin = (req: any, res: any, next: any) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    const verified = jwt.verify(token, JWT_SECRET);
+    req.user = verified;
     next();
-  };
+  } catch (err) {
+    res.status(400).json({ error: 'Invalid token' });
+  }
+};
 
-  // Register
+const isAdmin = (req: any, res: any, next: any) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  next();
+};
+
+// Register
   app.post('/api/auth/register', async (req, res) => {
     const { 
       userId, password, name, email, phone, 
@@ -329,9 +327,12 @@ async function startServer() {
     });
   }
 
+// Export the app for Vercel
+export default app;
+
+// Start server for local development or traditional hosting
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
-
-startServer();

@@ -5,20 +5,21 @@
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Inter", sans-serif;
   
-  --color-bento-primary: #c0392b;
-  --color-bento-bg: #ffffff;
-  --color-bento-dark: #1a1f26;
-  --color-bento-light: #576574;
+  --color-bento-primary: #e74c3c;
+  --color-bento-bg: #f8f9fa;
+  --color-bento-dark: #0f172a;
+  --color-bento-light: #64748b;
   --color-bento-card: #ffffff;
   --color-bento-accent: #10b981;
   --color-bento-border: #e2e8f0;
 
   /* Vibrant Colors */
-  --color-vibrant-red: #ea2027;
-  --color-vibrant-blue: #0652dd;
-  --color-vibrant-green: #009432;
-  --color-vibrant-yellow: #ffc312;
-  --color-vibrant-purple: #9980fa;
+  --color-vibrant-red: #ff4757;
+  --color-vibrant-blue: #2e86de;
+  --color-vibrant-green: #2ecc71;
+  --color-vibrant-yellow: #f1c40f;
+  --color-vibrant-purple: #8e44ad;
+  --color-vibrant-orange: #f39c12;
 }
 
 @layer base {
@@ -28,11 +29,27 @@
 }
 
 .glass-morphism {
-  @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-2xl;
+  @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-700 hover:bg-white/80;
+}
+
+.glass-morphism-dark {
+  @apply bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl transition-all duration-700 hover:bg-black/50;
 }
 
 .vibrant-gradient {
-  background: linear-gradient(135deg, var(--color-bento-primary) 0%, #ff4757 100%);
+  background: linear-gradient(135deg, var(--color-bento-primary) 0%, var(--color-vibrant-orange) 50%, #ff4757 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.vibrant-glow {
+  @apply shadow-[0_0_20px_rgba(231,76,60,0.4)] hover:shadow-[0_0_40px_rgba(231,76,60,0.6)] transition-all duration-500;
 }
 
 .bento-card {

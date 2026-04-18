@@ -1,11 +1,11 @@
 import React, { useState, useEffect, createContext, useContext, useRef, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Users, MapPin, Phone, Mail, Calendar, Activity, 
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
-  Briefcase, GraduationCap, CreditCard, ArrowRight, Zap
+  Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -490,7 +490,7 @@ const Register = () => {
   return (
     <div className="max-w-6xl mx-auto py-32 px-6 space-y-20">
       <div className="text-center space-y-6 max-w-3xl mx-auto">
-         <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Become an Odommo member</span>
+         <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Become an Adomyo member</span>
          <h2 className="text-7xl font-serif text-bento-dark italic leading-tight">সদস্য আবেদন ফর্ম</h2>
          <p className="text-lg text-bento-light font-serif italic leading-relaxed">অদম্য ২৪-এর অংশ হয়ে আর্তমানবতার সেবায় নিজেকে নিয়োজিত করুন। সকল তথ্য সঠিকভাবে পূরণ করুন।</p>
       </div>
@@ -633,7 +633,7 @@ const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings:
           }
         });
         const link = document.createElement('a');
-        link.download = `Odommo24_Member_${profile?.userId || 'Card'}.png`;
+        link.download = `Adomyo24_Member_${profile?.userId || 'Card'}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       } catch (err) {
@@ -1170,6 +1170,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const logoUrl = siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100";
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -1177,72 +1178,143 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const NavLink = ({ to, children, icon: Icon }: any) => (
-    <Link 
-      to={to} 
-      className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-white/10 hover:text-bento-primary group text-white/70"
-    >
-      {Icon && <Icon size={14} className="group-hover:scale-125 transition-transform" />}
-      {children}
-    </Link>
-  );
+  const NavLink = ({ to, children, icon: Icon }: any) => {
+    const isActive = location.pathname === to;
+    return (
+      <Link 
+        to={to} 
+        className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative group overflow-hidden ${isActive ? 'bg-white/10 text-bento-primary' : 'text-white/70 hover:text-white'}`}
+      >
+        {Icon && <Icon size={14} className={`${isActive ? 'scale-125' : 'group-hover:scale-125'} transition-transform`} />}
+        {children}
+        {isActive && (
+          <motion.div layoutId="nav-active" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-bento-primary rounded-full" />
+        )}
+      </Link>
+    );
+  };
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
       <div className="container mx-auto px-6">
-        <div className={`flex items-center justify-between px-8 py-4 rounded-[2rem] transition-all duration-500 border border-white/10 ${scrolled ? 'bg-[#2f3640]/80 backdrop-blur-2xl shadow-2xl shadow-black/20' : 'bg-transparent'}`}>
+        <div className={`flex items-center justify-between px-8 py-4 rounded-[2.5rem] transition-all duration-500 border border-white/10 ${scrolled ? 'bg-bento-dark/80 backdrop-blur-3xl shadow-2xl shadow-black/40 ring-1 ring-white/5' : 'bg-transparent'}`}>
            <Link to="/" className="flex items-center gap-4 group">
-              <div className="w-12 h-12 bg-white rounded-2xl p-2 shadow-2xl transition group-hover:scale-110 group-hover:rotate-6">
+              <motion.div 
+                whileHover={{ rotate: 12, scale: 1.1 }}
+                className="w-12 h-12 bg-white rounded-2xl p-2 shadow-2xl relative overflow-hidden"
+              >
                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-              </div>
+                 <div className="absolute inset-0 bg-gradient-to-tr from-bento-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.div>
               <div className="hidden sm:block">
-                 <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Odommo 24</h2>
+                 <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Adomyo 24</h2>
                  <p className="text-[7px] font-black text-bento-primary uppercase tracking-[0.3em] mt-1 italic leading-none">The Fearless Youth</p>
               </div>
            </Link>
 
-           <div className="hidden lg:flex items-center gap-2">
+           {/* Desktop Links */}
+           <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
+              <NavLink to="/" icon={LayoutGrid}>হোম</NavLink>
               <NavLink to="/events" icon={Calendar}>ইভেন্ট</NavLink>
               <NavLink to="/donations" icon={Heart}>দান</NavLink>
-              <a href="#committee" className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-white/10 hover:text-bento-primary group text-white/70">কমিটি</a>
               <NavLink to="/gallery" icon={Camera}>গ্যালারি</NavLink>
            </div>
 
            <div className="flex items-center gap-4">
               {user ? (
                  <div className="flex items-center gap-4">
-                    <Link to="/profile" className="hidden sm:flex items-center gap-3 bg-white/10 hover:bg-white hover:text-bento-dark px-6 py-3 rounded-2xl transition-all border border-white/10 group">
-                       <div className="w-8 h-8 rounded-xl bg-bento-primary flex items-center justify-center text-white overflow-hidden shadow-inner font-serif italic text-sm">
+                    <Link to="/profile" className="hidden sm:flex items-center gap-3 bg-white/5 hover:bg-white hover:text-bento-dark px-6 py-2.5 rounded-2xl transition-all border border-white/10 group">
+                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-bento-primary to-bento-accent flex items-center justify-center text-white overflow-hidden shadow-lg font-serif italic text-sm ring-2 ring-white/10">
                           {user.profile_image ? <img src={user.profile_image} className="w-full h-full object-cover" /> : user.name?.[0]}
                        </div>
-                       <span className="text-[10px] font-black italic uppercase tracking-widest text-white group-hover:text-bento-dark shrink-0">{user.name}</span>
+                       <span className="text-[10px] font-black italic uppercase tracking-widest text-white/90 group-hover:text-bento-dark shrink-0">{user.name}</span>
                     </Link>
                     {user.role === 'admin' && (
-                       <Link to="/admin" className="p-3 bg-bento-primary text-white rounded-2xl shadow-lg shadow-bento-primary/30 hover:scale-105 transition"><Settings size={20} /></Link>
+                       <Link to="/admin" className="p-3 bg-bento-primary text-white rounded-2xl shadow-lg shadow-bento-primary/30 hover:scale-105 transition hover:brightness-110"><Settings size={20} /></Link>
                     )}
                     <button onClick={logout} className="p-3 bg-white/5 hover:bg-red-500/10 text-white hover:text-red-500 rounded-2xl transition border border-white/10"><LogOut size={20} /></button>
                  </div>
               ) : (
                  <div className="flex items-center gap-3">
                     <Link to="/login" className="px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition">লগইন</Link>
-                    <Link to="/register" className="bg-gradient-to-r from-bento-primary to-bento-accent text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">আবেদন</Link>
+                    <Link to="/register" className="vibrant-gradient text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">আবেদন</Link>
                  </div>
               )}
-              <button className="lg:hidden p-3 bg-white/5 text-white rounded-2xl" onClick={() => setIsOpen(!isOpen)}>
+              <button className="lg:hidden p-3 bg-white/5 text-white rounded-2xl hover:bg-white/10 transition-colors" onClick={() => setIsOpen(!isOpen)}>
                  {isOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
            </div>
         </div>
       </div>
 
+      {/* Mobile Menu - Sidebar Style */}
       <AnimatePresence>
          {isOpen && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="lg:hidden mx-6 mt-4 p-8 bg-[#2f3640] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-2xl space-y-4">
-               <Link to="/events" className="flex items-center gap-4 text-white font-black uppercase text-xs p-4 bg-white/5 rounded-2xl" onClick={()=>setIsOpen(false)}>ইভেন্ট তালিকা</Link>
-               <Link to="/donations" className="flex items-center gap-4 text-white font-black uppercase text-xs p-4 bg-white/5 rounded-2xl" onClick={()=>setIsOpen(false)}>তহবিলে দান</Link>
-               <a href="#committee" className="flex items-center gap-4 text-white font-black uppercase text-xs p-4 bg-white/5 rounded-2xl" onClick={()=>setIsOpen(false)}>কেন্দ্রীয় কমিটি</a>
-               <Link to="/gallery" className="flex items-center gap-4 text-white font-black uppercase text-xs p-4 bg-white/5 rounded-2xl" onClick={()=>setIsOpen(false)}>ফটো গ্যালারি</Link>
-            </motion.div>
+            <>
+               <motion.div 
+                 initial={{ opacity: 0 }} 
+                 animate={{ opacity: 1 }} 
+                 exit={{ opacity: 0 }} 
+                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[-1]"
+                 onClick={() => setIsOpen(false)}
+               />
+               <motion.div 
+                  initial={{ x: '100%' }} 
+                  animate={{ x: 0 }} 
+                  exit={{ x: '100%' }} 
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed right-0 top-0 h-screen w-[85%] max-w-sm bg-bento-dark border-l border-white/10 shadow-3xl z-[100] flex flex-col"
+               >
+                  <div className="p-8 border-b border-white/10 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white rounded-xl p-2"><img src={logoUrl} className="w-full h-full object-contain" /></div>
+                      <span className="font-serif italic text-white text-xl">Adomyo 24</span>
+                    </div>
+                    <button onClick={() => setIsOpen(false)} className="p-2 text-white/50 hover:text-white"><X size={24} /></button>
+                  </div>
+                  
+                  <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
+                    {[
+                      { to: "/", label: "হোম পেজ", icon: LayoutGrid },
+                      { to: "/events", label: "ইভেন্ট তালিকা", icon: Calendar },
+                      { to: "/donations", label: "তহবিলে দান", icon: Heart },
+                      { to: "/gallery", label: "ফটো গ্যালারি", icon: Camera }
+                    ].map((item) => (
+                      <Link 
+                        key={item.label}
+                        to={item.to} 
+                        className={`flex items-center gap-4 p-6 rounded-3xl transition-all border border-transparent ${location.pathname === item.to ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-white/60 hover:bg-white/5 hover:border-white/5'}`} 
+                        onClick={()=>setIsOpen(false)}
+                      >
+                        <item.icon size={24} />
+                        <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="p-8 border-t border-white/10 bg-black/20">
+                    {user ? (
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-bento-primary flex items-center justify-center text-white overflow-hidden font-black">
+                               {user.profile_image ? <img src={user.profile_image} className="w-full h-full object-cover" /> : user.name?.[0]}
+                            </div>
+                            <div>
+                               <p className="text-white font-black text-sm uppercase tracking-widest">{user.name}</p>
+                               <p className="text-white/40 text-[10px] uppercase font-black tracking-widest">{user.role}</p>
+                            </div>
+                         </div>
+                         <button onClick={logout} className="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20"><LogOut size={20} /></button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4">
+                        <Link to="/login" className="bg-white/5 text-white text-center py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest" onClick={()=>setIsOpen(false)}>লগইন</Link>
+                        <Link to="/register" className="vibrant-gradient text-white text-center py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest" onClick={()=>setIsOpen(false)}>আবেদন</Link>
+                      </div>
+                    )}
+                  </div>
+               </motion.div>
+            </>
          )}
       </AnimatePresence>
     </nav>
@@ -1409,7 +1481,7 @@ const AdminDashboard = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.text('Odommo 24 - Member List', 14, 15);
+    doc.text('Adomyo 24 - Member List', 14, 15);
     const tableData = users.map(u => [
       u.name,
       u.userId,
@@ -1423,7 +1495,7 @@ const AdminDashboard = () => {
       body: tableData,
       startY: 20,
     });
-    doc.save('Odommo_Member_List.pdf');
+    doc.save('Adomyo_Member_List.pdf');
   };
 
   const filteredUsers = users.filter(u => 
@@ -1942,7 +2014,7 @@ export default function App() {
           >
             <img 
               src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=APUOphrvjyAQ7kNvwGiWCXm&_nc_oc=AdozKFFO5KC-D8xj6FAby8f1XkhGHR1-uUxzgoPnhzJTyhrtEC7g14w5N3kfJapq8nE&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=ZqaJ0_gCwgN_0LBT0_sNlg&_nc_ss=7a3a8&oh=00_Af04M6sGidVzOcANnjbpaS2oyuMlJNeNLNN-MYHexR-c0A&oe=69E9580F" 
-              alt="Odommo 24 Logo" 
+              alt="Adomyo 24 Logo" 
               className="w-full h-full object-contain rounded-[2rem]"
               referrerPolicy="no-referrer"
             />
@@ -2001,7 +2073,7 @@ export default function App() {
                    <Link to="/" className="flex items-center gap-4 group">
                       <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" />
                       <div>
-                         <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Odommo 24</h2>
+                         <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Adomyo 24</h2>
                          <p className="text-[9px] font-black text-bento-primary uppercase tracking-[0.4em] mt-1">Fearless Humanity</p>
                       </div>
                    </Link>
@@ -2052,7 +2124,7 @@ export default function App() {
 
               <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
                  <div className="space-y-4">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">© 2024 ODOMMO 24 ORGANIZATION. ALL RIGHTS RESERVED.</p>
+                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">© 2024 ADOMYO 24 ORGANIZATION. ALL RIGHTS RESERVED.</p>
                     <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em] bg-white/5 py-3 px-6 rounded-full inline-block border border-white/5 shadow-inner italic">
                       Developed, design and maintenance by <span className="text-bento-primary italic">Shoriful Islam</span>
                     </p>

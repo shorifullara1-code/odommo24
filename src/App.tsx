@@ -96,6 +96,27 @@ const HomeOverview = () => {
     <div className="space-y-32 pb-32">
       {/* 1. Dynamic Hero Section */}
       <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-bento-dark">
+         {/* Atmospheric Mesh Gradients */}
+         <div className="absolute inset-0 z-0 overflow-hidden">
+            <motion.div 
+               animate={{ 
+                  x: [0, 50, -50, 0],
+                  y: [0, -50, 50, 0],
+                  scale: [1, 1.2, 0.8, 1]
+               }}
+               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+               className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-bento-primary/30 rounded-full blur-[150px]"
+            />
+            <motion.div 
+               animate={{ 
+                  x: [0, -50, 50, 0],
+                  y: [0, 50, -50, 0],
+                  scale: [1, 0.8, 1.2, 1]
+               }}
+               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+               className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-bento-accent/20 rounded-full blur-[120px]"
+            />
+         </div>
          <AnimatePresence mode="wait">
             <motion.div 
                key={currentImgIdx}
@@ -111,8 +132,8 @@ const HomeOverview = () => {
          </AnimatePresence>
 
          <div className="container mx-auto px-6 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-               <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
+            <div className="flex items-center justify-center text-center">
+               <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                   <div className="space-y-6">
                      <motion.span 
                         initial={{ opacity: 0, y: 10 }}
@@ -124,45 +145,24 @@ const HomeOverview = () => {
                      <h1 className="text-8xl md:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter">
                         অদম্য <span className="text-bento-primary">২৪</span>
                      </h1>
-                     <p className="text-2xl text-white/70 font-serif italic max-w-lg leading-relaxed pt-4">
+                     <p className="text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
                         "অদম্য মানুষের পাশে, অদম্য সাহসে"—আর্তমানবতার সেবায় নিবেদিত সাভারের একটি অদম্য তরুণ সংগঠন।
                      </p>
                   </div>
-                  <div className="flex flex-wrap gap-6 pt-4">
-                     <Link to="/register" className="vibrant-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-bento-primary/30 hover:scale-105 transition-all">সদস্য হতে আবেদন</Link>
-                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark transition-all">তহবিলে অনুদান</Link>
+                  <div className="flex flex-wrap justify-center gap-6 pt-4">
+                     <Link to="/register" className="vibrant-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
+                        <span className="relative z-10">সদস্য হতে আবেদন</span>
+                        <motion.div 
+                          initial={{ x: '-100%' }}
+                          whileHover={{ x: '100%' }}
+                          transition={{ duration: 0.8 }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                        />
+                     </Link>
+                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark hover:shadow-[0_20px_40px_rgba(255,255,255,0.1)] transition-all">তহবিলে অনুদান</Link>
                   </div>
                </motion.div>
 
-               <div className="hidden lg:block relative group">
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }} 
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative z-10 glass-morphism rounded-[4rem] p-10 space-y-8"
-                  >
-                     <div className="flex justify-between items-center border-b border-white/10 pb-6">
-                        <h3 className="text-2xl font-black italic text-white flex items-center gap-3"><Activity className="text-bento-primary" /> সংগঠনে বর্তমান প্রভাব</h3>
-                     </div>
-                     <div className="grid grid-cols-2 gap-8">
-                        {[
-                           { label: 'সদস্য', val: '১২০+', color: 'text-white' },
-                           { label: 'রক্তদান', val: '৩কে+', color: 'text-bento-primary' },
-                           { label: 'সহায়তা', val: '৪৫০+', color: 'text-bento-accent' },
-                           { label: 'সেবা', val: '২৪/৭', color: 'text-vibrant-yellow' }
-                        ].map((s, i) => (
-                           <div key={i} className="space-y-1">
-                              <p className={`text-4xl font-black ${s.color}`}>{s.val}</p>
-                              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{s.label}</p>
-                           </div>
-                        ))}
-                     </div>
-                     <Link to="/events" className="block w-full text-center py-5 bg-white/5 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-bento-primary transition">ইভেন্ট ডায়েরি দেখুন</Link>
-                  </motion.div>
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-bento-primary shadow-2xl rounded-[3rem] p-6 z-20 animate-bounce flex flex-col items-center justify-center text-center text-white">
-                     <Heart size={24} fill="white" className="mb-2" />
-                     <p className="text-[10px] font-black uppercase leading-tight">রক্তদানই মহৎ দান</p>
-                  </div>
-               </div>
             </div>
          </div>
       </section>
@@ -173,9 +173,12 @@ const HomeOverview = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bento-card glass-morphism !p-20"
+          className="bento-card glass-morphism !p-20 relative overflow-hidden group border-none shadow-[0_0_80px_rgba(192,57,43,0.15)] ring-1 ring-white/10"
         >
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          {/* Internal Glow */}
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-bento-primary/5 rounded-full blur-[100px] group-hover:bg-bento-primary/10 transition-colors duration-700"></div>
+          
+          <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
                 <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em]">Our Core Mission</span>
                 <h2 className="text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, অদম্য <span className="text-bento-primary">২৪</span> জানে।</h2>
@@ -217,7 +220,10 @@ const HomeOverview = () => {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-12 gap-8 auto-rows-[250px]">
           {/* Quick Profile/Login */}
-          <motion.div className="bento-card col-span-12 lg:col-span-4 row-span-2 bg-gray-50 flex flex-col items-center justify-center text-center space-y-6">
+          <motion.div 
+            whileHover={{ y: -10 }}
+            className="bento-card col-span-12 lg:col-span-4 row-span-2 bg-gradient-to-b from-white to-gray-50 flex flex-col items-center justify-center text-center space-y-6 shadow-xl border-none ring-1 ring-black/5"
+          >
             <div className="w-24 h-24 bg-[rgba(192,57,43,0.1)] rounded-[2rem] flex items-center justify-center text-bento-primary"><Users size={48} /></div>
             <div className="space-y-1">
                <h3 className="text-2xl font-black text-bento-dark italic">সদস্য এলাকা</h3>
@@ -231,7 +237,10 @@ const HomeOverview = () => {
           </motion.div>
 
           {/* Emergency Fund */}
-          <motion.div className="bento-card col-span-12 lg:col-span-8 row-span-1 bg-bento-primary text-white border-none flex flex-col justify-between">
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bento-card col-span-12 lg:col-span-8 row-span-1 bg-gradient-to-r from-bento-primary to-bento-accent text-white border-none flex flex-col justify-between shadow-2xl shadow-bento-primary/20"
+          >
             <div className="flex justify-between items-start">
                <h3 className="text-2xl font-black flex items-center gap-3"><Heart fill="currentColor" /> জরুরি ত্রাণ তহবিল</h3>
                <span className="bg-white/20 text-[8px] font-black tracking-widest px-3 py-1 rounded-full uppercase">Urgent</span>
@@ -248,7 +257,10 @@ const HomeOverview = () => {
           </motion.div>
 
           {/* Events Mini */}
-          <motion.div className="bento-card col-span-12 lg:col-span-8 row-span-1 space-y-6">
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="bento-card col-span-12 lg:col-span-8 row-span-1 space-y-6 bg-white shadow-xl ring-1 ring-black/5"
+          >
             <div className="flex justify-between items-center border-b border-bento-border pb-4">
                <h3 className="text-xl font-black flex items-center gap-2"><Calendar className="text-bento-primary" /> আপকামিং ইভেন্ট</h3>
                <Link to="/events" className="text-[10px] font-black text-bento-primary uppercase tracking-widest">সকল ইভেন্ট &rarr;</Link>
@@ -277,13 +289,21 @@ const HomeOverview = () => {
          </div>
          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-               { icon: Heart, title: 'রক্তদান কর্মসূচি', desc: 'জরুরি রক্তের প্রয়োজনে আমাদের সদস্যরা সবসময় প্রস্তুত।' },
-               { icon: Briefcase, title: 'চিকিৎসা সহায়তা', desc: 'অসহায় মানুষের চিকিৎসায় আর্থিক ও মানসিকভাবে পাশে থাকা।' },
-               { icon: GraduationCap, title: 'শিক্ষা সহায়তা', desc: 'গরিব ছাত্র-ছাত্রীদের শিক্ষা উপকরণ বিতরণ।' },
-               { icon: MapPin, title: 'দুর্যোগ ত্রাণ', desc: 'প্রাকৃতিক দুর্যোগে আমরা সাধ্যমতো ত্রাণ পৌঁছে দেই।' }
+               { icon: Heart, title: 'রক্তদান কর্মসূচি', desc: 'জরুরি রক্তের প্রয়োজনে আমাদের সদস্যরা সবসময় প্রস্তুত।', color: 'hover:bg-red-500', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
+               { icon: Briefcase, title: 'চিকিৎসা সহায়তা', desc: 'অসহায় মানুষের চিকিৎসায় আর্থিক ও মানসিকভাবে পাশে থাকা।', color: 'hover:bg-blue-500', iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
+               { icon: GraduationCap, title: 'শিক্ষা সহায়তা', desc: 'গরিব ছাত্র-ছাত্রীদের শিক্ষা উপকরণ বিতরণ।', color: 'hover:bg-green-500', iconBg: 'bg-green-50', iconColor: 'text-green-500' },
+               { icon: MapPin, title: 'দুর্যোগ ত্রাণ', desc: 'প্রাকৃতিক দুর্যোগে আমরা সাধ্যমতো ত্রাণ পৌঁছে দেই।', color: 'hover:bg-orange-500', iconBg: 'bg-orange-50', iconColor: 'text-orange-500' }
             ].map((act, i) => (
-               <motion.div key={i} className="bento-card bg-white space-y-6 group hover:bg-bento-primary transition-colors duration-500">
-                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-bento-primary group-hover:bg-white transition"><act.icon size={32} /></div>
+               <motion.div 
+                 key={i} 
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true }}
+                 transition={{ delay: i * 0.1 }}
+                 whileHover={{ y: -10 }}
+                 className={`bento-card bg-white space-y-6 group ${act.color} transition-all duration-500 shadow-xl border-none ring-1 ring-black/5`}
+               >
+                  <div className={`w-16 h-16 ${act.iconBg} rounded-2xl flex items-center justify-center ${act.iconColor} group-hover:bg-white transition-all shadow-inner`}><act.icon size={32} /></div>
                   <div className="space-y-3">
                      <h3 className="text-2xl font-black italic text-bento-dark group-hover:text-white transition">{act.title}</h3>
                      <p className="text-sm text-bento-light italic group-hover:text-white/70 transition leading-relaxed">{act.desc}</p>
@@ -1896,9 +1916,61 @@ export default function App() {
   };
 
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center font-serif bg-white">
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="w-20 h-20 border-4 border-bento-primary border-t-transparent rounded-full mb-8" />
-      <h1 className="text-3xl font-black text-bento-primary tracking-[0.5em] uppercase">Loading Odommo 24</h1>
+    <div className="h-screen flex flex-col items-center justify-center font-serif bg-bento-dark relative overflow-hidden">
+      {/* Decorative Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-bento-primary/20 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-bento-accent/20 rounded-full blur-[120px] animate-pulse [animation-delay:1s]"></div>
+      
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="relative z-10 flex flex-col items-center"
+      >
+        <div className="relative group">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.05, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 4, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="w-48 h-48 bg-white p-4 rounded-[3rem] shadow-[0_0_50px_rgba(192,57,43,0.3)] border-4 border-bento-primary/20"
+          >
+            <img 
+              src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=APUOphrvjyAQ7kNvwGiWCXm&_nc_oc=AdozKFFO5KC-D8xj6FAby8f1XkhGHR1-uUxzgoPnhzJTyhrtEC7g14w5N3kfJapq8nE&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=ZqaJ0_gCwgN_0LBT0_sNlg&_nc_ss=7a3a8&oh=00_Af04M6sGidVzOcANnjbpaS2oyuMlJNeNLNN-MYHexR-c0A&oe=69E9580F" 
+              alt="Odommo 24 Logo" 
+              className="w-full h-full object-contain rounded-[2rem]"
+              referrerPolicy="no-referrer"
+            />
+          </motion.div>
+          {/* Scanning Effect */}
+          <motion.div 
+            animate={{ top: ['0%', '100%', '0%'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-bento-primary to-transparent z-20 blur-sm brightness-150"
+          />
+        </div>
+
+        <div className="mt-12 space-y-4 text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-4xl font-black text-white tracking-[0.5em] uppercase italic"
+          >
+            অদম্য <span className="text-bento-primary">২৪</span>
+          </motion.h1>
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce"></span>
+            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce [animation-delay:0.2s]"></span>
+            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce [animation-delay:0.4s]"></span>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 
@@ -1978,8 +2050,13 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
-                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">© 2024 ODOMMO 24 ORGANIZATION. ALL RIGHTS RESERVED.</p>
+              <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
+                 <div className="space-y-4">
+                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">© 2024 ODOMMO 24 ORGANIZATION. ALL RIGHTS RESERVED.</p>
+                    <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em] bg-white/5 py-3 px-6 rounded-full inline-block border border-white/5 shadow-inner italic">
+                      Developed, design and maintenance by <span className="text-bento-primary italic">Shoriful Islam</span>
+                    </p>
+                 </div>
                  <div className="flex items-center gap-8 text-white/30">
                     <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Privacy Policy</span>
                     <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Terms of Service</span>

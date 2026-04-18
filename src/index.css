@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-bento-primary: #c0392b;
+  --color-bento-bg: #ffffff;
+  --color-bento-dark: #1a1f26;
+  --color-bento-light: #576574;
+  --color-bento-card: #ffffff;
+  --color-bento-accent: #10b981;
+  --color-bento-border: #e2e8f0;
+
+  /* Vibrant Colors */
+  --color-vibrant-red: #ea2027;
+  --color-vibrant-blue: #0652dd;
+  --color-vibrant-green: #009432;
+  --color-vibrant-yellow: #ffc312;
+  --color-vibrant-purple: #9980fa;
+}
+
+@layer base {
+  body {
+    @apply bg-[#fdfdfd] text-bento-dark font-sans selection:bg-bento-primary/20 selection:text-bento-primary;
+  }
+}
+
+.glass-morphism {
+  @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-2xl;
+}
+
+.vibrant-gradient {
+  background: linear-gradient(135deg, var(--color-bento-primary) 0%, #ff4757 100%);
+}
+
+.bento-card {
+  @apply bg-white rounded-[2.5rem] p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[#f1f2f6] transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden;
+}
+
+.bento-card::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-700 bg-gradient-to-br from-bento-primary/5 via-transparent to-bento-accent/5 pointer-events-none;
+}
+
+.bento-card:hover::after {
+  @apply opacity-100;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-bento-primary to-bento-accent;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-bento-primary/20 rounded-full hover:bg-bento-primary/40 transition;
+}
+
+.editorial-title {
+  @apply font-serif italic text-[12vw] leading-[0.85] tracking-tighter text-bento-primary;
+}
+
+.bento-card {
+  @apply bg-bento-card rounded-[24px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-bento-border overflow-hidden transition-all duration-500;
+}
+
+.bento-card:hover {
+  @apply shadow-[0_20px_50px_rgba(0,0,0,0.08)] -translate-y-1;
+  border-color: rgba(192, 57, 43, 0.2);
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+
+.pill-image {
+  border-radius: 9999px;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "অদম্য ২৪ (Odommo 24)",
+  "description": "A dynamic social welfare organization management platform with user registration, profiles, event tracking, and donation management.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}

@@ -24,8 +24,35 @@
 
 @layer base {
   body {
-    @apply bg-[#fdfdfd] text-bento-dark font-sans selection:bg-bento-primary/20 selection:text-bento-primary;
+    @apply bg-bento-bg text-bento-dark font-sans selection:bg-bento-primary/20 selection:text-bento-primary relative overflow-x-hidden;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(231, 76, 60, 0.05) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, rgba(16, 185, 129, 0.03) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, rgba(243, 156, 18, 0.05) 0, transparent 50%);
   }
+}
+
+.bg-grain {
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+}
+
+.bg-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.bg-blob {
+  @apply fixed -z-10 blur-[100px] opacity-20 animate-pulse;
 }
 
 .glass-morphism {
@@ -53,7 +80,7 @@
 }
 
 .bento-card {
-  @apply bg-white rounded-[2.5rem] p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[#f1f2f6] transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden;
+  @apply bg-white rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-[#f1f2f6] transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden;
 }
 
 .bento-card::after {
@@ -84,9 +111,6 @@
   @apply font-serif italic text-[12vw] leading-[0.85] tracking-tighter text-bento-primary;
 }
 
-.bento-card {
-  @apply bg-bento-card rounded-[24px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-bento-border overflow-hidden transition-all duration-500;
-}
 
 .bento-card:hover {
   @apply shadow-[0_20px_50px_rgba(0,0,0,0.08)] -translate-y-1;

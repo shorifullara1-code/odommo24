@@ -131,7 +131,7 @@ const HomeOverview = () => {
             </motion.div>
          </AnimatePresence>
 
-         <div className="container mx-auto px-6 relative z-10">
+         <div className="container mx-auto px-4 sm:px-6 relative z-10">
             <div className="flex items-center justify-center text-center">
                <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                   <div className="space-y-6">
@@ -142,10 +142,10 @@ const HomeOverview = () => {
                      >
                         Since 2024 • সাভার, বনগাঁও
                      </motion.span>
-                     <h1 className="text-8xl md:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter">
+                     <h1 className="text-4xl sm:text-8xl lg:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter">
                         অদম্য <span className="text-bento-primary">২৪</span>
                      </h1>
-                     <p className="text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
+                     <p className="text-lg md:text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
                         "অদম্য মানুষের পাশে, অদম্য সাহসে"—আর্তমানবতার সেবায় নিবেদিত সাভারের একটি অদম্য তরুণ সংগঠন।
                      </p>
                   </div>
@@ -168,12 +168,12 @@ const HomeOverview = () => {
       </section>
 
       {/* 2. Mission & Impact Section */}
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bento-card glass-morphism !p-20 relative overflow-hidden group border-none shadow-[0_0_80px_rgba(192,57,43,0.15)] ring-1 ring-white/10"
+          className="bento-card glass-morphism !p-6 sm:!p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_0_80px_rgba(192,57,43,0.15)] ring-1 ring-white/10"
         >
           {/* Internal Glow */}
           <div className="absolute -top-40 -left-40 w-96 h-96 bg-bento-primary/5 rounded-full blur-[100px] group-hover:bg-bento-primary/10 transition-colors duration-700"></div>
@@ -181,8 +181,8 @@ const HomeOverview = () => {
           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
                 <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em]">Our Core Mission</span>
-                <h2 className="text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, অদম্য <span className="text-bento-primary">২৪</span> জানে।</h2>
-                <p className="text-2xl text-bento-light font-serif italic leading-relaxed">
+                <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, অদম্য <span className="text-bento-primary">২৪</span> জানে।</h2>
+                <p className="text-base md:text-2xl text-bento-light font-serif italic leading-relaxed">
                    সাভার উপজেলাধীন বনগাঁও ইউনিয়ন ভিত্তিক একটি অরাজনৈতিক, প্রতিবাদী ও সামাজিক সংগঠন। আমরা রক্তদান কর্মসূচি, শীতবস্ত্র বিতরণ এবং অসহায় মানুষের চিকিৎসা সেবায় সর্বদা নিয়োজিত।
                 </p>
                 <div className="flex gap-8 pt-6">
@@ -217,8 +217,8 @@ const HomeOverview = () => {
       </div>
 
       {/* 3. Interactive Bento Grid */}
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-12 gap-8 auto-rows-[250px]">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-12 gap-4 md:gap-8 auto-rows-[250px]">
           {/* Quick Profile/Login */}
           <motion.div 
             whileHover={{ y: -10 }}
@@ -239,7 +239,7 @@ const HomeOverview = () => {
           {/* Emergency Fund */}
           <motion.div 
             whileHover={{ scale: 1.02 }}
-            className="bento-card col-span-12 lg:col-span-8 row-span-1 bg-gradient-to-r from-bento-primary to-bento-accent text-white border-none flex flex-col justify-between shadow-2xl shadow-bento-primary/20"
+            className="bento-card col-span-12 lg:col-span-8 row-span-1 bg-gradient-to-r from-bento-primary to-bento-accent text-white border-none flex flex-col justify-between shadow-2xl shadow-bento-primary/20 p-6 md:p-10"
           >
             <div className="flex justify-between items-start">
                <h3 className="text-2xl font-black flex items-center gap-3"><Heart fill="currentColor" /> জরুরি ত্রাণ তহবিল</h3>
@@ -259,7 +259,7 @@ const HomeOverview = () => {
           {/* Events Mini */}
           <motion.div 
             whileHover={{ y: -5 }}
-            className="bento-card col-span-12 lg:col-span-8 row-span-1 space-y-6 bg-white shadow-xl ring-1 ring-black/5"
+            className="bento-card col-span-12 lg:col-span-8 row-span-1 space-y-6 bg-white shadow-xl ring-1 ring-black/5 p-6 md:p-10"
           >
             <div className="flex justify-between items-center border-b border-bento-border pb-4">
                <h3 className="text-xl font-black flex items-center gap-2"><Calendar className="text-bento-primary" /> আপকামিং ইভেন্ট</h3>
@@ -282,12 +282,12 @@ const HomeOverview = () => {
       </div>
 
       {/* 4. Activities Grid */}
-      <section className="container mx-auto px-6">
+      <section className="container mx-auto px-4 sm:px-6">
          <div className="text-center space-y-4 mb-20">
-            <h2 className="text-6xl font-serif text-bento-dark italic">কার্যক্রমের পরিধি</h2>
+            <h2 className="text-4xl md:text-6xl font-serif text-bento-dark italic">কার্যক্রমের পরিধি</h2>
             <p className="text-bento-light uppercase text-xs font-black tracking-[0.4em]">Our Daily Impact</p>
          </div>
-         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {[
                { icon: Heart, title: 'রক্তদান কর্মসূচি', desc: 'জরুরি রক্তের প্রয়োজনে আমাদের সদস্যরা সবসময় প্রস্তুত।', color: 'hover:bg-red-500', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
                { icon: Briefcase, title: 'চিকিৎসা সহায়তা', desc: 'অসহায় মানুষের চিকিৎসায় আর্থিক ও মানসিকভাবে পাশে থাকা।', color: 'hover:bg-blue-500', iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
@@ -315,10 +315,10 @@ const HomeOverview = () => {
 
       {/* 5. Committee Section */}
       <section id="committee" className="py-20">
-         <div className="container mx-auto px-6 space-y-24">
+         <div className="container mx-auto px-4 sm:px-6 space-y-24">
             <div className="text-center space-y-6">
                <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Guardians of Humanity</span>
-               <h2 className="text-7xl font-serif text-bento-dark italic">কেন্দ্রীয় আহ্বায়ক কমিটি</h2>
+               <h2 className="text-4xl md:text-7xl font-serif text-bento-dark italic">কেন্দ্রীয় আহ্বায়ক কমিটি</h2>
             </div>
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-12">
                {committee.length > 0 ? committee.map((c, i) => (
@@ -342,11 +342,11 @@ const HomeOverview = () => {
       </section>
 
       {/* 6. Join CTA */}
-      <section className="container mx-auto px-6 mb-32">
-         <div className="bg-bento-primary rounded-[4rem] p-24 text-center text-white relative overflow-hidden shadow-2xl">
+      <section className="container mx-auto px-4 sm:px-6 mb-32">
+         <div className="bg-bento-primary rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-24 text-center text-white relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl"></div>
             <div className="relative z-10 space-y-12">
-               <h2 className="text-7xl font-serif italic leading-tight">আপনিও কি অদম্য হতে চান?</h2>
+               <h2 className="text-4xl md:text-7xl font-serif italic leading-tight">আপনিও কি অদম্য হতে চান?</h2>
                <div className="flex flex-wrap justify-center gap-8">
                   <Link to="/register" className="bg-white text-bento-primary px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition">সদস্য আবেদন</Link>
                   <Link to="/donations" className="bg-bento-dark text-white px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:bg-white hover:text-bento-dark transition">সহযোগিতা করুন</Link>
@@ -488,14 +488,14 @@ const Register = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-32 px-6 space-y-20">
+    <div className="max-w-6xl mx-auto py-32 px-4 sm:px-6 space-y-20">
       <div className="text-center space-y-6 max-w-3xl mx-auto">
          <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Become an Adomyo member</span>
-         <h2 className="text-7xl font-serif text-bento-dark italic leading-tight">সদস্য আবেদন ফর্ম</h2>
+         <h2 className="text-4xl md:text-7xl font-serif text-bento-dark italic leading-tight">সদস্য আবেদন ফর্ম</h2>
          <p className="text-lg text-bento-light font-serif italic leading-relaxed">অদম্য ২৪-এর অংশ হয়ে আর্তমানবতার সেবায় নিজেকে নিয়োজিত করুন। সকল তথ্য সঠিকভাবে পূরণ করুন।</p>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bento-card border-none shadow-2xl p-16 bg-white relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bento-card border-none shadow-2xl p-6 md:p-16 bg-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-bento-primary via-bento-accent to-bento-primary"></div>
         
         <form onSubmit={handleSubmit} className="space-y-16">
@@ -595,7 +595,7 @@ const Register = () => {
              </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 bg-gray-50 p-10 rounded-[2.5rem] border border-bento-border">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 bg-gray-50 p-6 md:p-10 rounded-[2.5rem] border border-bento-border">
              <div className="flex items-center gap-6 text-bento-light italic text-sm max-w-xl">
                 <div className="w-16 h-16 bg-bento-primary rounded-[1.5rem] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[rgba(192,57,43,0.2)]"><Shield size={32} /></div>
                 <p className="leading-relaxed font-serif">আপনার সকল তথ্য সম্পূর্ণ নিরাপদ এবং শুধুমাত্র সংগঠনের অভ্যন্তরীণ প্রয়োজনে ব্যবহৃত হবে। আবেদনের পর এডমিন প্যানেল আপনার তথ্য যাচাই করবে।</p>
@@ -703,7 +703,7 @@ const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings:
                  referrerPolicy="no-referrer" 
                />
                <div style={{ textAlign: 'left', color: '#ffffff' }}>
-                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, lineHeight: 1.1, letterSpacing: '0.02em' }}>ODOMMO 24</h3>
+                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', margin: 0, lineHeight: 1.1, letterSpacing: '0.02em' }}>ADOMYO 24</h3>
                  <p style={{ fontSize: '0.5rem', fontWeight: 600, textTransform: 'uppercase', margin: '0.25rem 0 0', opacity: 0.9, letterSpacing: '0.1em' }}>Humanity • Justice • Accountability</p>
                </div>
             </div>
@@ -843,7 +843,7 @@ const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings:
              borderTop: '3px solid #c0392b'
            }}
          >
-            <p style={{ fontSize: '0.6rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '0.15em' }}>WWW.ODOMMO24.ORG</p>
+            <p style={{ fontSize: '0.6rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '0.15em' }}>WWW.ADOMYO24.ORG</p>
          </div>
          
          {/* Holographic Watermark Background */}
@@ -858,7 +858,7 @@ const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings:
             pointerEvents: 'none',
             whiteSpace: 'nowrap'
          }}>
-           ODOMMO 24
+           ADOMYO 24
          </div>
       </div>
       <button 
@@ -949,10 +949,10 @@ const ProfilePage = () => {
         <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/pattern/1920/1080')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#f5f6fa] to-transparent"></div>
         
-        <div className="container mx-auto px-6 h-full flex items-end pb-12 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 h-full flex items-end pb-12 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-8 mb-4">
-             <div className="w-44 h-44 bg-white rounded-[3rem] p-2 shadow-2xl relative group ring-8 ring-white/30">
-                <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-gray-100 flex items-center justify-center">
+             <div className="w-32 h-32 md:w-44 md:h-44 bg-white rounded-[2rem] md:rounded-[3rem] p-2 shadow-2xl relative group ring-8 ring-white/30">
+                <div className="w-full h-full rounded-[1.75rem] md:rounded-[2.5rem] overflow-hidden bg-gray-100 flex items-center justify-center">
                    {profileData.profile_image ? (
                      <img src={profileData.profile_image} alt={profileData.name} className="w-full h-full object-cover" />
                    ) : (
@@ -970,7 +970,7 @@ const ProfilePage = () => {
              </div>
              <div className="text-center md:text-left space-y-2">
                 <div className="flex items-center gap-3 justify-center md:justify-start">
-                   <h1 className="text-5xl md:text-6xl font-serif text-white italic drop-shadow-lg">{profileData.name || 'Anonymous User'}</h1>
+                   <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif text-white italic drop-shadow-lg">{profileData.name || 'Anonymous User'}</h1>
                    <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-md text-white border border-white/30`}>
                      {profileData.role}
                    </span>
@@ -988,7 +988,7 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 -mt-10 relative z-20 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 -mt-10 relative z-20 max-w-7xl">
         <div className="grid lg:grid-cols-12 gap-10">
           
           {/* Left Column: Actions & Card */}
@@ -1194,10 +1194,12 @@ const Navbar = () => {
     );
   };
 
+  const isHome = location.pathname === "/";
+
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
-      <div className="container mx-auto px-6">
-        <div className={`flex items-center justify-between px-8 py-4 rounded-[2.5rem] transition-all duration-500 border border-white/10 ${scrolled ? 'bg-bento-dark/80 backdrop-blur-3xl shadow-2xl shadow-black/40 ring-1 ring-white/5' : 'bg-transparent'}`}>
+      <div className="container mx-auto px-2 sm:px-6">
+        <div className={`flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 rounded-[2rem] sm:rounded-[2.5rem] transition-all duration-500 border border-white/10 ${scrolled || !isHome ? 'bg-bento-dark/80 backdrop-blur-3xl shadow-2xl shadow-black/40 ring-1 ring-white/5' : 'bg-transparent'}`}>
            <Link to="/" className="flex items-center gap-4 group">
               <motion.div 
                 whileHover={{ rotate: 12, scale: 1.1 }}
@@ -1235,12 +1237,12 @@ const Navbar = () => {
                     <button onClick={logout} className="p-3 bg-white/5 hover:bg-red-500/10 text-white hover:text-red-500 rounded-2xl transition border border-white/10"><LogOut size={20} /></button>
                  </div>
               ) : (
-                 <div className="flex items-center gap-3">
+                 <div className="hidden sm:flex items-center gap-3">
                     <Link to="/login" className="px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition">লগইন</Link>
                     <Link to="/register" className="vibrant-gradient text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">আবেদন</Link>
                  </div>
               )}
-              <button className="lg:hidden p-3 bg-white/5 text-white rounded-2xl hover:bg-white/10 transition-colors" onClick={() => setIsOpen(!isOpen)}>
+              <button className="lg:hidden p-3 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-all shadow-lg ring-1 ring-white/10 ml-1" onClick={() => setIsOpen(!isOpen)}>
                  {isOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
            </div>
@@ -1504,11 +1506,11 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="container mx-auto px-6 py-32 space-y-16">
+    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
       <div className="flex flex-col md:flex-row justify-between items-end gap-10">
          <div className="space-y-4">
             <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px] ml-1">Admin Control Room</span>
-            <h2 className="text-7xl font-serif italic text-bento-dark leading-tight">অ্যাডমিন ড্যাশবোর্ড</h2>
+            <h2 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight">অ্যাডমিন ড্যাশবোর্ড</h2>
          </div>
          <div className="flex gap-4">
             <div className="bg-white border-2 border-bento-border p-8 rounded-[2.5rem] text-center shadow-lg min-w-[160px]">
@@ -1522,12 +1524,12 @@ const AdminDashboard = () => {
          </div>
       </div>
 
-      <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto">
+      <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto custom-scrollbar no-scrollbar">
          {['members', 'events', 'committee', 'settings'].map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab as any)}
-              className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
+              className={`px-6 md:px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
             >
               {tab === 'members' ? 'সদস্য তালিকা' : tab === 'events' ? 'ইভেন্ট ম্যানেজমেন্ট' : tab === 'committee' ? 'কমিটি ম্যানেজমেন্ট' : 'সাইট সেটিংস'}
             </button>
@@ -1536,7 +1538,7 @@ const AdminDashboard = () => {
       
       {activeTab === 'members' && (
       <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 rounded-[24px] bg-white p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
+        <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition duration-1000"><Users size={200} /></div>
             
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-bento-border pb-6">
@@ -1821,18 +1823,18 @@ const EventsPage = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-6 py-20 space-y-16">
+    <div className="container mx-auto px-4 sm:px-6 py-20 space-y-16">
       <div className="text-center space-y-4">
-         <h1 className="text-7xl font-serif text-bento-dark italic">আসন্ন ইভেন্টসমূহ</h1>
+         <h1 className="text-4xl md:text-7xl font-serif text-bento-dark italic">আসন্ন ইভেন্টসমূহ</h1>
          <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
         {Array.isArray(events) && events.map((e, index) => (
           <motion.div key={e.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="bento-card !p-0 group cursor-pointer overflow-hidden flex flex-col ring-1 ring-bento-border hover:ring-bento-primary transition shadow-xl">
             <div className="h-64 overflow-hidden"><img src={e.image_url || `https://picsum.photos/seed/ev${e.id}/800/600`} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerPolicy="no-referrer" /></div>
-            <div className="p-8 space-y-4 flex-grow flex flex-col">
+            <div className="p-6 md:p-8 space-y-4 flex-grow flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-accent bg-[rgba(39,174,96,0.1)] px-3 py-1.5 rounded-full w-fit">{new Date(e.date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-              <h3 className="text-3xl font-serif text-bento-dark leading-tight group-hover:text-bento-primary transition h-20 overflow-hidden line-clamp-2">{e.title}</h3>
+              <h3 className="text-xl md:text-3xl font-serif text-bento-dark leading-tight group-hover:text-bento-primary transition h-20 overflow-hidden line-clamp-2">{e.title}</h3>
               <p className="text-bento-light text-sm italic leading-relaxed line-clamp-3 mb-6">{e.description}</p>
               <div className="pt-6 border-t border-bento-border mt-auto flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-bento-primary">
                  <span>Explore Detail</span> <ChevronRight size={16} className="group-hover:translate-x-2 transition" />
@@ -1867,13 +1869,13 @@ const DonationsPage = () => {
 
   const currentTotal = Array.isArray(donations) ? donations.reduce((sum, d) => sum + d.amount, 0) : 0;
   return (
-    <div className="container mx-auto px-6 py-20 max-w-6xl space-y-20">
+    <div className="container mx-auto px-4 sm:px-6 py-20 max-w-6xl space-y-20">
       <div className="grid lg:grid-cols-12 gap-12 items-start">
          <div className="lg:col-span-7 space-y-12">
-            <motion.div initial={{opacity:0, scale:0.9}} animate={{opacity:1, scale:1}} className="bento-card border-none bg-bento-primary text-white p-16 space-y-8 relative overflow-hidden group">
+            <motion.div initial={{opacity:0, scale:0.9}} animate={{opacity:1, scale:1}} className="bento-card border-none bg-bento-primary text-white p-8 md:p-16 space-y-8 relative overflow-hidden group">
                <Heart size={300} fill="currentColor" className="absolute -bottom-20 -right-20 opacity-5 group-hover:scale-110 transition duration-1000" />
                <div className="space-y-2 relative z-10">
-                  <h1 className="text-7xl font-serif text-white italic">সাহায্যের হাত বাড়ান</h1>
+                  <h1 className="text-4xl md:text-7xl font-serif text-white italic">সাহায্যের হাত বাড়ান</h1>
                   <p className="text-xl opacity-80 font-medium">আপনার ক্ষুদ্র অবদানেও ফুটবে এক অসহায় মানুষের হাসি।</p>
                </div>
                <div className="space-y-4 pt-4 relative z-10">
@@ -2049,9 +2051,30 @@ export default function App() {
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, siteSettings, updateSettings }}>
       <Router>
-        <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth">
+        <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth relative overflow-hidden">
+          {/* Global Background Design */}
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <div className="absolute inset-0 bg-grid opacity-[0.03]"></div>
+            <div className="absolute inset-0 bg-grain opacity-[0.2]"></div>
+            <motion.div 
+              animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px]" 
+            />
+            <motion.div 
+              animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px]" 
+            />
+            <motion.div 
+              animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px]" 
+            />
+          </div>
+
           <Navbar />
-          <main className="flex-grow">
+          <main className="flex-grow relative z-10">
             <Routes>
               <Route path="/" element={<HomeOverview />} />
               <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />

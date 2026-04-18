@@ -6,7 +6,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { supabase } from './src/lib/supabase.js';
+import { supabase } from './src/lib/supabase';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -23,6 +23,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 // --- API Routes ---
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
 
 // Auth Middleware
 const authenticateToken = (req: any, res: any, next: any) => {
@@ -44,79 +49,79 @@ const isAdmin = (req: any, res: any, next: any) => {
 };
 
 // Register
-  app.post('/api/auth/register', async (req, res) => {
-    const { 
-      userId, password, name, email, phone, 
+app.post('/api/auth/register', async (req, res) => {
+  const { 
+    userId, password, name, email, phone, 
+    father_name, mother_name, present_address, permanent_address,
+    blood_group, dob, profession, educational_qualification,
+    nid_number, emergency_contact, profile_image
+  } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
+    const role = userCount === 0 ? 'admin' : 'member';
+    
+    const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).single();
+    const nextIdNumber = lastUser ? (1001 + lastUser.id) : 1001;
+    const memberIdNumber = `OD24-${String(nextIdNumber).padStart(4, '0')}`;
+
+    const { data, error } = await supabase.from('users').insert([{
+      userId, password: hashedPassword, name, email, phone, role,
       father_name, mother_name, present_address, permanent_address,
       blood_group, dob, profession, educational_qualification,
-      nid_number, emergency_contact, profile_image
-    } = req.body;
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
-      const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
-      const role = userCount === 0 ? 'admin' : 'member';
-      
-      const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).single();
-      const nextIdNumber = lastUser ? (1001 + lastUser.id) : 1001;
-      const memberIdNumber = `OD24-${String(nextIdNumber).padStart(4, '0')}`;
+      nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber
+    }]).select().single();
 
-      const { data, error } = await supabase.from('users').insert([{
-        userId, password: hashedPassword, name, email, phone, role,
-        father_name, mother_name, present_address, permanent_address,
-        blood_group, dob, profession, educational_qualification,
-        nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber
-      }]).select().single();
-
-      if (error) throw error;
-      
-      res.status(201).json({ message: 'User registered successfully' });
-    } catch (err: any) {
-      if (err.code === '23505') { // Postgres unique violation
-        res.status(400).json({ error: 'User ID or Email already exists' });
-      } else {
-        res.status(500).json({ error: err.message });
-      }
+    if (error) throw error;
+    
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err: any) {
+    if (err.code === '23505') { // Postgres unique violation
+      res.status(400).json({ error: 'User ID or Email already exists' });
+    } else {
+      res.status(500).json({ error: err.message });
     }
+  }
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  const { userId, password } = req.body;
+  const { data: user, error } = await supabase.from('users').select('*').eq('userId', userId).single();
+  
+  if (error || !user) return res.status(400).json({ error: 'User not found' });
+
+  const validPass = await bcrypt.compare(password, user.password);
+  if (!validPass) return res.status(400).json({ error: 'Invalid password' });
+
+  const token = jwt.sign({ id: user.id, userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+  
+  res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+  res.json({ 
+    token, 
+    user: { 
+      id: user.id, 
+      userId: user.userId, 
+      name: user.name, 
+      role: user.role,
+      email: user.email,
+      profile_image: user.profile_image,
+      bio: user.bio,
+      father_name: user.father_name,
+      mother_name: user.mother_name,
+      present_address: user.present_address,
+      permanent_address: user.permanent_address,
+      blood_group: user.blood_group,
+      dob: user.dob,
+      profession: user.profession,
+      educational_qualification: user.educational_qualification,
+      nid_number: user.nid_number,
+      emergency_contact: user.emergency_contact,
+      member_id_number: user.member_id_number
+    } 
   });
-
-  // Login
-  app.post('/api/auth/login', async (req, res) => {
-    const { userId, password } = req.body;
-    const { data: user, error } = await supabase.from('users').select('*').eq('userId', userId).single();
-    
-    if (error || !user) return res.status(400).json({ error: 'User not found' });
-
-    const validPass = await bcrypt.compare(password, user.password);
-    if (!validPass) return res.status(400).json({ error: 'Invalid password' });
-
-    const token = jwt.sign({ id: user.id, userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-    
-    res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
-    res.json({ 
-      token, 
-      user: { 
-        id: user.id, 
-        userId: user.userId, 
-        name: user.name, 
-        role: user.role,
-        email: user.email,
-        profile_image: user.profile_image,
-        bio: user.bio,
-        father_name: user.father_name,
-        mother_name: user.mother_name,
-        present_address: user.present_address,
-        permanent_address: user.permanent_address,
-        blood_group: user.blood_group,
-        dob: user.dob,
-        profession: user.profession,
-        educational_qualification: user.educational_qualification,
-        nid_number: user.nid_number,
-        emergency_contact: user.emergency_contact,
-        member_id_number: user.member_id_number
-      } 
-    });
-  });
+});
 
   // Logout
   app.post('/api/auth/logout', (req, res) => {

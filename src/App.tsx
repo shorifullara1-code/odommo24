@@ -357,10 +357,11 @@ const Login = () => {
         login(data);
         navigate('/profile');
       } else {
-        setError(data.error);
+        setError(data.error || 'Login failed');
       }
     } catch (err) {
-      setError('Connection failed');
+      console.error('Login connection error:', err);
+      setError('Connection failed. Please check your internet or server logs.');
     }
   };
 
@@ -428,10 +429,11 @@ const Register = () => {
         setSuccess(true);
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError(data.error);
+        setError(data.error || 'Registration failed');
       }
     } catch (err) {
-      setError('Connection failed');
+      console.error('Registration connection error:', err);
+      setError('Connection failed. Please check your API configuration.');
     }
   };
 

@@ -452,8 +452,8 @@ const Register = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 90 * 1024) {
-        setError('ছবির সাইজ অবশ্যই ৯০কেবি এর কম হতে হবে!');
+      if (file.size > 500 * 1024) {
+        setError('ছবির সাইজ অবশ্যই ৫০০কেবি এর কম হতে হবে!');
         return;
       }
       setError('');
@@ -523,13 +523,13 @@ const Register = () => {
                 ) : (
                   <Camera size={40} className="text-gray-300" />
                 )}
-                <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                <div className="absolute inset-0 bg-[rgba(47,54,64,0.4)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                <div className="absolute inset-0 bg-[rgba(47,54,64,0.4)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none z-0">
                    <span className="text-[10px] font-black uppercase tracking-widest">ছবি যুক্ত করুন</span>
                 </div>
+                <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" title="Upload Profile Picture" />
              </div>
              <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">প্রোফাইল ছবি (সর্বোচ্চ ৯০কেবি)</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">প্রোফাইল ছবি (সর্বোচ্চ ৫০০কেবি)</p>
              </div>
           </div>
 

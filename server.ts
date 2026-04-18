@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
@@ -26,7 +25,12 @@ app.use(cookieParser());
 
 // Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    env: process.env.NODE_ENV,
+    vercel: !!process.env.VERCEL,
+    time: new Date().toISOString() 
+  });
 });
 
 // Auth Middleware
@@ -318,18 +322,14 @@ app.post('/api/auth/login', async (req, res) => {
 
   // --- Vite Middleware ---
 
-  if (process.env.NODE_ENV !== 'production') {
+  // --- Vite / Static Middleware ---
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
   }
 
 // Export the app for Vercel

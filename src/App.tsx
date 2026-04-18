@@ -75,6 +75,7 @@ const HomeOverview = () => {
   }, [siteSettings?.hero_images]);
 
   useEffect(() => {
+    fetch('/api/health').then(r => r.json()).then(d => console.log('API Status:', d)).catch(e => console.error('API Unreachable:', e));
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
     fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
@@ -352,16 +353,28 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, password }),
       });
-      const data = await res.json();
+      
+      let data;
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error('Non-JSON response:', text);
+        setError(`Server error: Expected JSON but got ${contentType || 'text'}. Check if API route is correct.`);
+        return;
+      }
+
       if (res.ok) {
         login(data);
         navigate('/profile');
       } else {
-        setError(data.error || 'Login failed');
+        setError(data.error || `Login failed (Status: ${res.status})`);
       }
     } catch (err) {
       console.error('Login connection error:', err);
-      setError('Connection failed. Please check your internet or server logs.');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Connection failed: ${errorMessage}. (Check Vercel logs or /api/health)`);
     }
   };
 

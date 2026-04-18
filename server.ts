@@ -6,7 +6,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { supabase } from './src/lib/supabase';
+import { supabase } from './src/lib/supabase.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

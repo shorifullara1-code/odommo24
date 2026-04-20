@@ -1,11 +1,13 @@
 import React, { useState, useEffect, createContext, useContext, useRef, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { translations } from './translations.ts';
 import { 
   Heart, Users, MapPin, Phone, Mail, Calendar, Activity, 
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
-  Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid
+  Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
+  Mars, Venus
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -32,6 +34,14 @@ export const useAuth = () => {
   return context;
 };
 
+// --- Language Context ---
+const LanguageContext = createContext<{ lang: 'en' | 'bn', setLang: (l: 'en' | 'bn') => void, t: (key: string) => string } | undefined>(undefined);
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) throw new Error('useLanguage must be used within LanguageProvider');
+  return context;
+};
+
 // --- Helper: Input Field ---
 const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder = "", required = false, disabled = false }: any) => (
   <div className="space-y-1.5">
@@ -53,6 +63,185 @@ const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeho
 
 // --- Pages ---
 
+const CommitteePage = () => {
+  const [committee, setCommittee] = useState<any[]>([]);
+  const { t, lang } = useLanguage();
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const translateRole = (role: string) => {
+    if (!role) return '';
+    const roleMap: {[key: string]: string} = {
+      'আহ্বায়ক': 'role_convener',
+      'আহ্বায়ক': 'role_convener',
+      'সদস্য সচিব': 'role_member_secretary',
+      'যুগ্ম সদস্য সচিব': 'role_joint_secretary',
+      'সদস্য': 'role_member'
+    };
+    const key = roleMap[role];
+    return key ? t(key as any) : role;
+  };
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const isFemale = (name: string) => {
+    const femaleKeywords = ['আক্তার', 'বেগম', 'মোসা:', 'মোসাম্মাৎ', 'নেছা', 'শান্তা', 'তৃষা', 'মিমি', 'রুমা', 'তাসনিম', 'অহনা', 'মুক্তা', 'সোনিয়া', 'নেহা', 'লামিয়া'];
+    return femaleKeywords.some(key => name.includes(key));
+  };
+  
+  const leaders = committee.filter(m => m.role.includes('আহ্বায়ক') || m.role.includes('সদস্য সচিব'));
+  const jointSecretaries = committee.filter(m => m.role.includes('যুগ্ম সদস্য সচিব'));
+  const generalMembers = committee.filter(m => !m.role.includes('আহ্বায়ক') && !m.role.includes('সদস্য সচিব'));
+
+  return (
+    <div className="pt-32 pb-20">
+       <section className="py-20 relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 space-y-20">
+            <div className="text-center space-y-6 max-w-4xl mx-auto">
+               <motion.span 
+                 initial={{ opacity: 0 }} 
+                 animate={{ opacity: 1 }}
+                 className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]"
+               >
+                 {t('committee_guardians')}
+               </motion.span>
+               <motion.h1 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none"
+               >
+                 {t('committee_title').split(' ')[0]} <span className="text-bento-primary">{t('committee_title').split(' ').slice(1).join(' ')}</span>
+               </motion.h1>
+               <motion.p 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ delay: 0.3 }}
+                 className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto"
+               >
+                 {t('committee_desc')}
+               </motion.p>
+            </div>
+
+            {committee.length > 0 ? (
+               <div className="space-y-32">
+                  <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                     {leaders.map((c, i) => (
+                        <motion.div 
+                           key={c.id} 
+                           initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 40 }} 
+                           whileInView={{ opacity: 1, y: 0 }} 
+                           viewport={{ once: true }} 
+                           transition={{ duration: 0.8, delay: i * 0.1 }}
+                           className="group relative will-change-transform"
+                        >
+                           <div className="relative aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
+                              {c.image_url ? (
+                                <img src={c.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" alt={c.name} referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center space-y-4">
+                                   <div className={`p-8 rounded-full ${isFemale(c.name) ? 'bg-pink-50 text-pink-400' : 'bg-blue-50 text-blue-400'}`}>
+                                      {isFemale(c.name) ? <Venus size={80} /> : <Mars size={80} />}
+                                   </div>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-bento-dark via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                              <div className="absolute bottom-12 left-12 right-12 space-y-2">
+                                 <h4 className="text-3xl md:text-4xl font-serif italic text-white leading-tight">{c.name}</h4>
+                                 <div className="flex items-center gap-4">
+                                    <div className="h-px w-8 bg-bento-primary"></div>
+                                    <span className="text-xs font-black uppercase tracking-[0.3em] text-bento-primary">{translateRole(c.role)}</span>
+                                 </div>
+                              </div>
+                           </div>
+                        </motion.div>
+                     ))}
+                  </div>
+
+                  <div className="space-y-16">
+                     <div className="flex items-center gap-6 justify-center">
+                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
+                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">{t('joint_secretaries')}</h3>
+                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
+                     </div>
+                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
+                        {jointSecretaries.map((c, i) => (
+                           <motion.div 
+                              key={c.id} 
+                              initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.9 }} 
+                              whileInView={{ opacity: 1, scale: 1 }} 
+                              viewport={{ once: true }} 
+                              transition={{ delay: i * 0.05 }}
+                              className="group space-y-6 text-center will-change-transform"
+                           >
+                              <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
+                                 {c.image_url ? (
+                                   <img src={c.image_url} className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" />
+                                 ) : (
+                                   <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
+                                      {isFemale(c.name) ? <Venus size={40} /> : <Mars size={40} />}
+                                   </div>
+                                 )}
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="font-serif italic text-lg text-bento-dark group-hover:text-bento-primary transition-colors">{c.name}</p>
+                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-light">{translateRole(c.role)}</p>
+                              </div>
+                           </motion.div>
+                        ))}
+                     </div>
+                  </div>
+
+                  <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-8 md:px-20 border border-gray-100">
+                     <div className="text-center space-y-4">
+                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">{t('general_members')}</h3>
+                        <p className="text-4xl font-serif italic text-bento-dark">{t('member_list_title').split(' ')[0]} <span className="text-bento-primary">{t('member_list_title').split(' ')[1]}</span></p>
+                     </div>
+                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
+                        {generalMembers.map((c, i) => (
+                           <motion.div 
+                              key={c.id} 
+                              initial={{ opacity: 0 }} 
+                              whileInView={{ opacity: 1 }} 
+                              viewport={{ once: true }}
+                              transition={{ delay: isMobile ? 0 : i * 0.02 }}
+                              className="flex flex-col items-center text-center space-y-4 group"
+                           >
+                              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm group-hover:border-bento-primary/30 group-hover:shadow-lg transition-all duration-500 overflow-hidden">
+                                 {c.image_url ? (
+                                    <img src={c.image_url} className="w-full h-full object-cover" alt={c.name} />
+                                 ) : (
+                                    <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
+                                       {isFemale(c.name) ? <Venus size={18} /> : <Mars size={18} />}
+                                    </div>
+                                 )}
+                              </div>
+                              <div>
+                                 <p className="text-sm font-bold text-bento-dark leading-tight">{c.name}</p>
+                                 <p className="text-[8px] font-black uppercase tracking-widest text-bento-light mt-1">{translateRole(c.role)}</p>
+                              </div>
+                           </motion.div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <div className="py-32 text-center space-y-6">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-200 animate-pulse">
+                     <Users size={32} />
+                  </div>
+                  <p className="text-bento-light italic font-serif italic">Loading committee information...</p>
+               </div>
+            )}
+          </div>
+       </section>
+    </div>
+  );
+};
 const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
@@ -73,6 +262,7 @@ const HomeOverview = () => {
   };
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const { user, siteSettings } = useAuth();
+  const { t } = useLanguage();
 
   const heroImages = useMemo(() => {
     try {
@@ -187,18 +377,18 @@ const HomeOverview = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="inline-block px-6 py-2 bg-bento-primary text-white rounded-full text-[10px] font-black uppercase tracking-[0.4em] shadow-xl"
                      >
-                        Since 2024 • সাভার, বনগাঁও
+                        Since 2024 • Ashulia, Savar
                      </motion.span>
                      <h1 className="text-4xl sm:text-8xl lg:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter">
-                        অদম্য <span className="text-bento-primary">২৪</span>
+                        {t('hero_title').split(' ')[0]} <span className="text-bento-primary">{t('hero_title').split(' ').slice(1).join(' ')}</span>
                      </h1>
                      <p className="text-lg md:text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
-                        "অদম্য মানুষের পাশে, অদম্য সাহসে"—আর্তমানবতার সেবায় নিবেদিত সাভারের একটি অদম্য তরুণ সংগঠন।
+                        {t('hero_subtitle')}
                      </p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-6 pt-4">
                      <Link to="/register" className="vibrant-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
-                        <span className="relative z-10">সদস্য হতে আবেদন</span>
+                        <span className="relative z-10">{t('member_apply')}</span>
                         <motion.div 
                           initial={{ x: '-100%' }}
                           whileHover={{ x: '100%' }}
@@ -206,7 +396,7 @@ const HomeOverview = () => {
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                         />
                      </Link>
-                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark hover:shadow-[0_20px_40px_rgba(255,255,255,0.1)] transition-all">তহবিলে অনুদান</Link>
+                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark hover:shadow-[0_20px_40px_rgba(255,255,255,0.1)] transition-all">{t('donate_now')}</Link>
                   </div>
                </motion.div>
 
@@ -223,31 +413,31 @@ const HomeOverview = () => {
             className="bg-[#d49d32] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-[3rem] p-10 md:p-14 shadow-2xl border-4 border-white ring-1 ring-black/5"
          >
             <div className="space-y-6 text-center mb-10">
-               <h3 className="text-2xl md:text-5xl font-serif font-black text-bento-dark uppercase tracking-wide italic">আপনার অনুদান প্রদান করুন</h3>
+               <h3 className="text-2xl md:text-5xl font-serif font-black text-bento-dark uppercase tracking-wide italic">{t('donate_section_title')}</h3>
             </div>
             <form action="/donations" className="grid grid-cols-1 md:grid-cols-4 gap-8 items-end">
                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">তহবিল নির্বাচন করুন *</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">{t('select_fund')} *</label>
                   <select className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner cursor-pointer appearance-none">
-                     <option>তহবিল - ১ (সাধারণ)</option>
-                     <option>তহবিল - ২ (ত্রাণ তহবিল)</option>
-                     <option>তহবিল - ৩ (শিক্ষা সহায়তা)</option>
+                     <option>{t('fund_general')}</option>
+                     <option>{t('fund_relief')}</option>
+                     <option>{t('fund_education')}</option>
                   </select>
                </div>
                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">মোবাইল / ইমেইল *</label>
-                  <input type="text" placeholder="মোবাইল নম্বর / ইমেইল লিখুন" className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">{t('mobile_email')} *</label>
+                  <input type="text" placeholder={t('mobile_email_placeholder')} className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
                </div>
                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">পরিমান (৳) *</label>
-                  <input type="number" placeholder="৳ সংখ্যায় লিখুন" className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">{t('amount_tk')} *</label>
+                  <input type="number" placeholder={t('amount_placeholder')} className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
                </div>
                <button type="submit" className="bg-[#008e4f] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-lg shadow-xl shadow-green-900/20 hover:bg-green-800 transition-all flex items-center justify-center gap-4 active:scale-95 group">
-                  দান করুন <ArrowRight size={20} className="group-hover:translate-x-2 transition" />
+                  {t('donate_now')} <ArrowRight size={20} className="group-hover:translate-x-2 transition" />
                </button>
             </form>
             <div className="mt-10 text-center text-xs md:text-base font-medium text-[#4a3b1d] italic drop-shadow-sm">
-               অদম্য ২৪ ফাউন্ডেশনে দান করলে আপনি মহান আল্লাহর সন্তুষ্টি ও দোয়া লাভ করবেন। <Link to="/donations" className="text-green-900 font-extrabold hover:underline">বিস্তারিত জানতে এখানে ক্লিক করুন।</Link>
+               {t('donation_blessing')} <Link to="/donations" className="text-green-900 font-extrabold hover:underline">{t('click_details')}</Link>
             </div>
          </motion.div>
       </div>
@@ -265,17 +455,17 @@ const HomeOverview = () => {
           
           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
-                <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em]">Our Core Mission</span>
+                <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em]">{t('core_mission')}</span>
                 <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, অদম্য <span className="text-bento-primary">২৪</span> জানে।</h2>
                 <p className="text-base md:text-2xl text-bento-light font-serif italic leading-relaxed">
-                   সাভার উপজেলাধীন বনগাঁও ইউনিয়ন ভিত্তিক একটি অরাজনৈতিক, প্রতিবাদী ও সামাজিক সংগঠন। আমরা রক্তদান কর্মসূচি, শীতবস্ত্র বিতরণ এবং অসহায় মানুষের চিকিৎসা সেবায় সর্বদা নিয়োজিত।
+                   {t('mission_desc')}
                 </p>
                 <div className="flex gap-8 pt-6">
                    <div className="flex items-center gap-4">
                       <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-bento-primary"><Heart size={28} /></div>
                       <div className="text-left">
-                         <p className="text-2xl font-black text-bento-dark">১.৫কে+</p>
-                         <p className="text-[10px] font-black text-bento-light uppercase tracking-widest">রক্তদান</p>
+                         <p className="text-2xl font-black text-bento-dark">{t('blood_donation_count')}</p>
+                         <p className="text-[10px] font-black text-bento-light uppercase tracking-widest">{t('blood_donations')}</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-4">
@@ -311,13 +501,13 @@ const HomeOverview = () => {
           >
             <div className="w-24 h-24 bg-[rgba(192,57,43,0.1)] rounded-[2rem] flex items-center justify-center text-bento-primary"><Users size={48} /></div>
             <div className="space-y-1">
-               <h3 className="text-2xl font-black text-bento-dark italic">সদস্য এলাকা</h3>
+               <h3 className="text-2xl font-black text-bento-dark italic">{t('nav_profile')}</h3>
                <p className="text-xs text-bento-light uppercase tracking-widest">আপনার ড্যাশবোর্ড</p>
             </div>
             {user ? (
-               <Link to="/profile" className="bg-bento-primary text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl">প্রোফাইল</Link>
+               <Link to="/profile" className="bg-bento-primary text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl">{t('nav_profile')}</Link>
             ) : (
-               <Link to="/login" className="bg-bento-dark text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition">লগইন</Link>
+               <Link to="/login" className="bg-bento-dark text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition">{t('nav_login')}</Link>
             )}
           </motion.div>
 
@@ -327,8 +517,8 @@ const HomeOverview = () => {
             className="bento-card col-span-12 lg:col-span-8 row-span-1 bg-gradient-to-r from-bento-primary to-bento-accent text-white border-none flex flex-col justify-between shadow-2xl shadow-bento-primary/20 p-6 md:p-10"
           >
             <div className="flex justify-between items-start">
-               <h3 className="text-2xl font-black flex items-center gap-3"><Heart fill="currentColor" /> জরুরি ত্রাণ তহবিল</h3>
-               <span className="bg-white/20 text-[8px] font-black tracking-widest px-3 py-1 rounded-full uppercase">Urgent</span>
+               <h3 className="text-2xl font-black flex items-center gap-3"><Heart fill="currentColor" /> {t('urgent_relief')}</h3>
+               <span className="bg-white/20 text-[8px] font-black tracking-widest px-3 py-1 rounded-full uppercase">{t('urgent_tag')}</span>
             </div>
             <div className="space-y-4">
                <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
@@ -336,7 +526,7 @@ const HomeOverview = () => {
                </div>
                <div className="flex justify-between items-end">
                   <p className="text-4xl font-black">৳{currentDonation.toLocaleString()}</p>
-                  <Link to="/donations" className="bg-white text-bento-primary px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse">দান করুন</Link>
+                  <Link to="/donations" className="bg-white text-bento-primary px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse">{t('donate_now')}</Link>
                </div>
             </div>
           </motion.div>
@@ -347,8 +537,8 @@ const HomeOverview = () => {
             className="bento-card col-span-12 lg:col-span-8 row-span-1 space-y-6 bg-white shadow-xl ring-1 ring-black/5 p-6 md:p-10"
           >
             <div className="flex justify-between items-center border-b border-bento-border pb-4">
-               <h3 className="text-xl font-black flex items-center gap-2"><Calendar className="text-bento-primary" /> আপকামিং ইভেন্ট</h3>
-               <Link to="/events" className="text-[10px] font-black text-bento-primary uppercase tracking-widest">সকল ইভেন্ট &rarr;</Link>
+               <h3 className="text-xl font-black flex items-center gap-2"><Calendar className="text-bento-primary" /> {t('upcoming_events')}</h3>
+               <Link to="/events" className="text-[10px] font-black text-bento-primary uppercase tracking-widest">{t('view_all_events')} &rarr;</Link>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
                {events.slice(0, 2).map((e: any) => (
@@ -360,7 +550,7 @@ const HomeOverview = () => {
                     <p className="font-bold text-bento-dark text-sm line-clamp-1">{e.title}</p>
                  </div>
                ))}
-               {events.length === 0 && <p className="text-center py-4 text-bento-light italic text-xs col-span-2">আপাতত কোনো ইভেন্ট নেই।</p>}
+               {events.length === 0 && <p className="text-center py-4 text-bento-light italic text-xs col-span-2">{t('no_events')}</p>}
             </div>
           </motion.div>
         </div>
@@ -369,15 +559,15 @@ const HomeOverview = () => {
       {/* 4. Activities Grid */}
       <section className="container mx-auto px-4 sm:px-6">
          <div className="text-center space-y-4 mb-20">
-            <h2 className="text-4xl md:text-6xl font-serif text-bento-dark italic">কার্যক্রমের পরিধি</h2>
-            <p className="text-bento-light uppercase text-xs font-black tracking-[0.4em]">Our Daily Impact</p>
+            <h2 className="text-4xl md:text-6xl font-serif text-bento-dark italic">{t('activities_scope')}</h2>
+            <p className="text-bento-light uppercase text-xs font-black tracking-[0.4em]">{t('daily_impact')}</p>
          </div>
          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {[
-               { icon: Heart, title: 'রক্তদান কর্মসূচি', desc: 'জরুরি রক্তের প্রয়োজনে আমাদের সদস্যরা সবসময় প্রস্তুত।', color: 'hover:bg-red-500', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
-               { icon: Briefcase, title: 'চিকিৎসা সহায়তা', desc: 'অসহায় মানুষের চিকিৎসায় আর্থিক ও মানসিকভাবে পাশে থাকা।', color: 'hover:bg-blue-500', iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
-               { icon: GraduationCap, title: 'শিক্ষা সহায়তা', desc: 'গরিব ছাত্র-ছাত্রীদের শিক্ষা উপকরণ বিতরণ।', color: 'hover:bg-green-500', iconBg: 'bg-green-50', iconColor: 'text-green-500' },
-               { icon: MapPin, title: 'দুর্যোগ ত্রাণ', desc: 'প্রাকৃতিক দুর্যোগে আমরা সাধ্যমতো ত্রাণ পৌঁছে দেই।', color: 'hover:bg-orange-500', iconBg: 'bg-orange-50', iconColor: 'text-orange-500' }
+               { icon: Heart, title: t('activity_blood'), desc: t('activity_blood_desc'), color: 'hover:bg-red-500', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
+               { icon: Briefcase, title: t('activity_medical'), desc: t('activity_medical_desc'), color: 'hover:bg-blue-500', iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
+               { icon: GraduationCap, title: t('activity_edu'), desc: t('activity_edu_desc'), color: 'hover:bg-green-500', iconBg: 'bg-green-50', iconColor: 'text-green-500' },
+               { icon: MapPin, title: t('activity_disaster'), desc: t('activity_disaster_desc'), color: 'hover:bg-orange-500', iconBg: 'bg-orange-50', iconColor: 'text-orange-500' }
             ].map((act, i) => (
                <motion.div 
                  key={i} 
@@ -398,160 +588,24 @@ const HomeOverview = () => {
          </div>
       </section>
 
-      {/* 5. Committee Section */}
+      {/* 5. Committee Section Teaser */}
       <section id="committee" className="py-32 bg-white relative overflow-hidden">
-         {/* Decorative background elements */}
          <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#c0392b_1px,transparent_1px)] [background-size:40px_40px]"></div>
          </div>
 
-         <div className="container mx-auto px-4 sm:px-6 space-y-32 relative z-10">
-            <div className="text-center space-y-6 max-w-4xl mx-auto">
-               <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Guardians of Humanity</span>
-               <h2 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">কেন্দ্রীয় আহ্বায়ক <span className="text-bento-primary">কমিটি</span></h2>
+         <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center space-y-12">
+            <div className="max-w-4xl mx-auto space-y-6">
+               <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">{t('committee_guardians')}</span>
+               <h2 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">{t('committee_title').split(' ')[0]} <span className="text-bento-primary">{t('committee_title').split(' ').slice(1).join(' ')}</span></h2>
                <p className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto">
-                  অদম্য ২৪-এর স্বপ্ন ও লক্ষ্য বাস্তবায়নে সুসংগঠিতভাবে কাজ করে যাচ্ছে একঝাঁক অদম্য তরুণ।
+                  {t('committee_desc_home')}
                </p>
             </div>
-
-            {committee.length > 0 ? (
-               <div className="space-y-32">
-                  {/* Leadership Tier */}
-                  <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-                     {leaders.map((c, i) => (
-                        <motion.div 
-                           key={c.id} 
-                           initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 40 }} 
-                           whileInView={{ opacity: 1, y: 0 }} 
-                           viewport={{ once: true }} 
-                           transition={{ duration: 0.8, delay: i * 0.1 }}
-                           className="group relative will-change-transform"
-                        >
-                           <div className="relative aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
-                              {c.image_url ? (
-                                <img 
-                                   src={c.image_url} 
-                                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" 
-                                   alt={c.name} 
-                                   referrerPolicy="no-referrer" 
-                                />
-                              ) : (
-                                <div className="flex flex-col items-center justify-center space-y-4">
-                                   <div className={`p-8 rounded-full ${isFemale(c.name) ? 'bg-pink-50 text-pink-400' : 'bg-blue-50 text-blue-400'}`}>
-                                      <UserIcon size={80} />
-                                   </div>
-                                   <span className="text-4xl">{isFemale(c.name) ? '♀' : '♂'}</span>
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-bento-dark via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                              <div className="absolute bottom-12 left-12 right-12 space-y-2">
-                                 <h4 className="text-3xl md:text-4xl font-serif italic text-white leading-tight">{c.name}</h4>
-                                 <div className="flex items-center gap-4">
-                                    <div className="h-px w-8 bg-bento-primary"></div>
-                                    <span className="text-xs font-black uppercase tracking-[0.3em] text-bento-primary">{c.role}</span>
-                                 </div>
-                              </div>
-                           </div>
-                           <div className="absolute -top-6 -right-6 w-24 h-24 bg-bento-primary/10 rounded-full blur-2xl group-hover:bg-bento-primary/20 transition-colors"></div>
-                        </motion.div>
-                     ))}
-                  </div>
-
-                  {/* Joint Secretary Tier */}
-                  <div className="space-y-16">
-                     <div className="flex items-center gap-6 justify-center">
-                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
-                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">যুগ্ম সদস্য সচিবগণ</h3>
-                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
-                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
-                        {jointSecretaries.map((c, i) => (
-                           <motion.div 
-                              key={c.id} 
-                              initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.9 }} 
-                              whileInView={{ opacity: 1, scale: 1 }} 
-                              viewport={{ once: true }} 
-                              transition={{ delay: i * 0.05 }}
-                              className="group space-y-6 text-center will-change-transform"
-                           >
-                              <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
-                                 {c.image_url ? (
-                                   <img 
-                                      src={c.image_url} 
-                                      className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
-                                      alt={c.name} 
-                                      referrerPolicy="no-referrer" 
-                                   />
-                                 ) : (
-                                   <div className="flex flex-col items-center justify-center">
-                                      <UserIcon size={40} className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'} />
-                                      <span className="text-xl mt-2">{isFemale(c.name) ? '♀' : '♂'}</span>
-                                   </div>
-                                 )}
-                                 <div className="absolute inset-0 bg-bento-primary/5 group-hover:bg-transparent transition"></div>
-                              </div>
-                              <div className="space-y-1">
-                                 <p className="font-serif italic text-lg text-bento-dark group-hover:text-bento-primary transition-colors">{c.name}</p>
-                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-light">যুগ্ম সদস্য সচিব</p>
-                              </div>
-                           </motion.div>
-                        ))}
-                     </div>
-                  </div>
-
-                  {/* General Members Tier */}
-                  <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-8 md:px-20 border border-gray-100">
-                     <div className="text-center space-y-4">
-                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">সাধারণ সদস্যবৃন্দ</h3>
-                        <p className="text-4xl font-serif italic text-bento-dark">অদম্য সদস্য <span className="text-bento-primary">তালিকা</span></p>
-                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
-                        {generalMembers.map((c, i) => (
-                           <motion.div 
-                              key={c.id} 
-                              initial={{ opacity: 0 }} 
-                              whileInView={{ opacity: 1 }} 
-                              viewport={{ once: true }}
-                              transition={{ delay: isMobile ? 0 : i * 0.02 }}
-                              className="flex flex-col items-center text-center space-y-4 group will-change-transform"
-                           >
-                              <div className="w-16 h-16 bg-white rounded-2xl flex flex-col items-center justify-center border border-gray-100 shadow-sm group-hover:border-bento-primary/30 group-hover:shadow-lg transition-all duration-500 overflow-hidden">
-                                 {c.image_url ? (
-                                    <img src={c.image_url} className="w-full h-full object-cover" alt={c.name} />
-                                 ) : (
-                                    <div className="flex flex-col items-center">
-                                       <UserIcon size={18} className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'} />
-                                       <span className="text-[10px] scale-75 leading-none">{isFemale(c.name) ? '♀' : '♂'}</span>
-                                    </div>
-                                 )}
-                              </div>
-                              <div>
-                                 <p className="text-sm font-bold text-bento-dark leading-tight">{c.name}</p>
-                                 <p className="text-[8px] font-black uppercase tracking-widest text-bento-light mt-1">সদস্য</p>
-                              </div>
-                           </motion.div>
-                        ))}
-                     </div>
-                     
-                     <div className="pt-10 flex flex-col items-center gap-6">
-                        <div className="flex items-center gap-4 text-bento-light font-serif italic text-sm">
-                           <Info size={16} />
-                           <p>অদম্য ২৪-এর সকল অদম্য সদস্যদের নামের তালিকা নিয়মিত আপডেট করা হয়।</p>
-                        </div>
-                        <Link to="/register" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-bento-primary hover:gap-6 transition-all duration-500">
-                           নতুন সদস্য হিসেবে যোগ দিন <ArrowRight size={14} />
-                        </Link>
-                     </div>
-                  </div>
-               </div>
-            ) : (
-               <div className="py-32 text-center space-y-6">
-                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-200 animate-pulse">
-                     <Users size={32} />
-                  </div>
-                  <p className="text-bento-light italic font-serif">কমিটির তথ্য লোড হচ্ছে...</p>
-               </div>
-            )}
+            
+            <Link to="/committee" className="inline-flex items-center gap-4 bg-bento-dark text-white px-12 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-bento-primary transition-all shadow-2xl hover:scale-105 active:scale-95">
+               {t('view_full_committee')} <ArrowRight size={20} />
+            </Link>
          </div>
       </section>
 
@@ -560,10 +614,10 @@ const HomeOverview = () => {
          <div className="bg-bento-primary rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-24 text-center text-white relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl"></div>
             <div className="relative z-10 space-y-12">
-               <h2 className="text-4xl md:text-7xl font-serif italic leading-tight">আপনিও কি অদম্য হতে চান?</h2>
+               <h2 className="text-4xl md:text-7xl font-serif italic leading-tight">{t('cta_title')}</h2>
                <div className="flex flex-wrap justify-center gap-8">
-                  <Link to="/register" className="bg-white text-bento-primary px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition">সদস্য আবেদন</Link>
-                  <Link to="/donations" className="bg-bento-dark text-white px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:bg-white hover:text-bento-dark transition">সহযোগিতা করুন</Link>
+                  <Link to="/register" className="bg-white text-bento-primary px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-105 transition">{t('member_apply')}</Link>
+                  <Link to="/donations" className="bg-bento-dark text-white px-16 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] hover:bg-white hover:text-bento-dark transition">{t('donate_now')}</Link>
                </div>
             </div>
          </div>
@@ -1381,6 +1435,7 @@ const ProfilePage = () => {
 
 const Navbar = () => {
   const { user, logout, siteSettings } = useAuth();
+  const { lang, setLang, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const logoUrl = siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100";
@@ -1430,14 +1485,22 @@ const Navbar = () => {
 
            {/* Desktop Links */}
            <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
-              <NavLink to="/" icon={LayoutGrid}>হোম</NavLink>
-              <NavLink to="/events" icon={Calendar}>ইভেন্ট</NavLink>
-              <NavLink to="/donations" icon={Heart}>দান</NavLink>
-              <NavLink to="/gallery" icon={Camera}>গ্যালারি</NavLink>
-              <NavLink to="/contact" icon={Phone}>যোগাযোগ</NavLink>
+              <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
+              <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
+              <NavLink to="/events" icon={Calendar}>{t('nav_events')}</NavLink>
+              <NavLink to="/donations" icon={Heart}>{t('nav_donations')}</NavLink>
+              <NavLink to="/contact" icon={Phone}>{t('nav_contact')}</NavLink>
            </div>
 
            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-2xl transition border border-white/10 group active:scale-95"
+              >
+                 <Globe size={16} className="text-bento-primary group-hover:rotate-180 transition-transform duration-700" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">{t('lang_switch')}</span>
+              </button>
+              
               {user ? (
                  <div className="flex items-center gap-4">
                     <Link to="/profile" className="hidden sm:flex items-center gap-3 bg-white/5 hover:bg-white hover:text-bento-dark px-6 py-2.5 rounded-2xl transition-all border border-white/10 group">
@@ -1453,8 +1516,8 @@ const Navbar = () => {
                  </div>
               ) : (
                  <div className="hidden sm:flex items-center gap-3">
-                    <Link to="/login" className="px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition">লগইন</Link>
-                    <Link to="/register" className="vibrant-gradient text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">আবেদন</Link>
+                    <Link to="/login" className="px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/70 hover:text-white transition">{t('nav_login')}</Link>
+                    <Link to="/register" className="vibrant-gradient text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">{t('nav_register')}</Link>
                  </div>
               )}
               <button className="lg:hidden p-3 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-all shadow-lg ring-1 ring-white/10 ml-1" onClick={() => setIsOpen(!isOpen)}>
@@ -1492,11 +1555,11 @@ const Navbar = () => {
                   
                   <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
                     {[
-                      { to: "/", label: "হোম পেজ", icon: LayoutGrid },
-                      { to: "/events", label: "ইভেন্ট তালিকা", icon: Calendar },
-                      { to: "/donations", label: "তহবিলে দান", icon: Heart },
-                      { to: "/gallery", label: "ফটো গ্যালারি", icon: Camera },
-                      { to: "/contact", label: "যোগাযোগ করুন", icon: Phone }
+                      { to: "/", label: t('nav_home'), icon: LayoutGrid },
+                      { to: "/committee", label: t('nav_committee'), icon: Users },
+                      { to: "/events", label: t('nav_events'), icon: Calendar },
+                      { to: "/donations", label: t('nav_donations'), icon: Heart },
+                      { to: "/contact", label: t('nav_contact'), icon: Phone }
                     ].map((item) => (
                       <Link 
                         key={item.label}
@@ -1545,11 +1608,12 @@ const AdminDashboard = () => {
   const [newEvenTitle, setNewEventTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'events' | 'committee' | 'settings'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'events' | 'committee' | 'settings' | 'donations'>('members');
   const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
+  const [donations, setDonations] = useState<any[]>([]);
   const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1560,6 +1624,7 @@ const AdminDashboard = () => {
     fetch('/api/admin/users').then(r => r.ok ? r.json() : []).then(data => setUsers(Array.isArray(data) ? data : []));
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
     fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
+    fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
   }, []);
 
   const showFeedback = (type: 'success' | 'error', msg: string) => {
@@ -1716,6 +1781,24 @@ const AdminDashboard = () => {
     doc.save('Adomyo_Member_List.pdf');
   };
 
+  const downloadDonationsPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Adomyo 24 - Donation List', 14, 15);
+    const tableData = donations.map(d => [
+      new Date(d.date).toLocaleDateString('bn-BD'),
+      d.donor_name,
+      `Tk. ${d.amount}`,
+      d.payment_method || 'Mobile Banking',
+      d.fund_type || 'General'
+    ]);
+    autoTable(doc, {
+      head: [['Date', 'Donor Name', 'Amount', 'Method', 'Fund']],
+      body: tableData,
+      startY: 20,
+    });
+    doc.save('Adomyo_Donation_Report.pdf');
+  };
+
   const filteredUsers = users.filter(u => 
     (u.phone && u.phone.includes(searchTerm)) || 
     (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -1741,13 +1824,13 @@ const AdminDashboard = () => {
       </div>
 
       <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto custom-scrollbar no-scrollbar">
-         {['members', 'events', 'committee', 'settings'].map((tab) => (
+         {['members', 'donations', 'events', 'committee', 'settings'].map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab as any)}
               className={`px-6 md:px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
             >
-              {tab === 'members' ? 'সদস্য তালিকা' : tab === 'events' ? 'ইভেন্ট ম্যানেজমেন্ট' : tab === 'committee' ? 'কমিটি ম্যানেজমেন্ট' : 'সাইট সেটিংস'}
+              {tab === 'members' ? 'সদস্য তালিকা' : tab === 'donations' ? 'অনুদান তালিকা' : tab === 'events' ? 'ইভেন্ট ম্যানেজমেন্ট' : tab === 'committee' ? 'কমিটি ম্যানেজমেন্ট' : 'সাইট সেটিংস'}
             </button>
          ))}
       </div>
@@ -1804,6 +1887,52 @@ const AdminDashboard = () => {
             </div>
          </div>
       </div>
+      )}
+
+      {activeTab === 'donations' && (
+        <div className="space-y-8">
+           <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
+              <h2 className="text-2xl font-serif italic text-bento-dark flex items-center gap-3"><Heart className="text-bento-primary" fill="currentColor" /> অনুদান প্রতিবেদন</h2>
+              <button onClick={downloadDonationsPDF} className="flex items-center gap-2 bg-bento-accent text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition">
+                 <Download size={18} /> রিপোর্ট ডাউনলোড (PDF)
+              </button>
+           </div>
+
+           <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                    <thead>
+                       <tr className="bg-gray-50 border-b border-gray-100">
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">তারিখ</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">দাতা</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">পরিমান</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">মাধ্যম</th>
+                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">তহবিল</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                       {donations.map((d) => (
+                          <tr key={d.id} className="hover:bg-gray-50/50 transition">
+                             <td className="px-10 py-6 text-sm font-bold text-bento-dark italic">{new Date(d.date).toLocaleDateString('bn-BD')}</td>
+                             <td className="px-10 py-6">
+                                <p className="text-sm font-black text-bento-dark">{d.donor_name}</p>
+                                <p className="text-[10px] text-bento-light opacity-60">{d.phone_email}</p>
+                             </td>
+                             <td className="px-10 py-6 text-xl font-black text-bento-primary">৳{d.amount}</td>
+                             <td className="px-10 py-6">
+                                <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                                   {d.payment_method || 'Mobile Banking'}
+                                </span>
+                             </td>
+                             <td className="px-10 py-6 text-xs text-bento-light font-bold italic">{d.fund_type || 'General'}</td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
+                 {donations.length === 0 && <p className="text-center py-20 text-bento-light italic">এখনো কোনো অনুদান পাওয়া যায়নি...</p>}
+              </div>
+           </div>
+        </div>
       )}
 
       {activeTab === 'events' && (
@@ -2033,6 +2162,7 @@ const DetailGroup = ({ label, items }: { label: string, items: { label: string, 
 );
 
 const EventsPage = () => {
+  const { t, lang } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
   useEffect(() => {
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
@@ -2041,7 +2171,7 @@ const EventsPage = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-20 space-y-16">
       <div className="text-center space-y-4">
-         <h1 className="text-4xl md:text-7xl font-serif text-bento-dark italic">আসন্ন ইভেন্টসমূহ</h1>
+         <h1 className="text-4xl md:text-7xl font-serif text-bento-dark italic">{t('events_page_title')}</h1>
          <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -2049,7 +2179,7 @@ const EventsPage = () => {
           <motion.div key={e.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="bento-card !p-0 group cursor-pointer overflow-hidden flex flex-col ring-1 ring-bento-border hover:ring-bento-primary transition shadow-xl">
             <div className="h-64 overflow-hidden"><img src={e.image_url || `https://picsum.photos/seed/ev${e.id}/800/600`} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerPolicy="no-referrer" /></div>
             <div className="p-6 md:p-8 space-y-4 flex-grow flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-accent bg-[rgba(39,174,96,0.1)] px-3 py-1.5 rounded-full w-fit">{new Date(e.date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-accent bg-[rgba(39,174,96,0.1)] px-3 py-1.5 rounded-full w-fit">{new Date(e.date).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               <h3 className="text-xl md:text-3xl font-serif text-bento-dark leading-tight group-hover:text-bento-primary transition h-20 overflow-hidden line-clamp-2">{e.title}</h3>
               <p className="text-bento-light text-sm italic leading-relaxed line-clamp-3 mb-6">{e.description}</p>
               <div className="pt-6 border-t border-bento-border mt-auto flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-bento-primary">
@@ -2064,6 +2194,7 @@ const EventsPage = () => {
 };
 
 const ContactUsPage = () => {
+  const { t, lang } = useLanguage();
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -2080,22 +2211,22 @@ const ContactUsPage = () => {
     <div className="container mx-auto px-4 sm:px-6 py-20 max-w-6xl space-y-24">
       <div className="text-center space-y-6">
          <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Get in Touch</span>
-         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">যোগাযোগ <span className="text-bento-primary">করুন</span></h1>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">{t('contact_title').split(' ')[0]} <span className="text-bento-primary">{t('contact_title').split(' ')[1]}</span></h1>
          <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-16 items-start">
          <div className="lg:col-span-5 space-y-12">
             <div className="space-y-8">
-               <h3 className="text-2xl font-serif italic text-bento-dark">আমাদের কার্যালয়</h3>
+               <h3 className="text-2xl font-serif italic text-bento-dark">{t('office_title')}</h3>
                <div className="space-y-8">
                   <div className="flex gap-6 group">
                      <div className="w-16 h-16 rounded-[2rem] bg-bento-primary/5 flex items-center justify-center text-bento-primary shrink-0 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500">
                         <MapPin size={28} />
                      </div>
                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">ঠিকানা</p>
-                        <p className="text-xl font-medium text-bento-dark leading-relaxed">ইউনিক বাসস্ট্যান্ড (মিজান প্লাজা), বাইপাইল, আশুলিয়া, সাভার, ঢাকা।</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">{t('office_address_label')}</p>
+                        <p className="text-xl font-medium text-bento-dark leading-relaxed">{t('footer_address')}</p>
                      </div>
                   </div>
 
@@ -2104,7 +2235,7 @@ const ContactUsPage = () => {
                         <Phone size={28} />
                      </div>
                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">মোবাইল নং-</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">{t('office_phone_label')}</p>
                         <p className="text-2xl font-black italic text-bento-dark">01722000231</p>
                      </div>
                   </div>
@@ -2123,8 +2254,8 @@ const ContactUsPage = () => {
 
             <div className="bg-bento-dark rounded-[3rem] p-10 text-white space-y-6 relative overflow-hidden group">
                <div className="absolute top-0 right-0 w-40 h-40 bg-bento-primary/10 rounded-full -mr-20 -mt-20 blur-2xl group-hover:scale-150 transition duration-1000"></div>
-               <h4 className="text-xl font-serif italic text-white/90">আমাদের ফেসবুক পেজ</h4>
-               <p className="text-sm text-white/50 leading-relaxed">সংগঠনের সকল কার্যক্রমের লাইভ আপডেট পেতে আমাদের ফেসবুক পেজটি ভিজিট করুন।</p>
+               <h4 className="text-xl font-serif italic text-white/90">{t('fb_page_title')}</h4>
+               <p className="text-sm text-white/50 leading-relaxed">{t('fb_page_desc')}</p>
                <a href="https://www.facebook.com/adomyo24" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-4 text-bento-primary font-black uppercase tracking-widest text-[10px] hover:gap-6 transition-all">FB.COM/ADOMYO24 <ArrowRight size={14} /></a>
             </div>
          </div>
@@ -2132,17 +2263,17 @@ const ContactUsPage = () => {
          <div className="lg:col-span-7">
             <form onSubmit={handleSubmit} className="bg-white rounded-[4rem] p-10 md:p-16 shadow-2xl border border-gray-100 space-y-10">
                <div className="space-y-2">
-                  <h3 className="text-3xl font-serif italic text-bento-dark">আপনার মতামত দিন</h3>
-                  <p className="text-bento-light text-sm italic">আমাদের সাথে যোগাযোগ করতে নিচের ফর্মটি ব্যবহার করুন। ধন্যবাদ।</p>
+                  <h3 className="text-3xl font-serif italic text-bento-dark">{t('contact_form_title')}</h3>
+                  <p className="text-bento-light text-sm italic">{t('contact_form_desc')}</p>
                </div>
                
                <div className="grid md:grid-cols-2 gap-8">
-                  <InputField label="আপনার নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} required />
-                  <InputField label="আপনার ইমেইল" type="email" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} required />
+                  <InputField label={t('form_name')} value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} required />
+                  <InputField label={t('form_email')} type="email" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} required />
                </div>
-               <InputField label="বিষয়" value={formData.subject} onChange={(e:any)=>setFormData({...formData, subject: e.target.value})} required />
+               <InputField label={t('form_subject')} value={formData.subject} onChange={(e:any)=>setFormData({...formData, subject: e.target.value})} required />
                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">বার্তা</label>
+                  <label className="block text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">{t('form_message')}</label>
                   <textarea 
                     value={formData.message} 
                     onChange={(e:any)=>setFormData({...formData, message: e.target.value})} 
@@ -2151,11 +2282,11 @@ const ContactUsPage = () => {
                     required
                   />
                </div>
-               <button type="submit" className="w-full bg-bento-primary text-white py-6 rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-2xl shadow-bento-primary/30 hover:brightness-110 active:scale-95 transition-all">বার্তা পাঠান</button>
+               <button type="submit" className="w-full bg-bento-primary text-white py-6 rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-2xl shadow-bento-primary/30 hover:brightness-110 active:scale-95 transition-all">{t('form_send')}</button>
                
                {submitted && (
                   <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="bg-green-50 p-6 rounded-2xl text-green-700 text-center text-sm font-medium border border-green-100 italic">
-                     আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই যোগাযোগ করবো।
+                     {t('form_success')}
                   </motion.div>
                )}
             </form>
@@ -2178,6 +2309,7 @@ const ContactUsPage = () => {
 };
 
 const DonationsPage = () => {
+  const { t, lang } = useLanguage();
   const [donations, setDonations] = useState<any[]>([]);
   const [step, setStep] = useState(1); // 1: Info, 2: Checkout, 3: Success
   const [formData, setFormData] = useState({ 
@@ -2210,7 +2342,10 @@ const DonationsPage = () => {
       body: JSON.stringify({
         donor_name: formData.donor_name,
         amount: Number(formData.amount),
-        message: formData.message || `Payment via ${selectedMethod}`
+        phone_email: formData.phone_email,
+        fund_type: formData.fund_type,
+        payment_method: selectedMethod,
+        message: formData.message
       }) 
     });
     
@@ -2242,29 +2377,29 @@ const DonationsPage = () => {
         <div className="space-y-20">
           <div className="text-center space-y-6">
              <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Support Humanity</span>
-             <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">আপনার <span className="text-bento-primary">অনদান</span> প্রদান করুন</h1>
+             <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">{t('donate_section_title').split(' ')[0]} <span className="text-bento-primary">{t('donate_section_title').split(' ').slice(1).join(' ')}</span></h1>
              <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
           </div>
 
           <div className="bg-yellow-500/5 backdrop-blur-xl border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
-            <h2 className="text-2xl font-serif text-center text-bento-dark italic">আপনার তথ্য পূরণ করুন</h2>
+            <h2 className="text-2xl font-serif text-center text-bento-dark italic">{t('donation_info_title')}</h2>
             
             <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">তহবিল *</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">{t('donation_fund_label')}</label>
                 <select 
-                  className="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
-                  value={formData.fund_type}
-                  onChange={(e) => setFormData({...formData, fund_type: e.target.value})}
+                   className="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
+                   value={formData.fund_type}
+                   onChange={(e) => setFormData({...formData, fund_type: e.target.value})}
                 >
-                  <option>তহবিল - ১ (সাধারণ)</option>
-                  <option>তহবিল - ২ (ত্রাণ)</option>
-                  <option>তহবিল - ৩ (শিক্ষা)</option>
+                   <option>{t('fund_general')}</option>
+                   <option>{t('fund_relief')}</option>
+                   <option>{t('fund_education')}</option>
                 </select>
               </div>
 
               <InputField 
-                label="আপনার নাম *" 
+                label={t('form_name') + " *"} 
                 value={formData.donor_name} 
                 onChange={(e:any)=>setFormData({...formData, donor_name: e.target.value})} 
                 placeholder="পরিচয় দিন" 
@@ -2272,7 +2407,7 @@ const DonationsPage = () => {
               />
               
               <InputField 
-                label="মোবাইল / ইমেইল *" 
+                label={t('mobile_email') + " *"} 
                 value={formData.phone_email} 
                 onChange={(e:any)=>setFormData({...formData, phone_email: e.target.value})} 
                 placeholder="017... / email@..." 
@@ -2280,48 +2415,48 @@ const DonationsPage = () => {
               />
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">পরিমান (BDT) *</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">{t('donation_amount_label')}</label>
                 <div className="flex gap-4">
                   <input 
                     type="number"
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
                     className="flex-grow bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
-                    placeholder="৳ সংখ্যায় লিখুন"
+                    placeholder={t('donation_amount_placeholder')}
                     required
                   />
-                  <button type="submit" className="bg-bento-accent hover:bg-green-700 text-white px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-green-500/20">দান করুন</button>
+                  <button type="submit" className="bg-bento-accent hover:bg-green-700 text-white px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-green-500/20">{t('donate_now')}</button>
                 </div>
               </div>
             </form>
             
             <p className="text-center text-xs text-bento-light italic">
-              অদম্য ২৪ ফাউন্ডেশনে দান করলে আপনি মানসিক প্রশান্তি ও সওয়াব লাভ করবেন। <span className="text-bento-primary font-bold cursor-pointer hover:underline">বিস্তারিত জানতে ক্লিক করুন।</span>
+              {t('donation_blessing')} <span className="text-bento-primary font-bold cursor-pointer hover:underline">{t('click_details')}</span>
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12">
              <div className="space-y-8">
-                <h3 className="text-3xl font-serif italic text-bento-dark">তহবিল পরিস্থিতি</h3>
+                <h3 className="text-3xl font-serif italic text-bento-dark">{t('fund_status')}</h3>
                 <div className="bento-card bg-bento-dark text-white p-12 space-y-6 relative overflow-hidden group">
                    <Heart size={200} className="absolute -bottom-10 -right-10 opacity-10 group-hover:scale-110 transition duration-1000" fill="currentColor" />
-                   <p className="text-sm font-black uppercase tracking-[0.3em] opacity-60">মোট সংগৃহীত তহবিল</p>
+                   <p className="text-sm font-black uppercase tracking-[0.3em] opacity-60">{t('total_collected')}</p>
                    <p className="text-6xl font-black italic">৳ {currentTotal.toLocaleString()}</p>
                    <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden">
                       <motion.div initial={{width: 0}} whileInView={{width: '65%'}} className="h-full bg-bento-primary" />
                    </div>
-                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">লক্ষ্যমাত্রা: ৳ ১০,০০,০০০</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{t('fund_target')}</p>
                 </div>
              </div>
 
              <div className="space-y-8">
-                <h3 className="text-3xl font-serif italic text-bento-dark">সাম্প্রতিক ফিড</h3>
+                <h3 className="text-3xl font-serif italic text-bento-dark">{t('recent_feed')}</h3>
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
                    {Array.isArray(donations) && donations.map((d, i) => (
                       <div key={d.id} className="bento-card !p-6 flex justify-between items-center bg-gray-50/50 border-gray-100 italic transition hover:shadow-lg">
                          <div className="space-y-1">
                             <p className="font-bold text-bento-dark">{d.donor_name}</p>
-                            <p className="text-[10px] text-bento-light uppercase tracking-widest">{new Date(d.date).toLocaleDateString('bn-BD')}</p>
+                            <p className="text-[10px] text-bento-light uppercase tracking-widest">{new Date(d.date).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US')}</p>
                          </div>
                          <p className="text-2xl font-black text-bento-primary">৳{d.amount}</p>
                       </div>
@@ -2470,6 +2605,11 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [siteSettings, setSiteSettings] = useState<any>(null);
+  const [lang, setLang] = useState<'en' | 'bn'>('bn');
+
+  const t = (key: string) => {
+    return (translations[lang] as any)[key] || key;
+  };
 
   const fetchSettings = async () => {
     try {
@@ -2610,129 +2750,142 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, siteSettings, updateSettings }}>
-      <Router>
-        <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth relative overflow-hidden">
-          {/* Global Background Design */}
-          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0 bg-grid opacity-[0.02] md:opacity-[0.03]"></div>
-            <div className="absolute inset-0 bg-grain opacity-[0.1] md:opacity-[0.2]"></div>
-            
-            {!isMobile && !shouldReduceMotion && (
-              <>
-                <motion.div 
-                  animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
-                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                  className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px] will-change-transform" 
-                />
-                <motion.div 
-                  animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                  className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px] will-change-transform" 
-                />
-                <motion.div 
-                  animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px] will-change-transform" 
-                />
-              </>
-            )}
-            
-            {/* Minimal Background for Mobile */}
-            {isMobile && (
-              <div className="absolute inset-0 bg-gradient-to-b from-bento-primary/5 via-transparent to-bento-accent/5 opacity-50"></div>
-            )}
-          </div>
-
-          <Navbar />
-          <main className="flex-grow relative z-10">
-            <Routes>
-              <Route path="/" element={<HomeOverview />} />
-              <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
-              <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
-              <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
-              <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/donations" element={<DonationsPage />} />
-              <Route path="/contact" element={<ContactUsPage />} />
-            </Routes>
-          </main>
-          <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
-            {/* Decorative Gradients */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[120px]"></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-bento-accent/10 rounded-full blur-[120px]"></div>
-
-            <div className="container mx-auto px-6 relative z-10">
-              <div className="grid lg:grid-cols-4 gap-20 pb-20 border-b border-white/5">
-                <div className="lg:col-span-1 space-y-8">
-                   <Link to="/" className="flex items-center gap-4 group">
-                      <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" />
-                      <div>
-                         <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Adomyo 24</h2>
-                         <p className="text-[9px] font-black text-bento-primary uppercase tracking-[0.4em] mt-1">Fearless Humanity</p>
-                      </div>
-                   </Link>
-                   <p className="text-white/40 font-serif italic text-lg leading-relaxed">অদম্য ২৪—একটি অরাজনৈতিক সামাজিক সংগঠন যা মানবতার সেবায় সদা জাগ্রত।</p>
-                </div>
-
-                <div className="space-y-8">
-                   <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">কুইক ন্যাভিগেশন</h3>
-                   <div className="flex flex-col gap-4">
-                      {['ইভেন্ট তালিকা', 'দান করুন', 'কেন্দ্রীয় কমিটি', 'গ্যালারি'].map(item => (
-                        <Link key={item} to="/" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
-                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
-                           {item}
-                        </Link>
-                      ))}
-                   </div>
-                </div>
-
-                <div className="space-y-8">
-                   <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">যোগাযোগ</h3>
-                   <div className="space-y-6">
-                      <div className="flex items-start gap-4 text-white/60 group">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-bento-primary group-hover:bg-bento-primary group-hover:text-white transition-all shrink-0"><MapPin size={18} /></div>
-                         <span className="text-sm font-medium">ইউনিক বাসস্ট্যান্ড (মিজান প্লাজা), বাইপাইল, আশুলিয়া, সাভার, ঢাকা।</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-white/60 group">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0"><Phone size={18} /></div>
-                         <span className="text-sm font-medium italic">01722000231</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-white/60 group">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all shrink-0"><Mail size={18} /></div>
-                         <span className="text-sm font-medium italic underline decoration-white/10 group-hover:decoration-yellow-500/50">adomyo24@gmail.com</span>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="space-y-8">
-                   <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">আমাদের কার্যক্রম</h3>
-                   <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5">
-                      <p className="text-3xl font-black italic text-bento-accent">১,২০০+</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mt-2">সদস্য সংখ্যা</p>
-                      <div className="h-2 w-full bg-white/10 rounded-full mt-4 overflow-hidden">
-                         <div className="h-full w-3/4 bg-bento-accent"></div>
-                      </div>
-                   </div>
-                </div>
-              </div>
-
-              <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
-                 <div className="space-y-4">
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">© 2024 ADOMYO 24 ORGANIZATION. ALL RIGHTS RESERVED.</p>
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em] bg-white/5 py-3 px-6 rounded-full inline-block border border-white/5 shadow-inner italic">
-                      Developed, design and maintenance by <span className="text-bento-primary italic">Shoriful Islam</span>
-                    </p>
-                 </div>
-                 <div className="flex items-center gap-8 text-white/30">
-                    <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Privacy Policy</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Terms of Service</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Admin Access</span>
-                 </div>
-              </div>
+      <LanguageContext.Provider value={{ lang, setLang, t }}>
+        <Router>
+          <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth relative overflow-hidden">
+            {/* Global Background Design */}
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+              <div className="absolute inset-0 bg-grid opacity-[0.02] md:opacity-[0.03]"></div>
+              <div className="absolute inset-0 bg-grain opacity-[0.1] md:opacity-[0.2]"></div>
+              
+              {!isMobile && !shouldReduceMotion && (
+                <>
+                  <motion.div 
+                    animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                    className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px] will-change-transform" 
+                  />
+                  <motion.div 
+                    animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
+                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px] will-change-transform" 
+                  />
+                  <motion.div 
+                    animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px] will-change-transform" 
+                  />
+                </>
+              )}
+              
+              {/* Minimal Background for Mobile */}
+              {isMobile && (
+                <div className="absolute inset-0 bg-gradient-to-b from-bento-primary/5 via-transparent to-bento-accent/5 opacity-50"></div>
+              )}
             </div>
-          </footer>
-        </div>
-      </Router>
+
+            <Navbar />
+            <main className="flex-grow relative z-10">
+              <Routes>
+                <Route path="/" element={<HomeOverview />} />
+                <Route path="/committee" element={<CommitteePage />} />
+                <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
+                <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
+                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
+                <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/donations" element={<DonationsPage />} />
+                <Route path="/contact" element={<ContactUsPage />} />
+              </Routes>
+            </main>
+            <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
+              {/* Decorative Gradients */}
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[120px]"></div>
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-bento-accent/10 rounded-full blur-[120px]"></div>
+
+              <div className="container mx-auto px-6 relative z-10">
+                <div className="grid lg:grid-cols-4 gap-20 pb-20 border-b border-white/5">
+                  <div className="lg:col-span-1 space-y-8">
+                     <Link to="/" className="flex items-center gap-4 group">
+                        <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" />
+                        <div>
+                           <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Adomyo 24</h2>
+                           <p className="text-[9px] font-black text-bento-primary uppercase tracking-[0.4em] mt-1">Fearless Humanity</p>
+                        </div>
+                     </Link>
+                     <p className="text-white/40 font-serif italic text-lg leading-relaxed">{t('footer_desc')}</p>
+                  </div>
+
+                  <div className="space-y-8">
+                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">{t('footer_quick_nav')}</h3>
+                     <div className="flex flex-col gap-4">
+                        <Link to="/" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_home')}
+                        </Link>
+                        <Link to="/committee" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_committee')}
+                        </Link>
+                        <Link to="/donations" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_donations')}
+                        </Link>
+                        <Link to="/contact" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_contact')}
+                        </Link>
+                     </div>
+                  </div>
+
+                  <div className="space-y-8">
+                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">{t('footer_contact')}</h3>
+                     <div className="space-y-6">
+                        <div className="flex items-start gap-4 text-white/60 group">
+                           <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-bento-primary group-hover:bg-bento-primary group-hover:text-white transition-all shrink-0"><MapPin size={18} /></div>
+                           <span className="text-sm font-medium">{t('footer_address')}</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-white/60 group">
+                           <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0"><Phone size={18} /></div>
+                           <span className="text-sm font-medium italic">01722000231</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-white/60 group">
+                           <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all shrink-0"><Mail size={18} /></div>
+                           <span className="text-sm font-medium italic underline decoration-white/10 group-hover:decoration-yellow-500/50">adomyo24@gmail.com</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="space-y-8">
+                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">{t('footer_activities')}</h3>
+                     <div className="bg-white/5 p-8 rounded-[2rem] border border-white/5">
+                        <p className="text-3xl font-black italic text-bento-accent">১,২০০+</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mt-2">{t('footer_member_count')}</p>
+                        <div className="h-2 w-full bg-white/10 rounded-full mt-4 overflow-hidden">
+                           <div className="h-full w-3/4 bg-bento-accent"></div>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+
+                <div className="pt-16 flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
+                   <div className="space-y-4">
+                      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">{t('footer_rights').toUpperCase()}</p>
+                      <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em] bg-white/5 py-3 px-6 rounded-full inline-block border border-white/5 shadow-inner italic">
+                        Developed, design and maintenance by <span className="text-bento-primary italic">Shoriful Islam</span>
+                      </p>
+                   </div>
+                   <div className="flex items-center gap-8 text-white/30">
+                      <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Privacy Policy</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Terms of Service</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest hover:text-white transition cursor-pointer italic">Admin Access</span>
+                   </div>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </Router>
+      </LanguageContext.Provider>
     </AuthContext.Provider>
   );
 }

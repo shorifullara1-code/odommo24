@@ -224,8 +224,16 @@ app.post('/api/auth/login', async (req, res) => {
   });
 
   app.post('/api/donations', async (req, res) => {
-    const { donor_name, amount, message } = req.body;
-    const { error } = await supabase.from('donations').insert([{ donor_name, amount, message }]);
+    const { donor_name, amount, message, phone_email, fund_type, payment_method } = req.body;
+    const { error } = await supabase.from('donations').insert([{ 
+      donor_name, 
+      amount, 
+      message,
+      phone_email,
+      fund_type,
+      payment_method,
+      date: new Date().toISOString()
+    }]);
     if (error) return res.status(500).json({ error: error.message });
     res.status(201).json({ message: 'Donation recorded' });
   });

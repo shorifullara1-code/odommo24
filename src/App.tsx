@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, useRef, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { 
   Heart, Users, MapPin, Phone, Mail, Calendar, Activity, 
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
@@ -57,6 +57,20 @@ const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
   const [committee, setCommittee] = useState<any[]>([]);
+  const shouldReduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  const isFemale = (name: string) => {
+    const femaleKeywords = ['আক্তার', 'বেগম', 'মোসা:', 'মোসাম্মাৎ', 'নেছা', 'শান্তা', 'তৃষা', 'মিমি', 'রুমা', 'তাসনিম', 'অহনা', 'মুক্তা', 'সোনিয়া', 'নেহা', 'লামিয়া'];
+    return femaleKeywords.some(key => name.includes(key));
+  };
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const { user, siteSettings } = useAuth();
 
@@ -97,6 +111,10 @@ const HomeOverview = () => {
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
+  const leaders = useMemo(() => committee.filter(c => c.role === 'আহ্বায়ক' || c.role === 'সদস্য সচিব').sort((a,b) => a.sort_order - b.sort_order), [committee]);
+  const jointSecretaries = useMemo(() => committee.filter(c => c.role === 'যুগ্ম সদস্য সচিব').sort((a,b) => a.sort_order - b.sort_order), [committee]);
+  const generalMembers = useMemo(() => committee.filter(c => c.role === 'সদস্য').sort((a,b) => a.sort_order - b.sort_order), [committee]);
+
   const currentDonation = Array.isArray(donations) ? donations.reduce((sum, d) => sum + d.amount, 0) : 0;
   const goal = 100000;
 
@@ -105,45 +123,57 @@ const HomeOverview = () => {
       {/* 1. Dynamic Hero Section */}
       <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-bento-dark">
          {/* Atmospheric Mesh Gradients */}
-         <div className="absolute inset-0 z-0 overflow-hidden">
-            <motion.div 
-               animate={{ 
-                  x: [0, 50, -50, 0],
-                  y: [0, -50, 50, 0],
-                  scale: [1, 1.2, 0.8, 1]
-               }}
-               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-               className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-bento-primary/30 rounded-full blur-[150px]"
-            />
-            <motion.div 
-               animate={{ 
-                  x: [0, -50, 50, 0],
-                  y: [0, 50, -50, 0],
-                  scale: [1, 0.8, 1.2, 1]
-               }}
-               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-               className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-bento-accent/20 rounded-full blur-[120px]"
-            />
-         </div>
+         {!isMobile && !shouldReduceMotion && (
+           <div className="absolute inset-0 z-0 overflow-hidden">
+              <motion.div 
+                 animate={{ 
+                    x: [0, 50, -50, 0],
+                    y: [0, -50, 50, 0],
+                    scale: [1, 1.2, 0.8, 1]
+                 }}
+                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                 className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-bento-primary/30 rounded-full blur-[150px] will-change-transform"
+              />
+              <motion.div 
+                 animate={{ 
+                    x: [0, -50, 50, 0],
+                    y: [0, 50, -50, 0],
+                    scale: [1, 0.8, 1.2, 1]
+                 }}
+                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                 className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-bento-accent/20 rounded-full blur-[120px] will-change-transform"
+              />
+           </div>
+         )}
          <AnimatePresence mode="wait">
             <motion.div 
                key={currentImgIdx}
-               initial={{ opacity: 0, scale: 1.05 }}
-               animate={{ opacity: 1, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.95 }}
-               transition={{ duration: 1.5 }}
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               transition={{ duration: 1 }}
                className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
             >
-               <img 
-                 src={heroImages[currentImgIdx]} 
-                 className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-20 md:hidden scale-110" 
-                 referrerPolicy="no-referrer" 
-               />
-               <img 
-                 src={heroImages[currentImgIdx]} 
-                 className={`w-full h-full object-contain md:object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-30' : 'opacity-60 md:opacity-40'}`}
-                 referrerPolicy="no-referrer" 
-               />
+               {isMobile ? (
+                  <img 
+                    src={heroImages[currentImgIdx]} 
+                    className="w-full h-full object-cover transition-opacity duration-1000 opacity-40"
+                    referrerPolicy="no-referrer" 
+                  />
+               ) : (
+                  <>
+                    <img 
+                      src={heroImages[currentImgIdx]} 
+                      className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-20 scale-110" 
+                      referrerPolicy="no-referrer" 
+                    />
+                    <img 
+                      src={heroImages[currentImgIdx]} 
+                      className={`w-full h-full object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-30' : 'opacity-40'}`}
+                      referrerPolicy="no-referrer" 
+                    />
+                  </>
+               )}
                <div className="absolute inset-0 bg-gradient-to-b from-bento-dark/80 via-transparent to-bento-dark md:bg-gradient-to-r md:from-bento-dark md:via-bento-dark/80 md:to-transparent"></div>
             </motion.div>
          </AnimatePresence>
@@ -183,6 +213,44 @@ const HomeOverview = () => {
             </div>
          </div>
       </section>
+      
+      {/* Quick Donation Bar (Inspired by leading humanitarian platforms) */}
+      <div className="relative z-20 -mt-20 container mx-auto px-4 sm:px-6">
+         <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-[#d49d32] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-[3rem] p-10 md:p-14 shadow-2xl border-4 border-white ring-1 ring-black/5"
+         >
+            <div className="space-y-6 text-center mb-10">
+               <h3 className="text-2xl md:text-5xl font-serif font-black text-bento-dark uppercase tracking-wide italic">আপনার অনুদান প্রদান করুন</h3>
+            </div>
+            <form action="/donations" className="grid grid-cols-1 md:grid-cols-4 gap-8 items-end">
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">তহবিল নির্বাচন করুন *</label>
+                  <select className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner cursor-pointer appearance-none">
+                     <option>তহবিল - ১ (সাধারণ)</option>
+                     <option>তহবিল - ২ (ত্রাণ তহবিল)</option>
+                     <option>তহবিল - ৩ (শিক্ষা সহায়তা)</option>
+                  </select>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">মোবাইল / ইমেইল *</label>
+                  <input type="text" placeholder="মোবাইল নম্বর / ইমেইল লিখুন" className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">পরিমান (৳) *</label>
+                  <input type="number" placeholder="৳ সংখ্যায় লিখুন" className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner" />
+               </div>
+               <button type="submit" className="bg-[#008e4f] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-lg shadow-xl shadow-green-900/20 hover:bg-green-800 transition-all flex items-center justify-center gap-4 active:scale-95 group">
+                  দান করুন <ArrowRight size={20} className="group-hover:translate-x-2 transition" />
+               </button>
+            </form>
+            <div className="mt-10 text-center text-xs md:text-base font-medium text-[#4a3b1d] italic drop-shadow-sm">
+               অদম্য ২৪ ফাউন্ডেশনে দান করলে আপনি মহান আল্লাহর সন্তুষ্টি ও দোয়া লাভ করবেন। <Link to="/donations" className="text-green-900 font-extrabold hover:underline">বিস্তারিত জানতে এখানে ক্লিক করুন।</Link>
+            </div>
+         </motion.div>
+      </div>
 
       {/* 2. Mission & Impact Section */}
       <div className="container mx-auto px-4 sm:px-6">
@@ -331,30 +399,159 @@ const HomeOverview = () => {
       </section>
 
       {/* 5. Committee Section */}
-      <section id="committee" className="py-20">
-         <div className="container mx-auto px-4 sm:px-6 space-y-24">
-            <div className="text-center space-y-6">
+      <section id="committee" className="py-32 bg-white relative overflow-hidden">
+         {/* Decorative background elements */}
+         <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#c0392b_1px,transparent_1px)] [background-size:40px_40px]"></div>
+         </div>
+
+         <div className="container mx-auto px-4 sm:px-6 space-y-32 relative z-10">
+            <div className="text-center space-y-6 max-w-4xl mx-auto">
                <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Guardians of Humanity</span>
-               <h2 className="text-4xl md:text-7xl font-serif text-bento-dark italic">কেন্দ্রীয় আহ্বায়ক কমিটি</h2>
+               <h2 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">কেন্দ্রীয় আহ্বায়ক <span className="text-bento-primary">কমিটি</span></h2>
+               <p className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto">
+                  অদম্য ২৪-এর স্বপ্ন ও লক্ষ্য বাস্তবায়নে সুসংগঠিতভাবে কাজ করে যাচ্ছে একঝাঁক অদম্য তরুণ।
+               </p>
             </div>
-            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-12">
-               {committee.length > 0 ? committee.map((c, i) => (
-                 <motion.div key={c.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="group relative bg-[#1a1f26] rounded-[3rem] overflow-hidden shadow-2xl">
-                    <div className="h-[400px] relative">
-                       <img src={c.image_url || `https://picsum.photos/seed/mem${c.id}/800/800`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700" alt={c.name} referrerPolicy="no-referrer" />
-                       <div className="absolute inset-0 bg-gradient-to-t from-[#1a1f26] via-transparent to-transparent"></div>
-                       <div className="absolute bottom-8 left-8">
-                          <h4 className="text-2xl font-serif italic text-white leading-tight">{c.name}</h4>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-bento-primary">{c.role}</span>
-                       </div>
-                    </div>
-                 </motion.div>
-               )) : (
-                 <div className="col-span-full py-20 text-center text-bento-light italic font-serif opacity-50">
-                    কমিটির তথ্য লোড হচ্ছে অথবা এখনও কোনো মেম্বার যোগ করা হয়নি...
-                 </div>
-               )}
-            </div>
+
+            {committee.length > 0 ? (
+               <div className="space-y-32">
+                  {/* Leadership Tier */}
+                  <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                     {leaders.map((c, i) => (
+                        <motion.div 
+                           key={c.id} 
+                           initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 40 }} 
+                           whileInView={{ opacity: 1, y: 0 }} 
+                           viewport={{ once: true }} 
+                           transition={{ duration: 0.8, delay: i * 0.1 }}
+                           className="group relative will-change-transform"
+                        >
+                           <div className="relative aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
+                              {c.image_url ? (
+                                <img 
+                                   src={c.image_url} 
+                                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" 
+                                   alt={c.name} 
+                                   referrerPolicy="no-referrer" 
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center space-y-4">
+                                   <div className={`p-8 rounded-full ${isFemale(c.name) ? 'bg-pink-50 text-pink-400' : 'bg-blue-50 text-blue-400'}`}>
+                                      <UserIcon size={80} />
+                                   </div>
+                                   <span className="text-4xl">{isFemale(c.name) ? '♀' : '♂'}</span>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-bento-dark via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                              <div className="absolute bottom-12 left-12 right-12 space-y-2">
+                                 <h4 className="text-3xl md:text-4xl font-serif italic text-white leading-tight">{c.name}</h4>
+                                 <div className="flex items-center gap-4">
+                                    <div className="h-px w-8 bg-bento-primary"></div>
+                                    <span className="text-xs font-black uppercase tracking-[0.3em] text-bento-primary">{c.role}</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="absolute -top-6 -right-6 w-24 h-24 bg-bento-primary/10 rounded-full blur-2xl group-hover:bg-bento-primary/20 transition-colors"></div>
+                        </motion.div>
+                     ))}
+                  </div>
+
+                  {/* Joint Secretary Tier */}
+                  <div className="space-y-16">
+                     <div className="flex items-center gap-6 justify-center">
+                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
+                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">যুগ্ম সদস্য সচিবগণ</h3>
+                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
+                     </div>
+                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
+                        {jointSecretaries.map((c, i) => (
+                           <motion.div 
+                              key={c.id} 
+                              initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.9 }} 
+                              whileInView={{ opacity: 1, scale: 1 }} 
+                              viewport={{ once: true }} 
+                              transition={{ delay: i * 0.05 }}
+                              className="group space-y-6 text-center will-change-transform"
+                           >
+                              <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
+                                 {c.image_url ? (
+                                   <img 
+                                      src={c.image_url} 
+                                      className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                                      alt={c.name} 
+                                      referrerPolicy="no-referrer" 
+                                   />
+                                 ) : (
+                                   <div className="flex flex-col items-center justify-center">
+                                      <UserIcon size={40} className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'} />
+                                      <span className="text-xl mt-2">{isFemale(c.name) ? '♀' : '♂'}</span>
+                                   </div>
+                                 )}
+                                 <div className="absolute inset-0 bg-bento-primary/5 group-hover:bg-transparent transition"></div>
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="font-serif italic text-lg text-bento-dark group-hover:text-bento-primary transition-colors">{c.name}</p>
+                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-light">যুগ্ম সদস্য সচিব</p>
+                              </div>
+                           </motion.div>
+                        ))}
+                     </div>
+                  </div>
+
+                  {/* General Members Tier */}
+                  <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-8 md:px-20 border border-gray-100">
+                     <div className="text-center space-y-4">
+                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">সাধারণ সদস্যবৃন্দ</h3>
+                        <p className="text-4xl font-serif italic text-bento-dark">অদম্য সদস্য <span className="text-bento-primary">তালিকা</span></p>
+                     </div>
+                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
+                        {generalMembers.map((c, i) => (
+                           <motion.div 
+                              key={c.id} 
+                              initial={{ opacity: 0 }} 
+                              whileInView={{ opacity: 1 }} 
+                              viewport={{ once: true }}
+                              transition={{ delay: isMobile ? 0 : i * 0.02 }}
+                              className="flex flex-col items-center text-center space-y-4 group will-change-transform"
+                           >
+                              <div className="w-16 h-16 bg-white rounded-2xl flex flex-col items-center justify-center border border-gray-100 shadow-sm group-hover:border-bento-primary/30 group-hover:shadow-lg transition-all duration-500 overflow-hidden">
+                                 {c.image_url ? (
+                                    <img src={c.image_url} className="w-full h-full object-cover" alt={c.name} />
+                                 ) : (
+                                    <div className="flex flex-col items-center">
+                                       <UserIcon size={18} className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'} />
+                                       <span className="text-[10px] scale-75 leading-none">{isFemale(c.name) ? '♀' : '♂'}</span>
+                                    </div>
+                                 )}
+                              </div>
+                              <div>
+                                 <p className="text-sm font-bold text-bento-dark leading-tight">{c.name}</p>
+                                 <p className="text-[8px] font-black uppercase tracking-widest text-bento-light mt-1">সদস্য</p>
+                              </div>
+                           </motion.div>
+                        ))}
+                     </div>
+                     
+                     <div className="pt-10 flex flex-col items-center gap-6">
+                        <div className="flex items-center gap-4 text-bento-light font-serif italic text-sm">
+                           <Info size={16} />
+                           <p>অদম্য ২৪-এর সকল অদম্য সদস্যদের নামের তালিকা নিয়মিত আপডেট করা হয়।</p>
+                        </div>
+                        <Link to="/register" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-bento-primary hover:gap-6 transition-all duration-500">
+                           নতুন সদস্য হিসেবে যোগ দিন <ArrowRight size={14} />
+                        </Link>
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <div className="py-32 text-center space-y-6">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-200 animate-pulse">
+                     <Users size={32} />
+                  </div>
+                  <p className="text-bento-light italic font-serif">কমিটির তথ্য লোড হচ্ছে...</p>
+               </div>
+            )}
          </div>
       </section>
 
@@ -1237,6 +1434,7 @@ const Navbar = () => {
               <NavLink to="/events" icon={Calendar}>ইভেন্ট</NavLink>
               <NavLink to="/donations" icon={Heart}>দান</NavLink>
               <NavLink to="/gallery" icon={Camera}>গ্যালারি</NavLink>
+              <NavLink to="/contact" icon={Phone}>যোগাযোগ</NavLink>
            </div>
 
            <div className="flex items-center gap-4">
@@ -1297,7 +1495,8 @@ const Navbar = () => {
                       { to: "/", label: "হোম পেজ", icon: LayoutGrid },
                       { to: "/events", label: "ইভেন্ট তালিকা", icon: Calendar },
                       { to: "/donations", label: "তহবিলে দান", icon: Heart },
-                      { to: "/gallery", label: "ফটো গ্যালারি", icon: Camera }
+                      { to: "/gallery", label: "ফটো গ্যালারি", icon: Camera },
+                      { to: "/contact", label: "যোগাযোগ করুন", icon: Phone }
                     ].map((item) => (
                       <Link 
                         key={item.label}
@@ -1864,77 +2063,405 @@ const EventsPage = () => {
   );
 };
 
+const ContactUsPage = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setTimeout(() => {
+       setSubmitted(false);
+       setFormData({ name: '', email: '', subject: '', message: '' });
+    }, 5000);
+  };
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-20 max-w-6xl space-y-24">
+      <div className="text-center space-y-6">
+         <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Get in Touch</span>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">যোগাযোগ <span className="text-bento-primary">করুন</span></h1>
+         <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-16 items-start">
+         <div className="lg:col-span-5 space-y-12">
+            <div className="space-y-8">
+               <h3 className="text-2xl font-serif italic text-bento-dark">আমাদের কার্যালয়</h3>
+               <div className="space-y-8">
+                  <div className="flex gap-6 group">
+                     <div className="w-16 h-16 rounded-[2rem] bg-bento-primary/5 flex items-center justify-center text-bento-primary shrink-0 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500">
+                        <MapPin size={28} />
+                     </div>
+                     <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">ঠিকানা</p>
+                        <p className="text-xl font-medium text-bento-dark leading-relaxed">ইউনিক বাসস্ট্যান্ড (মিজান প্লাজা), বাইপাইল, আশুলিয়া, সাভার, ঢাকা।</p>
+                     </div>
+                  </div>
+
+                  <div className="flex gap-6 group">
+                     <div className="w-16 h-16 rounded-[2rem] bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
+                        <Phone size={28} />
+                     </div>
+                     <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">মোবাইল নং-</p>
+                        <p className="text-2xl font-black italic text-bento-dark">01722000231</p>
+                     </div>
+                  </div>
+
+                  <div className="flex gap-6 group">
+                     <div className="w-16 h-16 rounded-[2rem] bg-yellow-50 flex items-center justify-center text-yellow-600 shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-500">
+                        <Mail size={28} />
+                     </div>
+                     <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">Email</p>
+                        <p className="text-xl font-medium text-bento-dark italic">adomyo24@gmail.com</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div className="bg-bento-dark rounded-[3rem] p-10 text-white space-y-6 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-40 h-40 bg-bento-primary/10 rounded-full -mr-20 -mt-20 blur-2xl group-hover:scale-150 transition duration-1000"></div>
+               <h4 className="text-xl font-serif italic text-white/90">আমাদের ফেসবুক পেজ</h4>
+               <p className="text-sm text-white/50 leading-relaxed">সংগঠনের সকল কার্যক্রমের লাইভ আপডেট পেতে আমাদের ফেসবুক পেজটি ভিজিট করুন।</p>
+               <a href="https://www.facebook.com/adomyo24" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-4 text-bento-primary font-black uppercase tracking-widest text-[10px] hover:gap-6 transition-all">FB.COM/ADOMYO24 <ArrowRight size={14} /></a>
+            </div>
+         </div>
+
+         <div className="lg:col-span-7">
+            <form onSubmit={handleSubmit} className="bg-white rounded-[4rem] p-10 md:p-16 shadow-2xl border border-gray-100 space-y-10">
+               <div className="space-y-2">
+                  <h3 className="text-3xl font-serif italic text-bento-dark">আপনার মতামত দিন</h3>
+                  <p className="text-bento-light text-sm italic">আমাদের সাথে যোগাযোগ করতে নিচের ফর্মটি ব্যবহার করুন। ধন্যবাদ।</p>
+               </div>
+               
+               <div className="grid md:grid-cols-2 gap-8">
+                  <InputField label="আপনার নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} required />
+                  <InputField label="আপনার ইমেইল" type="email" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} required />
+               </div>
+               <InputField label="বিষয়" value={formData.subject} onChange={(e:any)=>setFormData({...formData, subject: e.target.value})} required />
+               <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">বার্তা</label>
+                  <textarea 
+                    value={formData.message} 
+                    onChange={(e:any)=>setFormData({...formData, message: e.target.value})} 
+                    className="w-full bg-gray-50 border-2 border-bento-border p-6 rounded-3xl outline-none focus:border-bento-primary transition text-sm font-medium" 
+                    rows={6} 
+                    required
+                  />
+               </div>
+               <button type="submit" className="w-full bg-bento-primary text-white py-6 rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-2xl shadow-bento-primary/30 hover:brightness-110 active:scale-95 transition-all">বার্তা পাঠান</button>
+               
+               {submitted && (
+                  <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="bg-green-50 p-6 rounded-2xl text-green-700 text-center text-sm font-medium border border-green-100 italic">
+                     আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে। আমরা শীঘ্রই যোগাযোগ করবো।
+                  </motion.div>
+               )}
+            </form>
+         </div>
+      </div>
+      
+      {/* Map Placeholder */}
+      <div className="relative aspect-video md:aspect-[3/1] bg-gray-100 rounded-[5rem] overflow-hidden shadow-inner border border-gray-100 group">
+         <div className="absolute inset-0 flex flex-col items-center justify-center space-y-6 opacity-30 group-hover:opacity-50 transition-opacity">
+            <MapPin size={64} className="text-bento-dark" />
+            <p className="text-xl font-serif italic text-bento-dark">Google Map integration coming soon...</p>
+         </div>
+         <div className="absolute inset-x-8 bottom-8 bg-white/80 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-xl max-w-sm">
+            <h4 className="font-bold text-bento-dark text-lg mb-2">Adomyo 24 HQ</h4>
+            <p className="text-xs text-bento-light leading-relaxed">Unique Bus Stand (Mizan Plaza), Baipail, Ashulia, Savar, Dhaka.</p>
+         </div>
+      </div>
+    </div>
+  );
+};
+
 const DonationsPage = () => {
   const [donations, setDonations] = useState<any[]>([]);
-  const [formData, setFormData] = useState({ donor_name: '', amount: '', message: '' });
-  const [success, setSuccess] = useState(false);
+  const [step, setStep] = useState(1); // 1: Info, 2: Checkout, 3: Success
+  const [formData, setFormData] = useState({ 
+    donor_name: '', 
+    amount: '', 
+    message: '', 
+    phone_email: '',
+    fund_type: 'তহবিল - ১ (সাধারণ)' 
+  });
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextToCheckout = (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/donations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+    if (formData.amount && formData.phone_email && formData.donor_name) {
+      setStep(2);
+    }
+  };
+
+  const handleConfirmDonation = async () => {
+    if (!selectedMethod) return;
+    
+    // Simulate API call
+    const res = await fetch('/api/donations', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({
+        donor_name: formData.donor_name,
+        amount: Number(formData.amount),
+        message: formData.message || `Payment via ${selectedMethod}`
+      }) 
+    });
+    
     if (res.ok) {
-      setSuccess(true);
-      setFormData({ donor_name: '', amount: '', message: '' });
+      setStep(3);
       fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => {
+        setStep(1);
+        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)' });
+        setSelectedMethod(null);
+      }, 5000);
     }
   };
 
   const currentTotal = Array.isArray(donations) ? donations.reduce((sum, d) => sum + d.amount, 0) : 0;
+
+  const paymentMethods = [
+    { id: 'bkash', name: 'bKash', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/BKash_Logo.svg/512px-BKash_Logo.svg.png' },
+    { id: 'nagad', name: 'Nagad', logo: 'https://seeklogo.com/images/N/nagad-logo-7A70BB6664-seeklogo.com.png' },
+    { id: 'rocket', name: 'Rocket', logo: 'https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D1CC458D-seeklogo.com.png' },
+    { id: 'upay', name: 'Upay', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Upay_logo.svg/1200px-Upay_logo.svg.png' },
+    { id: 'nexus', name: 'Nexus Pay', logo: 'https://is1-ssl.mzstatic.com/image/thumb/Purple126/v4/4e/7d/50/4e7d5071-7b00-3b02-5e4e-862ad9b068da/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/512x512bb.jpg' },
+    { id: 'tap', name: 'Tap', logo: 'https://play-lh.googleusercontent.com/97-E165-H3N1-3Bv7-9X9-4-1-B-X-Q-Q-Y-H-R-J-K-L-M-N-O' },
+  ];
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-20 max-w-6xl space-y-20">
-      <div className="grid lg:grid-cols-12 gap-12 items-start">
-         <div className="lg:col-span-7 space-y-12">
-            <motion.div initial={{opacity:0, scale:0.9}} animate={{opacity:1, scale:1}} className="bento-card border-none bg-bento-primary text-white p-8 md:p-16 space-y-8 relative overflow-hidden group">
-               <Heart size={300} fill="currentColor" className="absolute -bottom-20 -right-20 opacity-5 group-hover:scale-110 transition duration-1000" />
-               <div className="space-y-2 relative z-10">
-                  <h1 className="text-4xl md:text-7xl font-serif text-white italic">সাহায্যের হাত বাড়ান</h1>
-                  <p className="text-xl opacity-80 font-medium">আপনার ক্ষুদ্র অবদানেও ফুটবে এক অসহায় মানুষের হাসি।</p>
-               </div>
-               <div className="space-y-4 pt-4 relative z-10">
-                  <p className="text-sm font-black uppercase tracking-widest opacity-60">তহবিল পরিস্থিতি</p>
-                  <p className="text-6xl font-black">৳ {currentTotal.toLocaleString()}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-50 italic">এই সপ্তাহে সংগৃহীত ত্রাণ তহবিল</p>
-               </div>
-            </motion.div>
+    <div className="container mx-auto px-4 sm:px-6 py-20 max-w-7xl space-y-24">
+      {step === 1 && (
+        <div className="space-y-20">
+          <div className="text-center space-y-6">
+             <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Support Humanity</span>
+             <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">আপনার <span className="text-bento-primary">অনদান</span> প্রদান করুন</h1>
+             <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
+          </div>
 
-            <form onSubmit={handleSubmit} className="bento-card border-none shadow-2xl p-12 space-y-8">
-               <h3 className="text-2xl font-black uppercase tracking-tighter text-bento-dark italic font-serif flex items-center gap-3"><Heart className="text-bento-primary" fill="currentColor" /> নতুন কন্ট্রিবিউশন</h3>
-               <div className="grid md:grid-cols-2 gap-6">
-                  <InputField label="আপনার নাম" value={formData.donor_name} onChange={(e:any)=>setFormData({...formData, donor_name: e.target.value})} placeholder="নাম প্রকাশ অনিচ্ছুকও হতে পারেন" required />
-                  <InputField label="টাকার পরিমাণ (BDT)" type="number" value={formData.amount} onChange={(e:any)=>setFormData({...formData, amount: e.target.value})} placeholder="৫০০, ১০০০, ৫০০০..." required />
-               </div>
-               <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">বার্তা (ঐচ্ছিক)</label>
-                  <textarea value={formData.message} onChange={(e:any)=>setFormData({...formData, message: e.target.value})} className="w-full bg-gray-50 border-2 border-bento-border p-5 rounded-3xl outline-none focus:border-bento-primary transition text-sm italic" rows={4} placeholder="মানবিক কোনো কথা..." />
-               </div>
-               <button type="submit" className="w-full bg-bento-primary text-white py-6 rounded-2xl font-black text-lg shadow-2xl shadow-[rgba(192,57,43,0.3)] transition hover:bg-bento-dark flex items-center justify-center gap-4">দান সম্পন্ন করুন <ChevronRight size={24} /></button>
-               {success && <p className="text-bento-accent font-black text-center text-sm animate-bounce">আপনার এই মহানুভবতার জন্য অসংখ্য কৃতজ্ঞতা!</p>}
+          <div className="bg-yellow-500/5 backdrop-blur-xl border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
+            <h2 className="text-2xl font-serif text-center text-bento-dark italic">আপনার তথ্য পূরণ করুন</h2>
+            
+            <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">তহবিল *</label>
+                <select 
+                  className="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
+                  value={formData.fund_type}
+                  onChange={(e) => setFormData({...formData, fund_type: e.target.value})}
+                >
+                  <option>তহবিল - ১ (সাধারণ)</option>
+                  <option>তহবিল - ২ (ত্রাণ)</option>
+                  <option>তহবিল - ৩ (শিক্ষা)</option>
+                </select>
+              </div>
+
+              <InputField 
+                label="আপনার নাম *" 
+                value={formData.donor_name} 
+                onChange={(e:any)=>setFormData({...formData, donor_name: e.target.value})} 
+                placeholder="পরিচয় দিন" 
+                required 
+              />
+              
+              <InputField 
+                label="মোবাইল / ইমেইল *" 
+                value={formData.phone_email} 
+                onChange={(e:any)=>setFormData({...formData, phone_email: e.target.value})} 
+                placeholder="017... / email@..." 
+                required 
+              />
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">পরিমান (BDT) *</label>
+                <div className="flex gap-4">
+                  <input 
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    className="flex-grow bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
+                    placeholder="৳ সংখ্যায় লিখুন"
+                    required
+                  />
+                  <button type="submit" className="bg-bento-accent hover:bg-green-700 text-white px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-green-500/20">দান করুন</button>
+                </div>
+              </div>
             </form>
-         </div>
+            
+            <p className="text-center text-xs text-bento-light italic">
+              অদম্য ২৪ ফাউন্ডেশনে দান করলে আপনি মানসিক প্রশান্তি ও সওয়াব লাভ করবেন। <span className="text-bento-primary font-bold cursor-pointer hover:underline">বিস্তারিত জানতে ক্লিক করুন।</span>
+            </p>
+          </div>
 
-         <div className="lg:col-span-5 space-y-8">
-            <h2 className="text-4xl font-serif text-bento-dark px-4 italic">সাম্প্রতিক ফিড</h2>
-            <div className="space-y-4 h-[900px] overflow-y-auto pr-4 custom-scrollbar">
-               {Array.isArray(donations) && donations.map((d, i) => (
-                  <motion.div initial={{opacity:0, x:20}} whileInView={{opacity:1, x:0}} viewport={{once:true}} transition={{delay: i*0.05}} key={d.id} className="bento-card !p-6 flex flex-col space-y-4 border-bento-border hover:border-bento-primary transition relative group cursor-default">
-                     <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                           <p className="font-black text-bento-dark text-xl">{d.donor_name}</p>
-                           <p className="text-[10px] font-bold text-bento-light uppercase tracking-widest opacity-60">{new Date(d.date).toLocaleDateString('bn-BD')}</p>
-                        </div>
-                        <p className="text-3xl font-black text-bento-accent group-hover:scale-110 transition">৳{d.amount}</p>
-                     </div>
-                     <p className="text-sm text-bento-light italic border-l-4 border-bento-border pl-4 bg-gray-50 py-3 rounded-r-xl">"{d.message || 'পাশে আছি মানবতার সেবায়।'}"</p>
-                  </motion.div>
-               ))}
+          <div className="grid lg:grid-cols-2 gap-12">
+             <div className="space-y-8">
+                <h3 className="text-3xl font-serif italic text-bento-dark">তহবিল পরিস্থিতি</h3>
+                <div className="bento-card bg-bento-dark text-white p-12 space-y-6 relative overflow-hidden group">
+                   <Heart size={200} className="absolute -bottom-10 -right-10 opacity-10 group-hover:scale-110 transition duration-1000" fill="currentColor" />
+                   <p className="text-sm font-black uppercase tracking-[0.3em] opacity-60">মোট সংগৃহীত তহবিল</p>
+                   <p className="text-6xl font-black italic">৳ {currentTotal.toLocaleString()}</p>
+                   <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden">
+                      <motion.div initial={{width: 0}} whileInView={{width: '65%'}} className="h-full bg-bento-primary" />
+                   </div>
+                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">লক্ষ্যমাত্রা: ৳ ১০,০০,০০০</p>
+                </div>
+             </div>
+
+             <div className="space-y-8">
+                <h3 className="text-3xl font-serif italic text-bento-dark">সাম্প্রতিক ফিড</h3>
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
+                   {Array.isArray(donations) && donations.map((d, i) => (
+                      <div key={d.id} className="bento-card !p-6 flex justify-between items-center bg-gray-50/50 border-gray-100 italic transition hover:shadow-lg">
+                         <div className="space-y-1">
+                            <p className="font-bold text-bento-dark">{d.donor_name}</p>
+                            <p className="text-[10px] text-bento-light uppercase tracking-widest">{new Date(d.date).toLocaleDateString('bn-BD')}</p>
+                         </div>
+                         <p className="text-2xl font-black text-bento-primary">৳{d.amount}</p>
+                      </div>
+                   ))}
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="flex items-center gap-4 text-bento-light hover:text-bento-dark transition cursor-pointer" onClick={() => setStep(1)}>
+            <ArrowRight className="rotate-180" size={20} />
+            <span className="font-bold text-sm">তহবিল পাতায় ফিরে যান</span>
+          </div>
+
+          <div className="grid lg:grid-cols-5 gap-12 items-start">
+            {/* Left: Summary */}
+            <div className="lg:col-span-2 space-y-8 sticky top-24">
+              <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-100 space-y-8">
+                <div className="flex items-center gap-4 pb-8 border-b border-gray-100">
+                  <div className="w-12 h-12 bg-bento-primary rounded-2xl flex items-center justify-center text-white font-black italic">A24</div>
+                  <div>
+                    <h3 className="font-bold text-bento-dark">Adomyo 24 Foundation</h3>
+                    <p className="text-[10px] text-bento-light font-black uppercase tracking-widest italic">{formData.fund_type}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center text-sm font-medium text-bento-light">
+                    <span>Subtotal</span>
+                    <span className="font-bold text-bento-dark">৳{Number(formData.amount).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm font-medium text-bento-light">
+                    <span>Convenience Charge</span>
+                    <span className="font-bold text-bento-accent">৳০.০০</span>
+                  </div>
+                  <div className="pt-6 border-t border-gray-100 flex justify-between items-center">
+                    <span className="font-serif italic text-xl text-bento-dark">Total amount</span>
+                    <span className="text-3xl font-black text-bento-primary">৳{Number(formData.amount).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-8">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">Donor Identity</h4>
+                  <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100">
+                    <p className="text-sm font-bold text-bento-dark italic">{formData.donor_name}</p>
+                    <p className="text-xs text-bento-light leading-relaxed">{formData.phone_email}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50/50 p-8 rounded-3xl border border-blue-100/50 flex items-center gap-4 italic text-xs text-blue-800">
+                <Shield size={24} className="shrink-0" />
+                <p>আপনার পেমেন্ট তথ্য এনক্রিপ্টেড এবং সম্পূর্ণ নিরাপদ। অদম্য ২৪ কোনো কার্ড তথ্য সংরক্ষণ করে না।</p>
+              </div>
             </div>
-         </div>
-      </div>
+
+            {/* Right: Payment Methods */}
+            <div className="lg:col-span-3 bg-white rounded-[3rem] p-10 md:p-14 shadow-2xl border border-gray-100 space-y-12">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-serif italic text-bento-dark">Payment Methods</h2>
+                <div className="flex items-center gap-2 text-xs font-bold text-bento-light">
+                   <Lock size={12} />
+                   Secure Checkout
+                </div>
+              </div>
+
+              <div className="space-y-10">
+                {/* Categories */}
+                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+                  {['Mobile Banking', 'Card', 'Net Banking'].map((cat) => (
+                    <button key={cat} className={`px-6 py-4 rounded-2xl font-bold text-xs whitespace-nowrap transition-all ${cat === 'Mobile Banking' ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'bg-gray-100 text-bento-light hover:bg-gray-200'}`}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                  {paymentMethods.map((m) => (
+                    <motion.div 
+                      key={m.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedMethod(m.id)}
+                      className={`relative aspect-video rounded-3xl border-2 cursor-pointer flex flex-col items-center justify-center p-4 transition-all group overflow-hidden ${selectedMethod === m.id ? 'border-bento-primary bg-bento-primary/5 shadow-xl' : 'border-gray-100 hover:border-bento-primary/20'}`}
+                    >
+                      <div className="w-12 h-12 mb-3 bg-white rounded-xl shadow-sm flex items-center justify-center overflow-hidden">
+                        <img src={m.logo} alt={m.name} className="w-10 h-10 object-contain p-1" referrerPolicy="no-referrer" />
+                      </div>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${selectedMethod === m.id ? 'text-bento-primary' : 'text-bento-light'}`}>{m.name}</span>
+                      {selectedMethod === m.id && (
+                        <div className="absolute top-3 right-3 w-4 h-4 bg-bento-primary text-white rounded-full flex items-center justify-center scale-110">
+                          <Zap size={8} fill="currentColor" />
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="pt-8 border-t border-gray-100 space-y-6">
+                   <button 
+                     onClick={handleConfirmDonation}
+                     disabled={!selectedMethod}
+                     className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.5em] text-sm transition-all ${selectedMethod ? 'bg-bento-accent text-white shadow-2xl shadow-green-500/30 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                   >
+                     Pay ৳{Number(formData.amount).toLocaleString()}
+                   </button>
+                   <p className="text-[10px] text-center text-bento-light leading-relaxed italic max-w-sm mx-auto">
+                     By clicking pay, you agree to our <span className="text-bento-primary underline">terms of service</span> and privacy policy. 
+                      facilitators for Adomyo 24 Foundation.
+                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <motion.div 
+          initial={{opacity:0, scale:0.95}} 
+          animate={{opacity:1, scale:1}} 
+          className="max-w-2xl mx-auto bento-card text-center p-20 space-y-8 bg-white border-2 border-green-500/20"
+        >
+          <div className="w-32 h-32 bg-green-100 text-bento-accent rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+            <Heart size={64} fill="currentColor" className="animate-pulse" />
+          </div>
+          <h2 className="text-4xl font-serif italic text-bento-dark">দান সম্পন্ন হয়েছে!</h2>
+          <p className="text-bento-light leading-relaxed italic italic">
+            ধন্যবাদ, <span className="font-bold text-bento-primary">{formData.donor_name}</span>! আপনার এই মহান অনুদান অদম্য ২৪ ফাউন্ডেশনের তহবিলে জমা হয়েছে। আপনার এই ক্ষুদ্র অবদানে বেঁচে যাবে অনেক প্রাণ।
+          </p>
+          <div className="pt-10 flex justify-center gap-6">
+            <button onClick={() => setStep(1)} className="px-10 py-4 bg-bento-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-bento-primary/30 transition-all active:scale-95">আবার দান করুন</button>
+            <Link to="/" className="px-10 py-4 border-2 border-bento-border text-bento-light hover:text-bento-dark rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all">হোম পেজে ফিরে যান</Link>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
@@ -1982,6 +2509,16 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  const shouldReduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const login = (data: { token: string; user: any }) => {
     setUser(data.user);
   };
@@ -2008,19 +2545,23 @@ export default function App() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center font-serif bg-bento-dark relative overflow-hidden">
-      {/* Decorative Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-bento-primary/20 rounded-full blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-bento-accent/20 rounded-full blur-[120px] animate-pulse [animation-delay:1s]"></div>
+      {/* Decorative Orbs - Substantially simplified for mobile */}
+      {!isMobile && (
+        <>
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-bento-primary/20 rounded-full blur-[80px] animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-bento-accent/20 rounded-full blur-[100px] animate-pulse [animation-delay:1s]"></div>
+        </>
+      )}
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 flex flex-col items-center"
       >
         <div className="relative group">
           <motion.div
-            animate={{ 
+            animate={shouldReduceMotion ? {} : { 
               scale: [1, 1.05, 1],
               rotate: [0, 5, -5, 0]
             }}
@@ -2029,7 +2570,7 @@ export default function App() {
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="w-48 h-48 bg-white p-4 rounded-[3rem] shadow-[0_0_50px_rgba(192,57,43,0.3)] border-4 border-bento-primary/20"
+            className="w-40 h-40 md:w-48 md:h-48 bg-white p-4 rounded-[2.5rem] md:rounded-[3rem] shadow-[0_0_50px_rgba(192,57,43,0.3)] border-4 border-bento-primary/20"
           >
             <img 
               src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=APUOphrvjyAQ7kNvwGiWCXm&_nc_oc=AdozKFFO5KC-D8xj6FAby8f1XkhGHR1-uUxzgoPnhzJTyhrtEC7g14w5N3kfJapq8nE&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=ZqaJ0_gCwgN_0LBT0_sNlg&_nc_ss=7a3a8&oh=00_Af04M6sGidVzOcANnjbpaS2oyuMlJNeNLNN-MYHexR-c0A&oe=69E9580F" 
@@ -2038,12 +2579,14 @@ export default function App() {
               referrerPolicy="no-referrer"
             />
           </motion.div>
-          {/* Scanning Effect */}
-          <motion.div 
-            animate={{ top: ['0%', '100%', '0%'] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-bento-primary to-transparent z-20 blur-sm brightness-150"
-          />
+          {/* Scanning Effect - simplified for mobile */}
+          {!shouldReduceMotion && (
+            <motion.div 
+              animate={{ top: ['0%', '100%', '0%'] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-bento-primary to-transparent z-20 blur-sm brightness-150"
+            />
+          )}
         </div>
 
         <div className="mt-12 space-y-4 text-center">
@@ -2070,24 +2613,34 @@ export default function App() {
       <Router>
         <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth relative overflow-hidden">
           {/* Global Background Design */}
-          <div className="fixed inset-0 z-0 pointer-events-none">
-            <div className="absolute inset-0 bg-grid opacity-[0.03]"></div>
-            <div className="absolute inset-0 bg-grain opacity-[0.2]"></div>
-            <motion.div 
-              animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
-              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px]" 
-            />
-            <motion.div 
-              animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px]" 
-            />
-            <motion.div 
-              animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px]" 
-            />
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 bg-grid opacity-[0.02] md:opacity-[0.03]"></div>
+            <div className="absolute inset-0 bg-grain opacity-[0.1] md:opacity-[0.2]"></div>
+            
+            {!isMobile && !shouldReduceMotion && (
+              <>
+                <motion.div 
+                  animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px] will-change-transform" 
+                />
+                <motion.div 
+                  animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
+                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px] will-change-transform" 
+                />
+                <motion.div 
+                  animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px] will-change-transform" 
+                />
+              </>
+            )}
+            
+            {/* Minimal Background for Mobile */}
+            {isMobile && (
+              <div className="absolute inset-0 bg-gradient-to-b from-bento-primary/5 via-transparent to-bento-accent/5 opacity-50"></div>
+            )}
           </div>
 
           <Navbar />
@@ -2100,6 +2653,7 @@ export default function App() {
               <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/donations" element={<DonationsPage />} />
+              <Route path="/contact" element={<ContactUsPage />} />
             </Routes>
           </main>
           <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
@@ -2135,17 +2689,17 @@ export default function App() {
                 <div className="space-y-8">
                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">যোগাযোগ</h3>
                    <div className="space-y-6">
-                      <div className="flex items-center gap-4 text-white/60">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-bento-primary"><MapPin size={18} /></div>
-                         <span className="text-sm font-medium">সাভার, ঢাকা, বাংলাদেশ</span>
+                      <div className="flex items-start gap-4 text-white/60 group">
+                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-bento-primary group-hover:bg-bento-primary group-hover:text-white transition-all shrink-0"><MapPin size={18} /></div>
+                         <span className="text-sm font-medium">ইউনিক বাসস্ট্যান্ড (মিজান প্লাজা), বাইপাইল, আশুলিয়া, সাভার, ঢাকা।</span>
                       </div>
-                      <div className="flex items-center gap-4 text-white/60">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-500"><Phone size={18} /></div>
-                         <span className="text-sm font-medium italic">০১৭০০-০০০০০০</span>
+                      <div className="flex items-center gap-4 text-white/60 group">
+                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0"><Phone size={18} /></div>
+                         <span className="text-sm font-medium italic">01722000231</span>
                       </div>
-                      <div className="flex items-center gap-4 text-white/60">
-                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-yellow-500"><Mail size={18} /></div>
-                         <span className="text-sm font-medium italic">info@odommo24.org</span>
+                      <div className="flex items-center gap-4 text-white/60 group">
+                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all shrink-0"><Mail size={18} /></div>
+                         <span className="text-sm font-medium italic underline decoration-white/10 group-hover:decoration-yellow-500/50">adomyo24@gmail.com</span>
                       </div>
                    </div>
                 </div>

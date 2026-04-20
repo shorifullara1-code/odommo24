@@ -56,11 +56,17 @@
 }
 
 .glass-morphism {
-  @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-700 hover:bg-white/80;
+  @apply bg-white/70 backdrop-blur-md md:backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-700 hover:bg-white/80;
 }
 
 .glass-morphism-dark {
-  @apply bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl transition-all duration-700 hover:bg-black/50;
+  @apply bg-black/40 backdrop-blur-md md:backdrop-blur-2xl border border-white/10 shadow-2xl transition-all duration-700 hover:bg-black/50;
+}
+
+.performance-safe {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  perspective: 1000;
 }
 
 .vibrant-gradient {

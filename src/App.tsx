@@ -7,7 +7,9 @@ import {
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
   Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
-  Mars, Venus, Youtube, Play, Facebook
+  Mars, Venus, Youtube, Play, Facebook,
+  HeartHandshake, Gift, Sun,
+  Bell, ExternalLink, ClipboardList
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -242,6 +244,124 @@ const CommitteePage = () => {
     </div>
   );
 };
+
+const MemberListPage = () => {
+  const [members, setMembers] = useState<any[]>([]);
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    fetch('/api/members').then(r => r.ok ? r.json() : []).then(setMembers);
+  }, []);
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center space-y-6"
+      >
+        <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">{t('nav_member_list')}</span>
+        <h1 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight tracking-tighter">{t('member_list_title')}</h1>
+        <p className="text-sm md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto leading-relaxed">{t('member_list_public_desc')}</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {Array.isArray(members) && members.map((m, idx) => (
+          <motion.div 
+            key={m.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.05 }}
+            className="bg-white border-2 border-bento-border rounded-[2.5rem] p-8 text-center space-y-6 hover:border-bento-primary hover:shadow-2xl transition-all duration-500 group"
+          >
+            <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500">
+               {m.profile_image ? (
+                 <img src={m.profile_image} className="w-full h-full object-cover" alt={m.name} />
+               ) : (
+                 <div className="w-full h-full flex items-center justify-center text-bento-primary">
+                    <UserIcon size={48} />
+                 </div>
+               )}
+            </div>
+            <div>
+               <h3 className="text-xl font-black italic text-bento-dark">{m.name}</h3>
+               <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1">{m.member_id_number}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {members.length === 0 && (
+         <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-bento-border text-bento-light italic font-serif">
+            {t('no_members')}
+         </div>
+      )}
+    </div>
+  );
+};
+
+const NoticeBoardPage = () => {
+  const [notices, setNotices] = useState<any[]>([]);
+  const { t, lang } = useLanguage();
+
+  useEffect(() => {
+    fetch('/api/notices').then(r => r.ok ? r.json() : []).then(setNotices);
+  }, []);
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center space-y-6"
+      >
+        <span className="text-bento-accent font-black uppercase tracking-[0.6em] text-[10px]">{t('nav_notices')}</span>
+        <h1 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight tracking-tighter">{t('notice_board_title')}</h1>
+        <div className="w-24 h-1 bg-bento-accent mx-auto rounded-full" />
+      </motion.div>
+
+      <div className="max-w-4xl mx-auto space-y-8">
+        {Array.isArray(notices) && notices.map((n, idx) => (
+          <motion.div 
+            key={n.id}
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.1 }}
+            className="bg-white border-2 border-bento-border rounded-[2.5rem] p-10 space-y-6 hover:shadow-2xl transition duration-500 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-5"><Bell size={120} /></div>
+            <div className="flex justify-between items-start">
+               <span className="bg-bento-accent/10 text-bento-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">{new Date(n.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US')}</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black italic text-bento-dark leading-tight">{n.title}</h2>
+            <p className="text-bento-light font-serif italic text-lg leading-relaxed whitespace-pre-line">{n.content}</p>
+            {n.link && (
+               <a 
+                 href={n.link} 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="inline-flex items-center gap-2 bg-bento-dark text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition shadow-lg shadow-black/20"
+               >
+                 <ExternalLink size={16} /> বিস্তারিত দেখুন
+               </a>
+            )}
+          </motion.div>
+        ))}
+
+        {notices.length === 0 && (
+           <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-bento-border text-bento-light italic font-serif">
+              {t('no_notices')}
+           </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
@@ -347,24 +467,23 @@ const HomeOverview = () => {
                {isMobile ? (
                   <img 
                     src={heroImages[currentImgIdx]} 
-                    className="w-full h-full object-cover transition-opacity duration-1000 opacity-40"
+                    className="w-full h-full object-cover transition-opacity duration-1000 opacity-60"
                     referrerPolicy="no-referrer" 
                   />
                ) : (
                   <>
                     <img 
                       src={heroImages[currentImgIdx]} 
-                      className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-20 scale-110" 
+                      className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-110" 
                       referrerPolicy="no-referrer" 
                     />
                     <img 
                       src={heroImages[currentImgIdx]} 
-                      className={`w-full h-full object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-30' : 'opacity-40'}`}
+                      className={`w-full h-full object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-50' : 'opacity-70'}`}
                       referrerPolicy="no-referrer" 
                     />
                   </>
                )}
-               <div className="absolute inset-0 bg-gradient-to-b from-bento-dark/80 via-transparent to-bento-dark md:bg-gradient-to-r md:from-bento-dark md:via-bento-dark/80 md:to-transparent"></div>
             </motion.div>
          </AnimatePresence>
 
@@ -379,8 +498,8 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-8xl lg:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter drop-shadow-2xl">
-                        {t('hero_title').split(' ')[0]} <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent">{t('hero_title').split(' ').slice(1).join(' ')}</span>
+                     <h1 className="text-4xl sm:text-8xl lg:text-[9rem] font-serif italic text-white leading-none drop-shadow-2xl px-4">
+                        {t('hero_title').split(' ')[0]} <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent inline-block pb-4">{t('hero_title').split(' ').slice(1).join(' ')}</span>
                      </h1>
                      <p className="text-lg md:text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
                         {t('hero_subtitle')}
@@ -403,9 +522,53 @@ const HomeOverview = () => {
             </div>
          </div>
       </section>
-      
+
+      {/* Donor Type Selection (Inspired by As-Sunnah Foundation) */}
+      <section className="relative z-20 -mt-24 container mx-auto px-4 sm:px-6 mb-16">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Regular Donor */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="p-4 border-2 border-dashed border-[#00964b]/30 rounded-[4rem]"
+            >
+               <Link to="/donations?type=regular" className="block bg-[#00964b] rounded-[3.5rem] p-12 text-center text-white space-y-6 shadow-2xl transition-all hover:scale-[1.02] active:scale-95 group">
+                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                     <HeartHandshake size={48} />
+                  </div>
+                  <h3 className="text-3xl font-black italic">{t('regular_donor')}</h3>
+               </Link>
+            </motion.div>
+
+            {/* Life Donor */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="p-4 border-2 border-dashed border-[#4b96f2]/30 rounded-[4rem]"
+            >
+               <Link to="/register" className="block bg-[#4b96f2] rounded-[3.5rem] p-12 text-center text-white space-y-6 shadow-2xl transition-all hover:scale-[1.02] active:scale-95 group">
+                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                     <Gift size={48} />
+                  </div>
+                  <h3 className="text-3xl font-black italic">{t('life_donor')}</h3>
+               </Link>
+            </motion.div>
+
+            {/* General Donation */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="p-4 border-2 border-dashed border-[#f2b24b]/30 rounded-[4rem]"
+            >
+               <Link to="/donations" className="block bg-[#f2b24b] rounded-[3.5rem] p-12 text-center text-white space-y-6 shadow-2xl transition-all hover:scale-[1.02] active:scale-95 group">
+                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                     <Sun size={48} />
+                  </div>
+                  <h3 className="text-3xl font-black italic">{t('general_donation')}</h3>
+               </Link>
+            </motion.div>
+         </div>
+      </section>
+
       {/* Quick Donation Bar (Inspired by leading humanitarian platforms) */}
-      <div className="relative z-20 -mt-20 container mx-auto px-4 sm:px-6">
+      <div className="relative z-20 container mx-auto px-4 sm:px-6">
          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -415,13 +578,21 @@ const HomeOverview = () => {
             <div className="space-y-6 text-center mb-10">
                <h3 className="text-2xl md:text-5xl font-serif font-black text-bento-dark uppercase tracking-wide italic">{t('donate_section_title')}</h3>
             </div>
-            <form action="/donations" className="grid grid-cols-1 md:grid-cols-4 gap-8 items-end">
+            <form action="/donations" className="grid grid-cols-1 md:grid-cols-5 gap-8 items-end">
                <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">{t('select_fund')} *</label>
                   <select className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner cursor-pointer appearance-none">
                      <option>{t('fund_general')}</option>
                      <option>{t('fund_relief')}</option>
                      <option>{t('fund_education')}</option>
+                  </select>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#4a3b1d] pl-2 drop-shadow-sm">Donor Type *</label>
+                  <select className="w-full bg-white border-none rounded-2xl p-5 outline-none focus:ring-4 focus:ring-bento-primary/20 transition font-bold text-sm shadow-inner cursor-pointer appearance-none">
+                     <option>{t('general_donation')}</option>
+                     <option>{t('regular_donor')}</option>
+                     <option>{t('life_donor')}</option>
                   </select>
                </div>
                <div className="space-y-2">
@@ -1564,12 +1735,14 @@ const Navbar = () => {
 
            {/* Desktop Links */}
            <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
-              <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
-              <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
-              <NavLink to="/events" icon={Calendar}>{t('nav_events')}</NavLink>
-              <NavLink to="/donations" icon={Heart}>{t('nav_donations')}</NavLink>
-              <NavLink to="/rules" icon={Info}>{t('nav_rules')}</NavLink>
-              <NavLink to="/contact" icon={Phone}>{t('nav_contact')}</NavLink>
+            <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
+            <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
+            <NavLink to="/members" icon={ClipboardList}>{t('nav_member_list')}</NavLink>
+            <NavLink to="/notices" icon={Bell}>{t('nav_notices')}</NavLink>
+            <NavLink to="/events" icon={Calendar}>{t('nav_events')}</NavLink>
+            <NavLink to="/donations" icon={Heart}>{t('nav_donations')}</NavLink>
+            <NavLink to="/rules" icon={Info}>{t('nav_rules')}</NavLink>
+            <NavLink to="/contact" icon={Phone}>{t('nav_contact')}</NavLink>
            </div>
 
            <div className="flex items-center gap-4">
@@ -1684,12 +1857,15 @@ const Navbar = () => {
 };
 
 const AdminDashboard = () => {
+  const { t, lang } = useLanguage();
   const [users, setUsers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [notices, setNotices] = useState<any[]>([]);
+  const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEvenTitle, setNewEventTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'events' | 'committee' | 'settings' | 'donations'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations'>('members');
   const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
@@ -1701,12 +1877,119 @@ const AdminDashboard = () => {
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
 
-  useEffect(() => {
+  const fetchData = async () => {
     fetch('/api/admin/users').then(r => r.ok ? r.json() : []).then(data => setUsers(Array.isArray(data) ? data : []));
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
     fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
+    fetch('/api/admin/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm) return users;
+    return users.filter(u => 
+      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      u.phone?.includes(searchTerm)
+    );
+  }, [users, searchTerm]);
+
+  const approveUser = async (userId: number) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/approve`, { method: 'PATCH' });
+      if (res.ok) {
+        showFeedback('success', 'User approved successfully');
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Approval failed');
+    }
+  };
+
+  const createNotice = async () => {
+    if (!newNotice.title || !newNotice.content) return;
+    try {
+      const res = await fetch('/api/admin/notices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newNotice)
+      });
+      if (res.ok) {
+        showFeedback('success', 'Notice published');
+        setNewNotice({ title: '', content: '', link: '' });
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Notice creation failed');
+    }
+  };
+
+  const deleteNotice = async (id: number) => {
+    if (!confirm('Are you sure?')) return;
+    try {
+      const res = await fetch(`/api/admin/notices/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'Notice deleted');
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Delete failed');
+    }
+  };
+
+  const deleteCommitteeMember = async (id: number) => {
+    if (!confirm('Are you sure?')) return;
+    try {
+      const res = await fetch(`/api/admin/committee/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'Member deleted');
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Delete failed');
+    }
+  };
+
+  const handleCommitteeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewMember({ ...newMember, image_url: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const downloadDonationsPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text('Donations Report - Adomyo 24', 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+    const tableData = donations.map(d => [
+      new Date(d.date).toLocaleDateString(),
+      d.donor_name,
+      d.phone_email,
+      `BDT ${d.amount}`,
+      d.payment_method || 'N/A',
+      d.fund_type || 'General'
+    ]);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Date', 'Donor', 'Contact', 'Amount', 'Method', 'Fund']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [192, 57, 43] }
+    });
+
+    doc.save(`Adomyo24_Donations_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   const showFeedback = (type: 'success' | 'error', msg: string) => {
     setAdminStats({ ...adminStats, [type]: msg });
@@ -1807,240 +2090,221 @@ const AdminDashboard = () => {
         body: JSON.stringify(newMember)
       });
       if (res.ok) {
-        showFeedback('success', 'মেম্বার সফলভাবে যোগ করা হয়েছে');
+        showFeedback('success', 'সদস্য সফলভাবে যোগ করা হয়েছে');
         setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
-        fetch('/api/committee').then(r => r.json()).then(setCommittee);
-      } else {
-        const data = await res.json();
-        showFeedback('error', data.error || 'সংরক্ষণ ব্যর্থ হয়েছে');
+        fetchData();
       }
     } catch (err) {
-      showFeedback('error', 'সার্ভার সংযোগে ত্রুটি');
+      showFeedback('error', 'যোগ করা সম্ভব হয়নি');
     }
   };
-
-  const deleteCommitteeMember = async (id: number) => {
-    try {
-      const res = await fetch(`/api/admin/committee/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showFeedback('success', 'মেম্বার মুছে ফেলা হয়েছে');
-        fetch('/api/committee').then(r => r.json()).then(setCommittee);
-      } else {
-         showFeedback('error', 'মুছে ফেলা ব্যর্থ হয়েছে');
-      }
-    } catch (err) {
-      showFeedback('error', 'সার্ভার সংযোগে ত্রুটি');
-    }
-  };
-
-  const handleCommitteeImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewMember(prev => ({ ...prev, image_url: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const downloadPDF = () => {
-    const doc = new jsPDF();
-    doc.text('Adomyo 24 - Member List', 14, 15);
-    const tableData = users.map(u => [
-      u.name,
-      u.userId,
-      u.phone,
-      u.blood_group,
-      u.profession,
-      u.role
-    ]);
-    autoTable(doc, {
-      head: [['Name', 'ID', 'Phone', 'Blood', 'Profession', 'Role']],
-      body: tableData,
-      startY: 20,
-    });
-    doc.save('Adomyo_Member_List.pdf');
-  };
-
-  const downloadDonationsPDF = () => {
-    const doc = new jsPDF();
-    doc.text('Adomyo 24 - Donation List', 14, 15);
-    const tableData = donations.map(d => [
-      new Date(d.date).toLocaleDateString('bn-BD'),
-      d.donor_name,
-      `Tk. ${d.amount}`,
-      d.payment_method || 'Mobile Banking',
-      d.fund_type || 'General'
-    ]);
-    autoTable(doc, {
-      head: [['Date', 'Donor Name', 'Amount', 'Method', 'Fund']],
-      body: tableData,
-      startY: 20,
-    });
-    doc.save('Adomyo_Donation_Report.pdf');
-  };
-
-  const filteredUsers = users.filter(u => 
-    (u.phone && u.phone.includes(searchTerm)) || 
-    (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10">
-         <div className="space-y-4">
-            <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px] ml-1">Admin Control Room</span>
-            <h2 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight">অ্যাডমিন ড্যাশবোর্ড</h2>
-         </div>
-         <div className="flex gap-4">
-            <div className="bg-white border-2 border-bento-border p-8 rounded-[2.5rem] text-center shadow-lg min-w-[160px]">
-               <h4 className="text-5xl font-black italic text-bento-primary">{Array.isArray(users) ? users.length : 0}</h4>
-               <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1">সদস্য</p>
-            </div>
-            <button onClick={downloadPDF} className="bg-bento-accent text-white p-8 rounded-[2.5rem] text-center shadow-lg min-w-[160px] flex flex-col items-center justify-center hover:scale-105 transition">
-               <Download size={32} className="mb-2" />
-               <p className="text-[10px] font-black uppercase tracking-widest">PDF লিস্ট</p>
-            </button>
-         </div>
-      </div>
-
-      <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto custom-scrollbar no-scrollbar">
-         {['members', 'donations', 'events', 'committee', 'settings'].map((tab) => (
-            <button 
-              key={tab} 
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-6 md:px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
-            >
-              {tab === 'members' ? 'সদস্য তালিকা' : tab === 'donations' ? 'অনুদান তালিকা' : tab === 'events' ? 'ইভেন্ট ম্যানেজমেন্ট' : tab === 'committee' ? 'কমিটি ম্যানেজমেন্ট' : 'সাইট সেটিংস'}
-            </button>
-         ))}
-      </div>
-      
-      {activeTab === 'members' && (
-      <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition duration-1000"><Users size={200} /></div>
-            
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-bento-border pb-6">
-              <h2 className="text-2xl font-black italic flex items-center gap-3"><Users className="text-bento-primary" /> সকল সদস্য তালিকা</h2>
-              <div className="relative w-full md:w-72">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-bento-light" size={16} />
-                 <input 
-                   type="text" 
-                   placeholder="Phone বা Name দিয়ে খুঁজুন..." 
-                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-bento-border rounded-xl focus:border-bento-primary outline-none transition text-sm italic"
-                   value={searchTerm}
-                   onChange={e => setSearchTerm(e.target.value)}
-                 />
-              </div>
-            </div>
-
-            <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar relative z-10">
-               {Array.isArray(filteredUsers) && filteredUsers.map(u => (
-                  <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:border-bento-primary hover:shadow-xl transition-all duration-500">
-                     <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-inner border border-bento-border">
-                           {u.profile_image ? (
-                             <img src={u.profile_image} className="w-full h-full object-cover" />
-                           ) : (
-                             <span className="font-serif text-3xl text-bento-primary">{u.name ? u.name[0] : '?'}</span>
-                           )}
-                        </div>
-                        <div>
-                           <p className="font-black text-xl italic text-bento-dark">{u.name}</p>
-                           <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">ID: @{u.userId} | Phone: {u.phone}</p>
-                        </div>
-                     </div>
-                     <div className="flex items-center gap-3">
-                        <button onClick={() => setSelectedUser(u)} className="p-3 bg-white border-2 border-bento-border rounded-xl text-bento-light hover:text-bento-primary hover:border-bento-primary transition"><Info size={20} /></button>
-                        <button onClick={() => toggleRole(u.id, u.role)} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition active:scale-95 ${u.role === 'admin' ? 'bg-bento-primary text-white' : 'bg-white border-2 border-bento-border text-bento-light hover:border-bento-primary hover:text-bento-primary'}`}>{u.role}</button>
-                     </div>
-                  </div>
-               ))}
-               {filteredUsers.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোন সদস্য পাওয়া যায়নি...</p>}
-            </div>
-         </div>
-         <div className="lg:col-span-4 space-y-8">
-            <div className="rounded-[24px] bg-[#2f3640] text-white p-12 shadow-2xl space-y-8 relative overflow-hidden text-center justify-center flex flex-col items-center">
-               <div className="w-20 h-20 bg-[rgba(192,57,43,0.1)] rounded-full flex items-center justify-center text-bento-primary"><Shield size={40} /></div>
-               <h3 className="text-2xl font-black italic">সদস্য তথ্য যাচাই</h3>
-               <p className="text-xs text-[rgba(255,255,255,0.4)] leading-relaxed italic uppercase tracking-widest">সকল তথ্য সঠিকভাবে ইনপুট দিন</p>
-            </div>
-         </div>
-      </div>
-      )}
-
-      {activeTab === 'donations' && (
-        <div className="space-y-8">
-           <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100">
-              <h2 className="text-2xl font-serif italic text-bento-dark flex items-center gap-3"><Heart className="text-bento-primary" fill="currentColor" /> অনুদান প্রতিবেদন</h2>
-              <button onClick={downloadDonationsPDF} className="flex items-center gap-2 bg-bento-accent text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition">
-                 <Download size={18} /> রিপোর্ট ডাউনলোড (PDF)
-              </button>
+    <div className="container mx-auto px-4 sm:px-6 py-20 min-h-screen">
+      <div className="bento-card bg-white p-8 md:p-16 shadow-2xl space-y-16 mt-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-bento-border pb-12">
+           <div className="space-y-2">
+              <h1 className="text-4xl md:text-6xl font-serif italic text-bento-dark">{t('admin_dashboard_title')}</h1>
+              <p className="text-xs font-black uppercase tracking-[0.4em] text-bento-light">Control Center / Adomyo 24</p>
            </div>
+           
+           <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto custom-scrollbar no-scrollbar">
+             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings'].map((tab) => (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`px-6 md:px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
+                >
+                  {tab === 'members' ? t('nav_member_list') : tab === 'pending' ? t('admin_pending_members') : tab === 'notices' ? t('admin_manage_notices') : tab === 'donations' ? t('admin_manage_donations') : tab === 'events' ? t('admin_manage_events') : tab === 'committee' ? t('admin_manage_committee') : t('admin_site_settings')}
+                </button>
+             ))}
+           </div>
+        </div>
 
-           <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                 <table className="w-full text-left">
-                    <thead>
-                       <tr className="bg-gray-50 border-b border-gray-100">
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">তারিখ</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">দাতা</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">পরিমান</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">মাধ্যম</th>
-                          <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-bento-light">তহবিল</th>
-                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                       {donations.map((d) => (
-                          <tr key={d.id} className="hover:bg-gray-50/50 transition">
-                             <td className="px-10 py-6 text-sm font-bold text-bento-dark italic">{new Date(d.date).toLocaleDateString('bn-BD')}</td>
-                             <td className="px-10 py-6">
-                                <p className="text-sm font-black text-bento-dark">{d.donor_name}</p>
-                                <p className="text-[10px] text-bento-light opacity-60">{d.phone_email}</p>
-                             </td>
-                             <td className="px-10 py-6 text-xl font-black text-bento-primary">৳{d.amount}</td>
-                             <td className="px-10 py-6">
-                                <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
-                                   {d.payment_method || 'Mobile Banking'}
-                                </span>
-                             </td>
-                             <td className="px-10 py-6 text-xs text-bento-light font-bold italic">{d.fund_type || 'General'}</td>
-                          </tr>
-                       ))}
-                    </tbody>
-                 </table>
-                 {donations.length === 0 && <p className="text-center py-20 text-bento-light italic">এখনো কোনো অনুদান পাওয়া যায়নি...</p>}
+        {activeTab === 'members' && (
+        <div className="grid lg:grid-cols-12 gap-8">
+           <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
+               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition duration-1000"><Users size={200} /></div>
+               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-bento-border pb-6">
+                 <h2 className="text-2xl font-black italic flex items-center gap-3"><Users className="text-bento-primary" /> অনুমোদিত সদস্য তালিকা</h2>
+                 <div className="relative w-full md:w-72">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-bento-light" size={16} />
+                    <input 
+                      type="text" 
+                      placeholder="Phone বা Name দিয়ে খুঁজুন..." 
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-bento-border rounded-xl focus:border-bento-primary outline-none transition text-sm italic"
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                    />
+                 </div>
+               </div>
+               <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar relative z-10">
+                  {filteredUsers.filter(u => u.status === 'approved').map(u => (
+                     <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:border-bento-primary hover:shadow-xl transition-all duration-500">
+                        <div className="flex items-center gap-6">
+                           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-inner border border-bento-border">
+                              {u.profile_image ? (
+                                 <img src={u.profile_image} className="w-full h-full object-cover" />
+                              ) : (
+                                 <span className="font-serif text-3xl text-bento-primary">{u.name ? u.name[0] : '?'}</span>
+                              )}
+                           </div>
+                           <div>
+                              <p className="font-black text-xl italic text-bento-dark">{u.name}</p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">ID: @{u.userId} | Phone: {u.phone}</p>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <button onClick={() => setSelectedUser(u)} className="p-3 bg-white border-2 border-bento-border rounded-xl text-bento-light hover:text-bento-primary hover:border-bento-primary transition"><Info size={20} /></button>
+                           <button onClick={() => toggleRole(u.id, u.role)} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition active:scale-95 ${u.role === 'admin' ? 'bg-bento-primary text-white' : 'bg-white border-2 border-bento-border text-bento-light hover:border-bento-primary hover:text-bento-primary'}`}>{u.role}</button>
+                        </div>
+                     </div>
+                  ))}
+                  {filteredUsers.filter(u => u.status === 'approved').length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোন সদস্য পাওয়া যায়নি...</p>}
+               </div>
+           </div>
+           <div className="lg:col-span-4 space-y-8">
+              <div className="rounded-[24px] bg-[#2f3640] text-white p-12 shadow-2xl space-y-8 relative overflow-hidden text-center justify-center flex flex-col items-center">
+                 <div className="w-20 h-20 bg-[rgba(192,57,43,0.1)] rounded-full flex items-center justify-center text-bento-primary"><Shield size={40} /></div>
+                 <h3 className="text-2xl font-black italic">সদস্য তথ্য যাচাই</h3>
+                 <p className="text-xs text-[rgba(255,255,255,0.4)] leading-relaxed italic uppercase tracking-widest">ভেরিফিকেশন এর জন্য নিচের তালিকা দেখুন</p>
               </div>
            </div>
         </div>
-      )}
+        )}
 
-      {activeTab === 'events' && (
-         <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-12">
-            <h3 className="text-3xl font-serif italic text-bento-dark border-b pb-6">ইভেন্ট ম্যানেজমেন্ট</h3>
-            <div className="grid md:grid-cols-2 gap-12">
-               <div className="space-y-8">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-bento-primary">নতুন ইভেন্ট যোগ করুন</h4>
-                  <div className="space-y-6">
-                     <InputField label="ইভেন্ট টাইটেল" value={newEvenTitle} onChange={(e:any)=>setNewEventTitle(e.target.value)} placeholder="উদা: রক্তদান কর্মসূচি" />
-                     <button onClick={createEvent} className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[rgba(192,57,43,0.2)] hover:scale-[1.02] active:scale-95 transition">পাবলিশ করুন</button>
-                  </div>
+        {activeTab === 'pending' && (
+        <div className="grid lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl border border-gray-100">
+              <h2 className="text-2xl font-black italic flex items-center gap-3 mb-10 border-b pb-6"><Shield className="text-bento-accent" /> {t('admin_pending_members')}</h2>
+              <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar">
+                 {users.filter(u => u.status === 'pending').map(u => (
+                    <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:shadow-xl transition-all">
+                       <div className="flex items-center gap-6">
+                          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border border-bento-border">
+                             {u.profile_image ? <img src={u.profile_image} className="w-full h-full object-cover" /> : <UserIcon className="text-bento-light" />}
+                          </div>
+                          <div>
+                             <p className="font-black text-xl italic text-bento-dark">{u.name}</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">Phone: {u.phone} | NID: {u.nid_number}</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <button onClick={() => setSelectedUser(u)} className="p-3 bg-white border-2 border-bento-border rounded-xl text-bento-light hover:text-bento-primary transition"><Info size={20} /></button>
+                          <button onClick={() => approveUser(u.id)} className="px-8 py-3 bg-bento-accent text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-500/20 active:scale-95 transition">{t('admin_approve')}</button>
+                       </div>
+                    </div>
+                 ))}
+                 {users.filter(u => u.status === 'pending').length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো অপেক্ষমান সদস্য নেই...</p>}
+              </div>
+          </div>
+        </div>
+        )}
+
+        {activeTab === 'notices' && (
+        <div className="grid lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-5 bento-card bg-white p-10 shadow-2xl space-y-8">
+              <h3 className="text-xl font-black italic border-b pb-4">{t('admin_add_notice')}</h3>
+              <div className="space-y-6">
+                 <InputField label="টাইটেল" value={newNotice.title} onChange={(e:any)=>setNewNotice({...newNotice, title: e.target.value})} placeholder="নোটিশের শিরোনাম..." />
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-bento-light">বিস্তারিত বার্তা</label>
+                    <textarea 
+                      value={newNotice.content} 
+                      onChange={(e:any)=>setNewNotice({...newNotice, content: e.target.value})} 
+                      className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:border-bento-primary h-32 outline-none transition text-sm"
+                      placeholder="নোটিশের বিস্তারিত তথ্য এখানে লিখুন..."
+                    />
+                 </div>
+                 <InputField label="লিঙ্ক (ঐচ্ছিক)" value={newNotice.link} onChange={(e:any)=>setNewNotice({...newNotice, link: e.target.value})} placeholder="https://..." />
+                 <button onClick={createNotice} className="w-full bg-bento-accent text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition">পাবলিশ নোটিশ</button>
+              </div>
+          </div>
+          <div className="lg:col-span-7 bento-card bg-white p-10 shadow-2xl space-y-6">
+              <h3 className="text-xl font-black italic border-b pb-4">বর্তমান নোটিশসমূহ</h3>
+              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                 {notices.map(n => (
+                    <div key={n.id} className="p-6 bg-gray-50 rounded-[2rem] border border-bento-border flex justify-between items-start group">
+                       <div className="space-y-2">
+                          <p className="font-bold text-base italic leading-tight">{n.title}</p>
+                          <p className="text-[9px] font-black uppercase tracking-widest opacity-40">{new Date(n.created_at).toLocaleDateString()}</p>
+                       </div>
+                       <button onClick={() => deleteNotice(n.id)} className="p-3 bg-white text-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition shadow-sm"><Trash2 size={16} /></button>
+                    </div>
+                 ))}
+                 {notices.length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো নোটিশ পাওয়া যায়নি...</p>}
+              </div>
+          </div>
+        </div>
+        )}
+
+        {activeTab === 'donations' && (
+          <div className="space-y-10">
+            <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
+               <div className="space-y-1">
+                  <h3 className="text-2xl font-black italic">অনুদান রিপোর্ট</h3>
+                  <p className="text-xs text-bento-light uppercase tracking-widest">মোট অনুদান সংখ্যা: {donations.length}</p>
                </div>
-               <div className="space-y-6">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-bento-light">বর্তমান ইভেন্টসমূহ</h4>
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                     {events.map(e => (
-                        <div key={e.id} className="p-4 bg-gray-50 rounded-2xl border border-bento-border flex justify-between items-center">
-                           <p className="font-bold text-sm italic">{e.title}</p>
-                           <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{new Date(e.date).toLocaleDateString()}</span>
-                        </div>
-                     ))}
+               <button onClick={downloadDonationsPDF} className="flex items-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
+                  <Download size={16} /> এক্সেল/পিডিএফ ডাউনলোড
+               </button>
+            </div>
+            
+            <div className="bento-card border border-bento-border bg-white overflow-hidden !p-0">
+               <table className="w-full text-left border-collapse">
+                  <thead className="bg-gray-50 border-b border-bento-border text-[10px] font-black uppercase tracking-widest text-bento-light">
+                    <tr>
+                      <th className="px-8 py-5">তারিখ</th>
+                      <th className="px-8 py-5">দাতার নাম</th>
+                      <th className="px-8 py-5">ধরন</th>
+                      <th className="px-8 py-5">মবলগ</th>
+                      <th className="px-8 py-5">যোগাযোগ</th>
+                      <th className="px-8 py-5">পদ্ধতি</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-bento-border">
+                    {donations.map(d => (
+                      <tr key={d.id} className="hover:bg-gray-50 transition">
+                        <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
+                        <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
+                        <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
+                        <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
+                        <td className="px-8 py-5 text-xs italic">{d.phone_email}</td>
+                        <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+               </table>
+               {donations.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অনুদান পাওয়া যায়নি...</p>}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'events' && (
+          <div className="grid lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-4 space-y-8">
+               <div className="bento-card bg-white p-10 shadow-2xl space-y-8">
+                  <h3 className="text-xl font-black italic border-b pb-4">নতুন ইভেন্ট যোগ করুন</h3>
+                  <div className="space-y-6">
+                     <InputField label="ইভেন্ট টাইটেল" value={newEvenTitle} onChange={(e:any) => setNewEventTitle(e.target.value)} placeholder="উদা: শীতবস্ত্র বিতরণ - ২০২৪" />
+                     <button onClick={createEvent} className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition">ইভেন্ট তৈরি করুন</button>
                   </div>
                </div>
             </div>
-         </div>
-      )}
+            <div className="lg:col-span-8 bento-card bg-white p-10 shadow-2xl space-y-6 min-h-[500px]">
+               <h3 className="text-xl font-black italic border-b pb-4">বর্তমান ইভেন্টসমূহ</h3>
+               <div className="grid sm:grid-cols-2 gap-6">
+                  {events.map(e => (
+                    <div key={e.id} className="p-6 bg-gray-50 rounded-3xl border border-bento-border group relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-4 opacity-10"><Calendar size={40} /></div>
+                       <p className="text-[10px] font-black text-bento-primary uppercase tracking-widest mb-2 italic">{new Date(e.date).toLocaleDateString()}</p>
+                       <h4 className="font-bold text-lg italic text-bento-dark leading-tight">{e.title}</h4>
+                    </div>
+                  ))}
+                  {events.length === 0 && <p className="col-span-2 text-center py-20 text-bento-light italic font-serif">কোনো ইভেন্ট পরিকল্পনা করা নেই...</p>}
+               </div>
+            </div>
+          </div>
+        )}
 
       {activeTab === 'committee' && (
          <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-12">
@@ -2225,6 +2489,7 @@ const AdminDashboard = () => {
         )}
       </AnimatePresence>
     </div>
+    </div>
   );
 };
 
@@ -2241,6 +2506,70 @@ const DetailGroup = ({ label, items }: { label: string, items: { label: string, 
      </div>
   </div>
 );
+
+const PublicMembersPage = () => {
+  const { t, lang } = useLanguage();
+  const [members, setMembers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    fetch('/api/members').then(r => r.ok ? r.json() : []).then(data => setMembers(Array.isArray(data) ? data : []));
+  }, []);
+
+  const filteredMembers = useMemo(() => {
+    if (!searchTerm) return members;
+    return members.filter(m => m.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [members, searchTerm]);
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-24 min-h-screen">
+      <div className="text-center space-y-4 mb-20">
+         <h1 className="text-5xl md:text-8xl font-serif text-bento-dark italic">{t('members_page_title')}</h1>
+         <div className="w-48 h-2 bg-bento-primary mx-auto rounded-full"></div>
+         <p className="text-sm font-black uppercase tracking-[0.5em] text-bento-light">Our Growing Community</p>
+      </div>
+
+      <div className="max-w-xl mx-auto mb-16 relative">
+         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-bento-light" size={20} />
+         <input 
+           type="text" 
+           placeholder={lang === 'bn' ? 'সদস্যের নাম দিয়ে খুঁজুন...' : 'Search members by name...'}
+           className="w-full pl-16 pr-8 py-5 bg-white border-2 border-bento-border rounded-[2rem] shadow-xl focus:border-bento-primary outline-none transition text-base italic"
+           value={searchTerm}
+           onChange={e => setSearchTerm(e.target.value)}
+         />
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+         {filteredMembers.map((member, index) => (
+           <motion.div 
+             key={member.id}
+             initial={{ opacity: 0, scale: 0.9 }}
+             whileInView={{ opacity: 1, scale: 1 }}
+             viewport={{ once: true }}
+             transition={{ delay: index * 0.05 }}
+             className="bento-card border border-bento-border hover:border-bento-primary hover:shadow-2xl transition duration-500 group text-center"
+           >
+              <div className="w-24 h-24 bg-gray-50 rounded-[2rem] mx-auto mb-6 flex items-center justify-center overflow-hidden border-2 border-bento-border group-hover:border-bento-primary transition shadow-inner">
+                 {member.profile_image ? (
+                   <img src={member.profile_image} className="w-full h-full object-cover" />
+                 ) : (
+                   <UserIcon className="text-bento-light group-hover:text-bento-primary transition" size={32} />
+                 )}
+              </div>
+              <h3 className="text-xl font-serif italic text-bento-dark mb-2">{member.name}</h3>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-light">Member ID: @{member.userId || 'N/A'}</p>
+           </motion.div>
+         ))}
+      </div>
+      {filteredMembers.length === 0 && (
+         <div className="text-center py-40 text-bento-light font-serif italic text-xl">
+            {lang === 'bn' ? 'কোন সদস্য পাওয়া যায়নি...' : 'No members found...'}
+         </div>
+      )}
+    </div>
+  );
+};
 
 const EventsPage = () => {
   const { t, lang } = useLanguage();
@@ -2398,7 +2727,8 @@ const DonationsPage = () => {
     amount: '', 
     message: '', 
     phone_email: '',
-    fund_type: 'তহবিল - ১ (সাধারণ)' 
+    fund_type: 'তহবিল - ১ (সাধারণ)',
+    donor_type: 'সাধারণ অনুদান'
   });
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
@@ -2425,6 +2755,7 @@ const DonationsPage = () => {
         amount: Number(formData.amount),
         phone_email: formData.phone_email,
         fund_type: formData.fund_type,
+        donor_type: formData.donor_type,
         payment_method: selectedMethod,
         message: formData.message
       }) 
@@ -2465,7 +2796,7 @@ const DonationsPage = () => {
           <div className="bg-yellow-500/5 backdrop-blur-xl border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
             <h2 className="text-2xl font-serif text-center text-bento-dark italic">{t('donation_info_title')}</h2>
             
-            <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">{t('donation_fund_label')}</label>
                 <select 
@@ -2476,6 +2807,19 @@ const DonationsPage = () => {
                    <option>{t('fund_general')}</option>
                    <option>{t('fund_relief')}</option>
                    <option>{t('fund_education')}</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">{t('donor_type')} *</label>
+                <select 
+                   className="w-full bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
+                   value={formData.donor_type}
+                   onChange={(e) => setFormData({...formData, donor_type: e.target.value})}
+                >
+                   <option>{t('general_donation')}</option>
+                   <option>{t('regular_donor')}</option>
+                   <option>{t('life_donor')}</option>
                 </select>
               </div>
 
@@ -3027,6 +3371,8 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<HomeOverview />} />
                 <Route path="/committee" element={<CommitteePage />} />
+                <Route path="/members" element={<PublicMembersPage />} />
+                <Route path="/notices" element={<NoticeBoardPage />} />
                 <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
                 <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
                 <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />

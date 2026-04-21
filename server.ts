@@ -74,7 +74,8 @@ app.post('/api/auth/register', async (req, res) => {
       userId, password: hashedPassword, name, email, phone, role,
       father_name, mother_name, present_address, permanent_address,
       blood_group, dob, profession, educational_qualification,
-      nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber
+      nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber,
+      status: role === 'admin' ? 'approved' : 'pending'
     }]).select().single();
 
     if (error) throw error;
@@ -140,12 +141,17 @@ app.post('/api/auth/login', async (req, res) => {
         id, userId, name, email, phone, role, profile_image, bio,
         father_name, mother_name, present_address, permanent_address,
         blood_group, dob, profession, educational_qualification,
-        nid_number, emergency_contact, member_id_number
+        nid_number, emergency_contact, member_id_number, status
       `)
       .eq('id', req.user.id)
       .single();
     
     if (error) return res.status(404).json({ error: 'User not found' });
+    
+    if (user.status !== 'approved' && user.role !== 'admin') {
+      return res.status(403).json({ error: 'Your membership is pending approval' });
+    }
+    
     res.json(user);
   });
 
@@ -193,13 +199,96 @@ app.post('/api/auth/login', async (req, res) => {
   app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
     const { data: users, error } = await supabase.from('users')
       .select(`
-        id, userId, name, email, phone, role, created_at,
+        id, userId, name, email, phone, role, created_at, status,
         father_name, mother_name, present_address, permanent_address,
         blood_group, dob, profession, educational_qualification,
         nid_number, emergency_contact, member_id_number
       `);
     if (error) return res.status(500).json({ error: error.message });
     res.json(users);
+  });
+
+  // Admin: Approve user
+  app.patch('/api/admin/users/:id/approve', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('users').update({ status: 'approved' }).eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'User approved' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Public: Get approved members list
+  app.get('/api/members', async (req, res) => {
+    try {
+      const { data: members, error } = await supabase.from('users')
+        .select('id, name, profile_image, member_id_number')
+        .eq('status', 'approved')
+        .order('name', { ascending: true });
+      if (error) throw error;
+      res.json(members);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Notices CRUD
+  app.get('/api/admin/notices', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { data: notices, error } = await supabase.from('notices')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      res.json(notices);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/notices', async (req, res) => {
+    try {
+      const { data: notices, error } = await supabase.from('notices')
+        .select('*')
+        .eq('is_active', 1)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      res.json(notices);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/admin/notices', authenticateToken, isAdmin, async (req, res) => {
+    const { title, content, link } = req.body;
+    try {
+      const { error } = await supabase.from('notices').insert([{ title, content, link }]);
+      if (error) throw error;
+      res.status(201).json({ message: 'Notice created' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put('/api/admin/notices/:id', authenticateToken, isAdmin, async (req, res) => {
+    const { title, content, link, is_active } = req.body;
+    try {
+      const { error } = await supabase.from('notices').update({ title, content, link, is_active }).eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Notice updated' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/admin/notices/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('notices').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Notice deleted' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   // Events CRUD
@@ -224,7 +313,7 @@ app.post('/api/auth/login', async (req, res) => {
   });
 
   app.post('/api/donations', async (req, res) => {
-    const { donor_name, amount, message, phone_email, fund_type, payment_method } = req.body;
+    const { donor_name, amount, message, phone_email, fund_type, payment_method, donor_type } = req.body;
     const { error } = await supabase.from('donations').insert([{ 
       donor_name, 
       amount, 
@@ -232,6 +321,7 @@ app.post('/api/auth/login', async (req, res) => {
       phone_email,
       fund_type,
       payment_method,
+      donor_type,
       date: new Date().toISOString()
     }]);
     if (error) return res.status(500).json({ error: error.message });

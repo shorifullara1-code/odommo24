@@ -503,10 +503,10 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-8xl lg:text-[9rem] font-serif italic text-white leading-none drop-shadow-2xl px-4">
-                        {t('hero_title').split(' ')[0]} <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent inline-block pb-4">{t('hero_title').split(' ').slice(1).join(' ')}</span>
+                     <h1 className="text-4xl sm:text-8xl lg:text-[9rem] font-serif italic text-bento-primary font-black leading-none drop-shadow-2xl px-4">
+                        {t('hero_title')}
                      </h1>
-                     <p className="text-lg md:text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
+                     <p className="text-lg md:text-2xl text-white font-serif font-bold italic max-w-2xl mx-auto leading-relaxed pt-4">
                         {t('hero_subtitle')}
                      </p>
                   </div>

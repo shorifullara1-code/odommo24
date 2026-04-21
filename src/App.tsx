@@ -1877,7 +1877,10 @@ const Navbar = () => {
                   <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
                     {[
                       { to: "/", label: t('nav_home'), icon: LayoutGrid },
+                      { to: "/live", label: t('nav_live'), icon: Tv },
                       { to: "/committee", label: t('nav_committee'), icon: Users },
+                      { to: "/members", label: t('nav_member_list'), icon: ClipboardList },
+                      { to: "/notices", label: t('nav_notices'), icon: Bell },
                       { to: "/events", label: t('nav_events'), icon: Calendar },
                       { to: "/donations", label: t('nav_donations'), icon: Heart },
                       { to: "/rules", label: t('nav_rules'), icon: Info },

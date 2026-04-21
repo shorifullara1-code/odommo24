@@ -7,7 +7,7 @@ import {
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
   Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
-  Mars, Venus, Youtube, Play, Facebook,
+  Mars, Venus, Youtube, Play, Facebook, Tv,
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music
@@ -1803,6 +1803,7 @@ const Navbar = () => {
            {/* Desktop Links */}
            <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
             <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
+            <NavLink to="/live" icon={Tv}>{t('nav_live')}</NavLink>
             <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
             <NavLink to="/members" icon={ClipboardList}>{t('nav_member_list')}</NavLink>
             <NavLink to="/notices" icon={Bell}>{t('nav_notices')}</NavLink>
@@ -1932,7 +1933,7 @@ const AdminDashboard = () => {
   const [newEvenTitle, setNewEventTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live'>('members');
   const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
@@ -2169,22 +2170,22 @@ const AdminDashboard = () => {
     }
   };
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-20 min-h-screen">
-      <div className="bento-card bg-white p-8 md:p-16 shadow-2xl space-y-16 mt-8">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-20 min-h-screen">
+      <div className="bento-card bg-white p-6 md:p-12 shadow-2xl space-y-12 mt-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-bento-border pb-12">
            <div className="space-y-2">
               <h1 className="text-4xl md:text-6xl font-serif italic text-bento-dark">{t('admin_dashboard_title')}</h1>
               <p className="text-xs font-black uppercase tracking-[0.4em] text-bento-light">Control Center / Adomyo 24</p>
            </div>
            
-           <div className="flex gap-4 border-b border-bento-border pb-4 overflow-x-auto custom-scrollbar no-scrollbar">
-             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings'].map((tab) => (
+           <div className="flex flex-wrap gap-4 border-b border-bento-border pb-4 w-full">
+             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings', 'live'].map((tab) => (
                 <button 
                   key={tab} 
                   onClick={() => setActiveTab(tab as any)}
-                  className={`px-6 md:px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
+                  className={`px-4 md:px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
                 >
-                  {tab === 'members' ? t('nav_member_list') : tab === 'pending' ? t('admin_pending_members') : tab === 'notices' ? t('admin_manage_notices') : tab === 'donations' ? t('admin_manage_donations') : tab === 'events' ? t('admin_manage_events') : tab === 'committee' ? t('admin_manage_committee') : t('admin_site_settings')}
+                  {tab === 'members' ? t('nav_member_list') : tab === 'pending' ? t('admin_pending_members') : tab === 'notices' ? t('admin_manage_notices') : tab === 'donations' ? t('admin_manage_donations') : tab === 'events' ? t('admin_manage_events') : tab === 'committee' ? t('admin_manage_committee') : tab === 'settings' ? t('admin_site_settings') : t('admin_manage_live')}
                 </button>
              ))}
            </div>
@@ -2557,6 +2558,30 @@ const AdminDashboard = () => {
             </motion.div>
           </div>
         )}
+        {activeTab === 'live' && (
+          <div className="max-w-2xl space-y-10 pb-20">
+             <div className="bg-gray-50 p-10 rounded-[3rem] border border-bento-border space-y-8">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Tv size={24} /></div>
+                   <h3 className="text-2xl font-black italic">{t('admin_manage_live')}</h3>
+                </div>
+                <p className="text-sm text-bento-light italic">এখানে YouTube বা অন্য কোনো ভিডিও স্ট্রিমিং সার্ভিস থেকে প্রাপ্ত Embed লিঙ্কটি দিন।</p>
+                <div className="space-y-6">
+                   <InputField 
+                     label="লাইভ স্ট্রিম এমবেড লিঙ্ক" 
+                     value={siteSettings?.live_stream_link || ''} 
+                     onChange={async (e:any) => {
+                       await updateSettings('live_stream_link', e.target.value);
+                     }} 
+                     placeholder="উদা: https://www.youtube.com/embed/LIVE_ID" 
+                   />
+                   <div className="p-6 bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-blue-100 italic leading-relaxed">
+                      বিজ্ঞপ্তি: আপনি যখন এখানে লিঙ্কটি আপডেট করবেন, তা সরাসরি ওয়েবসাইটে কার্যকর হবে। লিঙ্ক না থাকলে পেইজে "No Live Stream" বার্তা দেখাবে।
+                   </div>
+                </div>
+             </div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
     </div>
@@ -2668,6 +2693,69 @@ const EventsPage = () => {
             </div>
           </motion.div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+const LiveStreamPage = () => {
+  const { t, lang } = useLanguage();
+  const { siteSettings } = useAuth();
+  const liveLink = siteSettings?.live_stream_link;
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16 min-h-screen">
+      <div className="text-center space-y-6">
+         <motion.span 
+           initial={{ opacity: 0 }} 
+           animate={{ opacity: 1 }}
+           className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]"
+         >
+           {lang === 'bn' ? 'সরাসরি সম্প্রচার' : 'LIVE BROADCAST'}
+         </motion.span>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic">{t('nav_live')}</h1>
+         <div className="w-48 h-2 bg-bento-primary mx-auto rounded-full"></div>
+      </div>
+
+      <div className="max-w-5xl mx-auto">
+        {liveLink ? (
+          <div className="aspect-video bg-black rounded-[3rem] overflow-hidden shadow-2xl ring-4 ring-bento-primary/10 relative group">
+             <iframe 
+               src={liveLink} 
+               className="w-full h-full border-0"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+               allowFullScreen
+             ></iframe>
+             <div className="absolute top-8 left-8 flex items-center gap-3">
+                <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_15px_rgba(220,38,38,1)]"></div>
+                <span className="text-[10px] font-black text-white uppercase tracking-widest bg-red-600/80 backdrop-blur-md px-3 py-1 rounded-lg">LIVE</span>
+             </div>
+          </div>
+        ) : (
+          <div className="aspect-video bg-gray-50 rounded-[3rem] border-2 border-dashed border-bento-border flex flex-col items-center justify-center space-y-6 text-center p-12">
+             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-bento-light">
+                <Tv size={40} />
+             </div>
+             <div>
+                <h3 className="text-2xl font-black italic text-bento-dark">{lang === 'bn' ? 'কোনো লাইভ স্ট্রীম পাওয়া যায়নি' : 'No Live Stream Available'}</h3>
+                <p className="text-bento-light font-serif italic mt-2">{lang === 'bn' ? 'অনুগ্রহ করে আমাদের ফেসবুক পেজ অথবা ইউটিউবে যুক্ত থাকুন।' : 'Please stay tuned to our Facebook page or YouTube channel.'}</p>
+             </div>
+             <div className="flex gap-4">
+                <Link to="/contact" className="bg-bento-dark text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition">{t('nav_contact')}</Link>
+             </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="max-w-3xl mx-auto p-12 bg-white rounded-[2.5rem] border border-bento-border shadow-xl space-y-6">
+         <h3 className="text-2xl font-black italic text-bento-dark flex items-center gap-4">
+            <Info className="text-bento-primary" /> {lang === 'bn' ? 'গুরুত্বপূর্ণ তথ্য' : 'Important Information'}
+         </h3>
+         <p className="text-bento-light font-serif italic leading-relaxed">
+            {lang === 'bn' 
+              ? 'অদম্য ২৪-এর সকল গুরুত্বপূর্ণ ইভেন্ট এবং কর্মসূচি সরাসরি দেখতে আমাদের সাথে থাকুন। লাইভ স্ট্রীম চলাকালীন কোনো সমস্যা হলে ফেসবুক পেজে মেসেজ করুন।' 
+              : 'Stay with us to watch all major events and activities of Adomyo 24 live. If you face any issues during the live stream, please message us on our Facebook page.'}
+         </p>
       </div>
     </div>
   );
@@ -3459,6 +3547,7 @@ export default function App() {
             <main className="flex-grow relative z-10">
               <Routes>
                 <Route path="/" element={<HomeOverview />} />
+                <Route path="/live" element={<LiveStreamPage />} />
                 <Route path="/committee" element={<CommitteePage />} />
                 <Route path="/members" element={<PublicMembersPage />} />
                 <Route path="/notices" element={<NoticeBoardPage />} />
@@ -3539,6 +3628,10 @@ export default function App() {
                         <Link to="/" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
                            {t('nav_home')}
+                        </Link>
+                        <Link to="/live" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_live')}
                         </Link>
                         <Link to="/committee" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />

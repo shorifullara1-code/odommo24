@@ -148,6 +148,8 @@ export const translations = {
     rules_f_23: "২৩. বিভিন্ন সাংস্কৃতিক অনুষ্ঠান ও উৎসবের মাধ্যমে সামাজিক সংহতি ও সাম্প্রদায়িক সম্প্রীতি সুদৃঢ় করা।",
     rules_section_g_title: "ছ. সামগ্রিক লক্ষ্য ও মূল্যবোধ",
     rules_g_24: "২৪. শিক্ষা, মানবিক ও সাংস্কৃতিক কর্মকাণ্ডের মাধ্যমে সমাজে ইতিবাচক মূল্যবোধ সৃষ্টি করা এবং সততা, ন্যায়বিচার ও সাংস্কৃতিক চেতনার ভিত্তিতে একটি ন্যায়ভিত্তিক, মানবিক ও জবাবদিহিমূলক সমাজ গড়ে তোলা।",
+    nav_live: "লাইভ স্ট্রিম",
+    admin_manage_live: "লাইভ স্ট্রীম ম্যানেজমেন্ট",
   },
   en: {
     nav_home: "Home",
@@ -297,5 +299,7 @@ export const translations = {
     rules_f_23: "23. Strengthening social cohesion and communal harmony through various cultural programs and festivals.",
     rules_section_g_title: "G. Overall Goals and Values",
     rules_g_24: "24. Creating positive values in society through educational, humanitarian, and cultural activities and building a justice-based, humanitarian, and accountable society on the basis of honesty, justice, and cultural consciousness.",
+    nav_live: "Live Stream",
+    admin_manage_live: "Live Stream Management",
   },
 };

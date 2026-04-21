@@ -7,7 +7,7 @@ import {
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
   Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
-  Mars, Venus, Youtube, Play
+  Mars, Venus, Youtube, Play, Facebook
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -629,6 +629,40 @@ const HomeOverview = () => {
                     </a>
                   </div>
                </div>
+            </div>
+         </motion.div>
+      </section>
+
+      {/* Facebook Community Section */}
+      <section className="container mx-auto px-4 sm:px-6 mb-32">
+         <motion.div 
+           initial={{ opacity: 0, y: 30 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="bento-card bg-gradient-to-br from-[#1877F2]/10 to-[#1877F2]/5 !p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_40px_100px_rgba(24,119,242,0.1)] ring-1 ring-[#1877F2]/20"
+         >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1877F2]/5 rounded-full blur-[120px] pointer-events-none group-hover:bg-[#1877F2]/10 transition-all duration-700"></div>
+            
+            <div className="flex flex-col items-center text-center space-y-8 relative z-10">
+               <div className="w-24 h-24 bg-[#1877F2] text-white rounded-3xl flex items-center justify-center shadow-2xl rotate-3 group-hover:rotate-0 transition-all duration-500">
+                  <Facebook size={48} />
+               </div>
+               <div className="max-w-2xl space-y-4">
+                  <h2 className="text-3xl md:text-6xl font-serif text-bento-dark italic leading-tight">
+                    {t('fb_page_title')}
+                  </h2>
+                  <p className="text-lg text-bento-light font-serif italic leading-relaxed">
+                    {t('fb_page_desc')}
+                  </p>
+               </div>
+               <a 
+                 href="https://www.facebook.com/adomyo24" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="inline-flex items-center gap-4 bg-[#1877F2] text-white px-12 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition active:scale-95 group/btn"
+               >
+                 {lang === 'bn' ? 'আমাদের সঙ্গে যুক্ত হন' : 'Join Our Community'} <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+               </a>
             </div>
          </motion.div>
       </section>
@@ -3019,6 +3053,25 @@ export default function App() {
                         </div>
                      </Link>
                      <p className="text-white/40 font-serif italic text-lg leading-relaxed">{t('footer_desc')}</p>
+                     
+                     <div className="pt-4 flex items-center gap-4">
+                        <a 
+                          href="https://www.facebook.com/adomyo24" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 rounded-2xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-all shadow-lg"
+                        >
+                           <Facebook size={20} />
+                        </a>
+                        <a 
+                          href="https://www.youtube.com/channel/UCkBJa7zuSf9PlwQIU1w3RqQ" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 rounded-2xl bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all shadow-lg"
+                        >
+                           <Youtube size={20} />
+                        </a>
+                     </div>
                   </div>
 
                   <div className="space-y-8">

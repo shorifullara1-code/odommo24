@@ -7,7 +7,7 @@ import {
   Menu, X, Shield, Lock, User as UserIcon, Camera, ChevronRight,
   Download, Search, Info, Trash2, LogIn, UserPlus, LogOut, Settings,
   Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
-  Mars, Venus
+  Mars, Venus, Youtube, Play
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -262,7 +262,7 @@ const HomeOverview = () => {
   };
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const { user, siteSettings } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const heroImages = useMemo(() => {
     try {
@@ -379,8 +379,8 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-8xl lg:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter">
-                        {t('hero_title').split(' ')[0]} <span className="text-bento-primary">{t('hero_title').split(' ').slice(1).join(' ')}</span>
+                     <h1 className="text-4xl sm:text-8xl lg:text-[10rem] font-serif italic text-white leading-[0.8] tracking-tighter drop-shadow-2xl">
+                        {t('hero_title').split(' ')[0]} <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent">{t('hero_title').split(' ').slice(1).join(' ')}</span>
                      </h1>
                      <p className="text-lg md:text-2xl text-white/70 font-serif italic max-w-2xl mx-auto leading-relaxed pt-4">
                         {t('hero_subtitle')}
@@ -455,8 +455,8 @@ const HomeOverview = () => {
           
           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
-                <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em]">{t('core_mission')}</span>
-                <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, অদম্য <span className="text-bento-primary">২৪</span> জানে।</h2>
+                <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em] drop-shadow-sm">{t('core_mission')}</span>
+                <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent">অদম্য ২৪</span> জানে।</h2>
                 <p className="text-base md:text-2xl text-bento-light font-serif italic leading-relaxed">
                    {t('mission_desc')}
                 </p>
@@ -587,6 +587,51 @@ const HomeOverview = () => {
             ))}
          </div>
       </section>
+      
+      {/* YouTube Channel Section */}
+      <section className="container mx-auto px-4 sm:px-6 mb-32">
+         <motion.div 
+           initial={{ opacity: 0, y: 30 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="bento-card glass-morphism !p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_40px_100px_rgba(192,57,43,0.1)] ring-1 ring-white/10"
+         >
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-600/10 rounded-full blur-[100px] group-hover:bg-red-600/20 transition-all duration-700"></div>
+            <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
+               <div className="space-y-8">
+                  <h2 className="text-3xl md:text-6xl font-serif text-bento-dark italic leading-tight">
+                    {t('activities_video_title')}
+                  </h2>
+                  <p className="text-lg text-bento-light font-serif italic leading-relaxed">
+                    {lang === 'bn' 
+                      ? "সংগঠনের সকল মানবিক ও সামাজিক কার্যক্রমের ভিডিও প্রতিবেদন দেখতে আমাদের অফিসিয়াল ইউটিউব চ্যানেলটি সাবস্ক্রাইব করুন।" 
+                      : "Subscribe to our official YouTube channel to watch video reports of all our humanitarian and social activities."}
+                  </p>
+                  <a 
+                    href="https://www.youtube.com/channel/UCkBJa7zuSf9PlwQIU1w3RqQ" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-4 bg-[#FF0000] text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:scale-105 transition active:scale-95"
+                  >
+                    <Youtube size={24} /> {t('watch_on_youtube')}
+                  </a>
+               </div>
+               <div className="aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl relative group/vid">
+                  <img src="https://yt3.googleusercontent.com/V7-kYJcwhxTqKKC0C4vRhaukNWVl2Vqrr6IR7RAv-MiE6Slk3Gx-thDbuTIvit-zRMK_2zbwgmU=s160-c-k-c0x00ffffff-no-rj" className="w-full h-full object-cover opacity-80 group-hover/vid:scale-110 transition duration-1000" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <a 
+                      href="https://www.youtube.com/channel/UCkBJa7zuSf9PlwQIU1w3RqQ" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-20 h-20 bg-white text-[#FF0000] rounded-full flex items-center justify-center shadow-2xl scale-110 group-hover/vid:scale-125 transition duration-500"
+                    >
+                      <Play fill="currentColor" size={32} />
+                    </a>
+                  </div>
+               </div>
+            </div>
+         </motion.div>
+      </section>
 
       {/* 5. Committee Section Teaser */}
       <section id="committee" className="py-32 bg-white relative overflow-hidden">
@@ -597,7 +642,7 @@ const HomeOverview = () => {
          <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center space-y-12">
             <div className="max-w-4xl mx-auto space-y-6">
                <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">{t('committee_guardians')}</span>
-               <h2 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">{t('committee_title').split(' ')[0]} <span className="text-bento-primary">{t('committee_title').split(' ').slice(1).join(' ')}</span></h2>
+               <h2 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">{t('committee_title').split(' ')[0]} <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent">{t('committee_title').split(' ').slice(1).join(' ')}</span></h2>
                <p className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto">
                   {t('committee_desc_home')}
                </p>
@@ -1489,6 +1534,7 @@ const Navbar = () => {
               <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
               <NavLink to="/events" icon={Calendar}>{t('nav_events')}</NavLink>
               <NavLink to="/donations" icon={Heart}>{t('nav_donations')}</NavLink>
+              <NavLink to="/rules" icon={Info}>{t('nav_rules')}</NavLink>
               <NavLink to="/contact" icon={Phone}>{t('nav_contact')}</NavLink>
            </div>
 
@@ -1559,6 +1605,7 @@ const Navbar = () => {
                       { to: "/committee", label: t('nav_committee'), icon: Users },
                       { to: "/events", label: t('nav_events'), icon: Calendar },
                       { to: "/donations", label: t('nav_donations'), icon: Heart },
+                      { to: "/rules", label: t('nav_rules'), icon: Info },
                       { to: "/contact", label: t('nav_contact'), icon: Phone }
                     ].map((item) => (
                       <Link 
@@ -2601,6 +2648,158 @@ const DonationsPage = () => {
   );
 };
 
+const RulesAndRegulationPage = () => {
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState('a');
+  const sections = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-20 max-w-6xl space-y-20">
+      <div className="text-center space-y-6">
+         <motion.span 
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]"
+         >
+           Mission & Principles
+         </motion.span>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic leading-none">
+           {t('nav_rules').split(' ')[0]} <span className="text-bento-primary">{t('nav_rules').split(' ').slice(1).join(' ')}</span>
+         </h1>
+         <div className="w-40 h-1 bg-gradient-to-r from-transparent via-bento-primary to-transparent mx-auto rounded-full"></div>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-4 mb-20 bg-white/30 backdrop-blur-md p-4 rounded-[3rem] sticky top-24 z-30 shadow-xl border border-white/20">
+        {sections.map(s => (
+          <button
+            key={s}
+            onClick={() => setActiveTab(s)}
+            className={`px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 shadow-xl ${
+              activeTab === s 
+              ? 'vibrant-gradient text-white scale-110 shadow-bento-primary/30' 
+              : 'bg-white text-bento-light hover:bg-gray-50 border border-gray-100 opacity-60'
+            }`}
+          >
+            {t(`rules_section_${s}_title`).split('.')[0]}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+           key={activeTab}
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           exit={{ opacity: 0, y: -30 }}
+           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+           className="bento-card glass-morphism !p-10 md:!p-24 relative overflow-hidden group shadow-[0_40px_100px_rgba(192,57,43,0.1)] border-none"
+        >
+          {/* Internal Glow Effects for colorful appearance */}
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-bento-primary/5 rounded-full blur-[120px] group-hover:bg-bento-primary/10 transition-colors duration-1000"></div>
+          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-bento-accent/5 rounded-full blur-[120px] group-hover:bg-bento-accent/10 transition-colors duration-1000"></div>
+
+          <div className="relative z-10 space-y-16">
+            <div className="space-y-6">
+               <h2 className="text-3xl md:text-6xl font-serif text-bento-dark italic leading-tight">
+                 {t(`rules_section_${activeTab}_title`)}
+               </h2>
+               <div className="w-32 h-2 bg-gradient-to-r from-bento-primary to-transparent rounded-full"></div>
+            </div>
+
+            <div className="grid gap-12">
+              {activeTab === 'a' && (
+                <>
+                  <RuleItem index="১" text={t('rules_a_1')} />
+                  <RuleItem index="২" text={t('rules_a_2')} />
+                  <RuleItem index="৩" text={t('rules_a_3')} />
+                </>
+              )}
+              {activeTab === 'b' && (
+                <>
+                  <RuleItem index="৪" text={t('rules_b_4')} />
+                  <RuleItem index="৫" text={t('rules_b_5')} />
+                  <RuleItem index="৬" text={t('rules_b_6')} />
+                  <RuleItem index="৭" text={t('rules_b_7')} />
+                  <RuleItem index="৮" text={t('rules_b_8')} />
+                  <RuleItem index="৯" text={t('rules_b_9')} />
+                </>
+              )}
+              {activeTab === 'c' && (
+                <>
+                  <RuleItem index="১০" text={t('rules_c_10')} />
+                  <RuleItem index="১১" text={t('rules_c_11')} />
+                  <RuleItem index="১২" text={t('rules_c_12')} />
+                  <RuleItem index="১৩" text={t('rules_c_13')} />
+                </>
+              )}
+              {activeTab === 'd' && (
+                <>
+                  <RuleItem index="১৪" text={t('rules_d_14')} />
+                  <RuleItem index="১৫" text={t('rules_d_15')} />
+                  <RuleItem index="১৬" text={t('rules_d_16')} />
+                </>
+              )}
+              {activeTab === 'e' && (
+                <>
+                  <RuleItem index="১৭" text={t('rules_e_17')} />
+                  <RuleItem index="১৮" text={t('rules_e_18')} />
+                  <RuleItem index="১৯" text={t('rules_e_19')} />
+                  <RuleItem index="২০" text={t('rules_e_20')} />
+                </>
+              )}
+              {activeTab === 'f' && (
+                <>
+                  <RuleItem index="২১" text={t('rules_f_21')} />
+                  <RuleItem index="২২" text={t('rules_f_22')} />
+                  <RuleItem index="২৩" text={t('rules_f_23')} />
+                </>
+              )}
+              {activeTab === 'g' && (
+                <>
+                  <RuleItem index="২৪" text={t('rules_g_24')} />
+                </>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="bg-bento-dark rounded-[4rem] p-16 md:p-24 text-center text-white space-y-10 shadow-2xl relative overflow-hidden group">
+         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 group-hover:scale-110 transition-transform duration-1000"></div>
+         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-bento-primary/20 via-transparent to-bento-accent/20"></div>
+         <div className="relative z-10 space-y-8">
+            <h3 className="text-4xl md:text-6xl font-serif italic">{t('mission_title')}</h3>
+            <p className="text-white/60 text-lg max-w-3xl mx-auto font-serif italic leading-relaxed">{t('mission_desc')}</p>
+            <div className="pt-8">
+               <Link to="/register" className="inline-block vibrant-gradient text-white px-20 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.5em] shadow-[0_20px_50px_rgba(192,57,43,0.4)] hover:scale-110 hover:shadow-[0_20px_70px_rgba(192,57,43,0.6)] transition-all">
+                 {t('member_apply')}
+               </Link>
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+};
+
+const RuleItem = ({ text, index }: { text: string, index: string }) => (
+  <motion.div 
+    initial={{ opacity: 0, x: -20 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true }}
+    className="flex gap-8 items-start group"
+  >
+    <div className="w-16 h-16 rounded-3xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:vibrant-gradient group-hover:text-white transition-all duration-500 ring-4 ring-transparent group-hover:ring-bento-primary/10">
+      <span className="text-2xl font-serif italic font-black text-bento-primary group-hover:text-white transition-colors">{index}</span>
+    </div>
+    <div className="space-y-2 pt-2">
+       <p className="text-xl md:text-2xl text-bento-dark font-serif italic leading-relaxed group-hover:text-bento-primary transition-colors duration-500">
+         {text.includes('.') ? text.split('.').slice(1).join('.').trim() : text}
+       </p>
+       <div className="w-0 group-hover:w-full h-px bg-gradient-to-r from-bento-primary/30 to-transparent transition-all duration-700"></div>
+    </div>
+  </motion.div>
+);
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -2761,19 +2960,24 @@ export default function App() {
               {!isMobile && !shouldReduceMotion && (
                 <>
                   <motion.div 
-                    animate={{ x: [0, 100, 0], y: [0, 150, 0] }}
+                    animate={{ x: [0, 100, 0], y: [0, 150, 0], scale: [1, 1.2, 1] }}
                     transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-bento-primary/10 rounded-full blur-[120px] will-change-transform" 
+                    className="absolute -top-20 -left-20 w-[800px] h-[800px] bg-bento-primary/20 rounded-full blur-[140px] will-change-transform" 
                   />
                   <motion.div 
-                    animate={{ x: [0, -150, 0], y: [0, 100, 0] }}
+                    animate={{ x: [0, -150, 0], y: [0, 100, 0], scale: [1, 0.8, 1] }}
                     transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                    className="absolute top-1/2 -right-20 w-[500px] h-[500px] bg-bento-accent/5 rounded-full blur-[100px] will-change-transform" 
+                    className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-bento-accent/15 rounded-full blur-[120px] will-change-transform" 
                   />
                   <motion.div 
-                    animate={{ x: [0, 50, 0], y: [0, -200, 0] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] bg-vibrant-orange/5 rounded-full blur-[150px] will-change-transform" 
+                    animate={{ x: [0, 150, 0], y: [0, -250, 0], rotate: 360 }}
+                    transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                    className="absolute bottom-1/4 left-1/4 w-[900px] h-[900px] bg-vibrant-orange/10 rounded-full blur-[180px] will-change-transform" 
+                  />
+                  <motion.div 
+                    animate={{ x: [-100, 100, -100], y: [0, 200, 0] }}
+                    transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-1/4 left-1/2 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-[100px] will-change-transform" 
                   />
                 </>
               )}
@@ -2796,6 +3000,7 @@ export default function App() {
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/donations" element={<DonationsPage />} />
                 <Route path="/contact" element={<ContactUsPage />} />
+                <Route path="/rules" element={<RulesAndRegulationPage />} />
               </Routes>
             </main>
             <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
@@ -2830,6 +3035,10 @@ export default function App() {
                         <Link to="/donations" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
                            {t('nav_donations')}
+                        </Link>
+                        <Link to="/rules" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_rules')}
                         </Link>
                         <Link to="/contact" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />

@@ -2169,6 +2169,44 @@ const AdminDashboard = () => {
       showFeedback('error', 'যোগ করা সম্ভব হয়নি');
     }
   };
+  const formatLiveLink = (url: string) => {
+    if (!url) return '';
+    let targetUrl = url.trim();
+
+    // If user pastes full iframe code, extract src
+    if (targetUrl.includes('<iframe') && targetUrl.includes('src="')) {
+      const match = targetUrl.match(/src="([^"]+)"/);
+      if (match && match[1]) targetUrl = match[1];
+    }
+
+    try {
+      // YouTube
+      if (targetUrl.includes('youtube.com/watch?v=')) {
+        const id = new URL(targetUrl).searchParams.get('v');
+        return `https://www.youtube.com/embed/${id}`;
+      }
+      if (targetUrl.includes('youtu.be/')) {
+        const id = targetUrl.split('/').pop()?.split('?')[0];
+        return `https://www.youtube.com/embed/${id}`;
+      }
+      // Facebook
+      if (targetUrl.includes('facebook.com') && !targetUrl.includes('plugins/video.php')) {
+        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(targetUrl)}&show_text=0&width=560`;
+      }
+      return targetUrl;
+    } catch (e) {
+      return targetUrl;
+    }
+  };
+
+  const [liveLinkInput, setLiveLinkInput] = useState(siteSettings?.live_stream_link || '');
+
+  useEffect(() => {
+    if (siteSettings?.live_stream_link) {
+      setLiveLinkInput(siteSettings.live_stream_link);
+    }
+  }, [siteSettings?.live_stream_link]);
+
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-20 min-h-screen">
       <div className="bento-card bg-white p-6 md:p-12 shadow-2xl space-y-12 mt-8">
@@ -2559,25 +2597,53 @@ const AdminDashboard = () => {
           </div>
         )}
         {activeTab === 'live' && (
-          <div className="max-w-2xl space-y-10 pb-20">
+          <div className="grid lg:grid-cols-2 gap-12 pb-20">
              <div className="bg-gray-50 p-10 rounded-[3rem] border border-bento-border space-y-8">
                 <div className="flex items-center gap-4">
                    <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Tv size={24} /></div>
                    <h3 className="text-2xl font-black italic">{t('admin_manage_live')}</h3>
                 </div>
-                <p className="text-sm text-bento-light italic">এখানে YouTube বা অন্য কোনো ভিডিও স্ট্রিমিং সার্ভিস থেকে প্রাপ্ত Embed লিঙ্কটি দিন।</p>
+                <p className="text-sm text-bento-light italic">এখানে YouTube বা ফেসবুক থেকে সরাসরি কপি করা লিঙ্কটি দিন। সিস্টেম স্বয়ংক্রিয়ভাবে এটিকে Embed লিঙ্কে রূপান্তর করবে।</p>
                 <div className="space-y-6">
                    <InputField 
-                     label="লাইভ স্ট্রিম এমবেড লিঙ্ক" 
-                     value={siteSettings?.live_stream_link || ''} 
-                     onChange={async (e:any) => {
-                       await updateSettings('live_stream_link', e.target.value);
-                     }} 
-                     placeholder="উদা: https://www.youtube.com/embed/LIVE_ID" 
+                     label="লাইভ স্ট্রিম লিঙ্ক (URL)" 
+                     value={liveLinkInput} 
+                     onChange={(e:any) => setLiveLinkInput(e.target.value)} 
+                     placeholder="উদা: https://www.youtube.com/watch?v=... অথবা https://fb.watch/..." 
                    />
+                   <button 
+                     onClick={async () => {
+                       const formatted = formatLiveLink(liveLinkInput);
+                       setLiveLinkInput(formatted);
+                       await updateSettings('live_stream_link', formatted);
+                       showFeedback('success', 'লাইভ লিঙ্ক আপডেট হয়েছে');
+                     }}
+                     className="w-full bg-bento-primary text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:scale-[1.02] transition-all"
+                   >
+                     লিঙ্ক সেভ করুন
+                   </button>
                    <div className="p-6 bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-blue-100 italic leading-relaxed">
-                      বিজ্ঞপ্তি: আপনি যখন এখানে লিঙ্কটি আপডেট করবেন, তা সরাসরি ওয়েবসাইটে কার্যকর হবে। লিঙ্ক না থাকলে পেইজে "No Live Stream" বার্তা দেখাবে।
+                      বিজ্ঞপ্তি: "Monitor" দেখানোর সমস্যা এড়াতে ওয়েবসাইটের নিজের লিঙ্ক এখানে দিবেন না। শুধুমাত্র ইউটিউব বা ফেসবুক ভিডিওর লিঙ্ক ব্যবহার করুন।
                    </div>
+                </div>
+             </div>
+
+             <div className="space-y-6">
+                <h4 className="text-xs font-black uppercase tracking-[0.4em] text-center text-bento-light">লাইভ প্রিভিউ (Live Preview)</h4>
+                <div className="aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-black/5 relative group">
+                   {siteSettings?.live_stream_link ? (
+                     <iframe 
+                       src={siteSettings.live_stream_link} 
+                       className="w-full h-full border-0"
+                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                       allowFullScreen
+                     ></iframe>
+                   ) : (
+                     <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20 italic p-8 text-center">
+                        <Tv size={40} className="mb-4 opacity-50" />
+                        <p>লিঙ্ক সেভ করলে এখানে প্রিভিউ দেখা যাবে</p>
+                     </div>
+                   )}
                 </div>
              </div>
           </div>

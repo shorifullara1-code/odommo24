@@ -338,8 +338,10 @@ const NoticeBoardPage = () => {
             <div className="flex justify-between items-start">
                <span className="bg-bento-accent/10 text-bento-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">{new Date(n.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US')}</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black italic text-bento-dark leading-tight">{n.title}</h2>
-            <p className="text-bento-light font-serif italic text-lg leading-relaxed whitespace-pre-line">{n.content}</p>
+            <h2 className="text-3xl md:text-5xl font-black italic text-bento-dark leading-tight tracking-tight drop-shadow-sm">{n.title}</h2>
+            <p className="text-bento-dark/80 font-serif italic text-xl md:text-2xl leading-relaxed whitespace-pre-line border-l-4 border-bento-accent/20 pl-8 py-2">
+               {n.content}
+            </p>
             {n.link && (
                <a 
                  href={n.link} 
@@ -367,6 +369,7 @@ const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
   const [committee, setCommittee] = useState<any[]>([]);
+  const [notices, setNotices] = useState<any[]>([]);
   const shouldReduceMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -412,6 +415,7 @@ const HomeOverview = () => {
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
     fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
+    fetch('/api/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
   }, []);
 
   useEffect(() => {
@@ -523,6 +527,68 @@ const HomeOverview = () => {
             </div>
          </div>
       </section>
+      
+      {/* Compact Notice Board Widget */}
+      {notices && notices.length > 0 && (
+        <section className="relative z-30 -mt-20 mb-16 container mx-auto px-4 sm:px-6">
+           <div className="max-w-lg">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="bg-white/80 backdrop-blur-xl border-2 border-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden group"
+              >
+                 {/* Premium Background Detail */}
+                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-bento-primary/10 to-transparent rounded-bl-[100px] opacity-50 group-hover:scale-110 transition-transform duration-700" />
+                 
+                 <div className="flex items-center justify-between mb-10 relative z-10">
+                    <div className="flex items-center gap-5">
+                       <motion.div 
+                         animate={{ rotate: [0, -10, 10, -10, 0] }}
+                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                         className="w-14 h-14 bg-bento-primary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-bento-primary/30"
+                       >
+                          <Bell size={28} />
+                       </motion.div>
+                       <div>
+                          <h3 className="text-2xl font-black italic text-bento-dark tracking-tighter leading-none">{lang === 'bn' ? 'নোটিশ বোর্ড' : 'Notice Board'}</h3>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-accent mt-1">{lang === 'bn' ? 'সর্বশেষ আপডেট' : 'Latest Updates'}</p>
+                       </div>
+                    </div>
+                    <Link to="/notices" className="group/btn relative overflow-hidden bg-gray-50 p-3 rounded-full hover:bg-bento-primary hover:text-white transition-all duration-300">
+                       <ArrowRight size={20} className="relative z-10" />
+                    </Link>
+                 </div>
+
+                 <div className="space-y-4 relative z-10">
+                    {notices.slice(0, 3).map((n, i) => (
+                      <Link 
+                        key={n.id} 
+                        to="/notices" 
+                        className="block p-5 bg-white/40 hover:bg-white rounded-3xl border border-bento-border/40 hover:border-bento-primary/20 hover:shadow-xl transition-all duration-300 group/item"
+                      >
+                         <div className="flex justify-between items-center gap-6">
+                            <span className="text-base font-bold text-bento-dark leading-snug group-hover/item:text-bento-primary transition-colors line-clamp-1">
+                               {n.title}
+                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                               <span className="text-[9px] font-black uppercase tracking-widest text-bento-light opacity-60">
+                                  {new Date(n.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US')}
+                               </span>
+                               <ChevronRight size={14} className="text-bento-primary opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
+                            </div>
+                         </div>
+                      </Link>
+                    ))}
+                 </div>
+
+                 {/* Bottom Floating Bar accent */}
+                 <div className="w-12 h-1.5 bg-bento-primary/20 mx-auto mt-8 rounded-full" />
+              </motion.div>
+           </div>
+        </section>
+      )}
 
       {/* Donor Type Selection (Inspired by As-Sunnah Foundation) */}
       <section className="relative z-20 -mt-24 container mx-auto px-4 sm:px-6 mb-16">
@@ -1919,12 +1985,15 @@ const AdminDashboard = () => {
         body: JSON.stringify(newNotice)
       });
       if (res.ok) {
-        showFeedback('success', 'Notice published');
+        showFeedback('success', 'Notice published successfully');
         setNewNotice({ title: '', content: '', link: '' });
         fetchData();
+      } else {
+        const errorData = await res.json();
+        showFeedback('error', `Failed: ${errorData.error || 'Server error'}`);
       }
-    } catch (err) {
-      showFeedback('error', 'Notice creation failed');
+    } catch (err: any) {
+      showFeedback('error', `Creation failed: ${err.message}`);
     }
   };
 

@@ -9,7 +9,8 @@ import {
   Briefcase, GraduationCap, CreditCard, ArrowRight, Zap, LayoutGrid, Globe,
   Mars, Venus, Youtube, Play, Facebook,
   HeartHandshake, Gift, Sun,
-  Bell, ExternalLink, ClipboardList
+  Bell, ExternalLink, ClipboardList,
+  Instagram, Rss, Music
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -2668,6 +2669,25 @@ const ContactUsPage = () => {
                <p className="text-sm text-white/50 leading-relaxed">{t('fb_page_desc')}</p>
                <a href="https://www.facebook.com/adomyo24" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-4 text-bento-primary font-black uppercase tracking-widest text-[10px] hover:gap-6 transition-all">FB.COM/ADOMYO24 <ArrowRight size={14} /></a>
             </div>
+
+            <div className="flex items-center gap-4 mt-6">
+               {[
+                 { href: "https://www.instagram.com/adomyo24/", icon: Instagram, color: "hover:bg-[#E4405F]" },
+                 { href: "https://www.youtube.com/channel/UCkBJa7zuSf9PlwQIU1w3RqQ", icon: Youtube, color: "hover:bg-[#FF0000]" },
+                 { href: "https://www.tiktok.com/@adomyo24", icon: Music, color: "hover:bg-black" },
+                 { href: "https://adomyo24.blogspot.com/", icon: Rss, color: "hover:bg-[#FF5722]" },
+               ].map((social, i) => (
+                 <a 
+                   key={i} 
+                   href={social.href} 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   className={`w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 ${social.color} hover:text-white hover:scale-110 transition-all duration-300 shadow-lg`}
+                 >
+                    <social.icon size={16} />
+                 </a>
+               ))}
+            </div>
          </div>
 
          <div className="lg:col-span-7">
@@ -3400,7 +3420,7 @@ export default function App() {
                      </Link>
                      <p className="text-white/40 font-serif italic text-lg leading-relaxed">{t('footer_desc')}</p>
                      
-                     <div className="pt-4 flex items-center gap-4">
+                     <div className="pt-4 flex items-center gap-4 flex-wrap">
                         <a 
                           href="https://www.facebook.com/adomyo24" 
                           target="_blank" 
@@ -3416,6 +3436,30 @@ export default function App() {
                           className="w-12 h-12 rounded-2xl bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all shadow-lg"
                         >
                            <Youtube size={20} />
+                        </a>
+                        <a 
+                          href="https://www.instagram.com/adomyo24/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 rounded-2xl bg-[#E4405F]/10 text-[#E4405F] flex items-center justify-center hover:bg-[#E4405F] hover:text-white transition-all shadow-lg"
+                        >
+                           <Instagram size={20} />
+                        </a>
+                        <a 
+                          href="https://www.tiktok.com/@adomyo24" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 rounded-2xl bg-[#000000]/10 text-white flex items-center justify-center hover:bg-[#000000] transition-all shadow-lg"
+                        >
+                           <Music size={20} />
+                        </a>
+                        <a 
+                          href="https://adomyo24.blogspot.com/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 rounded-2xl bg-[#FF5722]/10 text-[#FF5722] flex items-center justify-center hover:bg-[#FF5722] hover:text-white transition-all shadow-lg"
+                        >
+                           <Rss size={20} />
                         </a>
                      </div>
                   </div>

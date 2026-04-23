@@ -1874,7 +1874,7 @@ const Navbar = () => {
                     <button onClick={() => setIsOpen(false)} className="p-2 text-white/50 hover:text-white"><X size={24} /></button>
                   </div>
                   
-                  <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
+                  <div className="p-8 pt-12 space-y-4 overflow-y-auto flex-grow flex flex-col justify-start">
                     {[
                       { to: "/", label: t('nav_home'), icon: LayoutGrid },
                       { to: "/live", label: t('nav_live'), icon: Tv },
@@ -1943,7 +1943,22 @@ const AdminDashboard = () => {
   const [committee, setCommittee] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
   const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
+  const [editingMember, setEditingMember] = useState<any>(null);
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
+  
+  /* 
+    DORKARI SQL CODE:
+    
+    CREATE TABLE committee_members (
+      id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+      name TEXT NOT NULL,
+      role TEXT NOT NULL,
+      image_url TEXT,
+      sort_order INT DEFAULT 0,
+      is_active INT DEFAULT 1,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  */
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
@@ -2032,9 +2047,31 @@ const AdminDashboard = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      setNewMember({ ...newMember, image_url: reader.result as string });
+      if (editingMember) {
+        setEditingMember({ ...editingMember, image_url: reader.result as string });
+      } else {
+        setNewMember({ ...newMember, image_url: reader.result as string });
+      }
     };
     reader.readAsDataURL(file);
+  };
+
+  const updateCommitteeMember = async () => {
+    if (!editingMember || !editingMember.name || !editingMember.role) return;
+    try {
+      const res = await fetch(`/api/admin/committee/${editingMember.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingMember)
+      });
+      if (res.ok) {
+        showFeedback('success', 'তথ্য সফলভাবে আপডেট হয়েছে');
+        setEditingMember(null);
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
+    }
   };
 
   const downloadDonationsPDF = () => {
@@ -2419,19 +2456,34 @@ const AdminDashboard = () => {
         )}
 
       {activeTab === 'committee' && (
-         <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-12">
-            <h3 className="text-3xl font-serif italic text-bento-dark border-b pb-6">কেন্দ্রীয় আহ্বায়ক কমিটি ম্যানেজমেন্ট</h3>
+         <div className="bento-card border-none bg-white p-8 md:p-12 shadow-2xl space-y-12">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-bento-border pb-8">
+               <h3 className="text-3xl font-serif italic text-bento-dark">কেন্দ্রীয় আহ্বায়ক কমিটি ম্যানেজমেন্ট</h3>
+               {editingMember && (
+                  <button 
+                    onClick={() => { setEditingMember(null); setNewMember({ name: '', role: '', image_url: '', sort_order: 0 }); }}
+                    className="px-6 py-2 bg-gray-100 text-bento-light rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition"
+                  >
+                    নতুন মেম্বার যোগ করুন
+                  </button>
+               )}
+            </div>
+
             <div className="grid md:grid-cols-12 gap-12">
-               <div className="md:col-span-5 space-y-8">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-bento-primary">নতুন মেম্বার যোগ করুন</h4>
+               {/* Form Column */}
+               <div className="md:col-span-5 space-y-8 bg-gray-50/50 p-8 rounded-[2.5rem] border border-gray-100">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-bento-primary">
+                    {editingMember ? 'সদস্যের তথ্য সংশোধন করুন' : 'নতুন মেম্বার যোগ করুন'}
+                  </h4>
+                  
                   <div className="space-y-6">
-                     <div className="flex justify-center">
+                     <div className="flex flex-col items-center gap-4">
                         <div 
                            onClick={() => committeeFileInputRef.current?.click()}
-                           className="w-32 h-32 bg-gray-50 rounded-3xl border-2 border-dashed border-bento-border flex flex-col items-center justify-center cursor-pointer hover:border-bento-primary transition overflow-hidden group"
+                           className="w-32 h-32 bg-white rounded-3xl border-2 border-dashed border-bento-border flex flex-col items-center justify-center cursor-pointer hover:border-bento-primary transition overflow-hidden group shadow-inner"
                         >
-                           {newMember.image_url ? (
-                              <img src={newMember.image_url} className="w-full h-full object-cover" />
+                           {(editingMember ? editingMember.image_url : newMember.image_url) ? (
+                              <img src={editingMember ? editingMember.image_url : newMember.image_url} className="w-full h-full object-cover" />
                            ) : (
                               <>
                                  <Camera size={24} className="text-bento-light group-hover:text-bento-primary transition" />
@@ -2439,38 +2491,97 @@ const AdminDashboard = () => {
                               </>
                            )}
                         </div>
+                        <p className="text-[8px] font-black uppercase tracking-[0.2em] text-bento-light/60">ক্লিক করে ছবি আপলোড করুন</p>
                         <input type="file" ref={committeeFileInputRef} className="hidden" accept="image/*" onChange={handleCommitteeImageUpload} />
                      </div>
-                     <InputField label="সদস্যের নাম" value={newMember.name} onChange={(e:any)=>setNewMember({...newMember, name: e.target.value})} placeholder="উদা: মোহাম্মদ সজীব আহমেদ" />
-                     <InputField label="পদবী" value={newMember.role} onChange={(e:any)=>setNewMember({...newMember, role: e.target.value})} placeholder="উদা: কোষাধ্যক্ষ" />
-                     <InputField label="ক্রম (Sort Order)" type="number" value={newMember.sort_order} onChange={(e:any)=>setNewMember({...newMember, sort_order: parseInt(e.target.value) || 0})} placeholder="0, 1, 2..." />
-                     <button onClick={addCommitteeMember} className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[rgba(192,57,43,0.2)] hover:scale-[1.02] active:scale-95 transition">সংরক্ষণ করুন</button>
-                     {adminStats.success && <p className="text-green-500 text-[10px] font-black uppercase text-center">{adminStats.success}</p>}
+
+                     <InputField 
+                        label="সদস্যের ছবি (URL)" 
+                        value={editingMember ? editingMember.image_url : newMember.image_url} 
+                        onChange={(e:any) => editingMember ? setEditingMember({...editingMember, image_url: e.target.value}) : setNewMember({...newMember, image_url: e.target.value})} 
+                        placeholder="বা ছবির লিঙ্ক সরাসরি এখানে দিন..." 
+                     />
+                     
+                     <InputField 
+                        label="সদস্যের নাম" 
+                        value={editingMember ? editingMember.name : newMember.name} 
+                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, name: e.target.value}) : setNewMember({...newMember, name: e.target.value})} 
+                        placeholder="উদা: মোহাম্মদ সজীব আহমেদ" 
+                     />
+                     
+                     <InputField 
+                        label="পদবী" 
+                        value={editingMember ? editingMember.role : newMember.role} 
+                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, role: e.target.value}) : setNewMember({...newMember, role: e.target.value})} 
+                        placeholder="উদা: কোষাধ্যক্ষ" 
+                     />
+                     
+                     <InputField 
+                        label="ক্রম (Sort Order)" 
+                        type="number" 
+                        value={editingMember ? editingMember.sort_order : newMember.sort_order} 
+                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, sort_order: parseInt(e.target.value) || 0}) : setNewMember({...newMember, sort_order: parseInt(e.target.value) || 0})} 
+                        placeholder="0, 1, 2..." 
+                     />
+                     
+                     <button 
+                        onClick={editingMember ? updateCommitteeMember : addCommitteeMember} 
+                        className={`w-full text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:scale-[1.02] active:scale-95 ${editingMember ? 'bg-bento-accent shadow-green-500/20' : 'bg-bento-primary shadow-[rgba(192,57,43,0.2)]'}`}
+                     >
+                        {editingMember ? 'আপডেট করুন' : 'সংরক্ষণ করুন'}
+                     </button>
+                     
+                     {adminStats.success && <p className="text-green-500 text-[10px] font-black uppercase text-center animate-pulse">{adminStats.success}</p>}
                      {adminStats.error && <p className="text-red-500 text-[10px] font-black uppercase text-center">{adminStats.error}</p>}
                   </div>
                </div>
+
+               {/* List Column */}
                <div className="md:col-span-7 space-y-6">
-                  <div className="flex justify-between items-center">
-                     <h4 className="text-xs font-black uppercase tracking-widest text-bento-light">কমিটি সদস্যবৃন্দ ({committee.length})</h4>
-                     <button onClick={() => fetch('/api/committee').then(r => r.json()).then(setCommittee)} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition">রিফ্রেশ</button>
+                  <div className="flex justify-between items-center border-b border-gray-100 pb-4">
+                     <h4 className="text-xs font-black uppercase tracking-widest text-bento-light italic">কমিটি সদস্যবৃন্দ ({committee.length})</h4>
+                     <button onClick={() => fetchData()} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition flex items-center gap-2">রিফ্রেশ</button>
                   </div>
-                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                  
+                  <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                      {committee.map(m => (
-                        <div key={m.id} className="p-4 bg-gray-50 rounded-2xl border border-bento-border flex justify-between items-center group">
-                           <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-white rounded-xl overflow-hidden border border-bento-border">
-                                 <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" />
+                        <div key={m.id} className={`p-5 bg-white rounded-3xl border transition-all duration-300 flex justify-between items-center group shadow-sm hover:shadow-xl ${editingMember?.id === m.id ? 'border-bento-primary ring-2 ring-bento-primary/10' : 'border-gray-100'}`}>
+                           <div className="flex items-center gap-5">
+                              <div className="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform">
+                                 <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" alt={m.name} referrerPolicy="no-referrer" />
                               </div>
                               <div>
-                                 <p className="font-bold text-sm italic">{m.name}</p>
-                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-primary">{m.role}</p>
+                                 <p className="font-black text-base italic text-bento-dark">{m.name}</p>
+                                 <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-bento-primary bg-bento-primary/5 px-2 py-0.5 rounded-md">{m.role}</span>
+                                    <span className="text-[8px] font-black text-bento-light uppercase">Order: {m.sort_order}</span>
+                                 </div>
                               </div>
                            </div>
-                           <button onClick={() => deleteCommitteeMember(m.id)} className="p-3 bg-white text-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition hover:bg-red-50">
-                              <Trash2 size={16} />
-                           </button>
+                           <div className="flex items-center gap-2">
+                              <button 
+                                 onClick={() => { setEditingMember(m); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                 className="p-3 bg-gray-50 text-bento-light rounded-xl hover:bg-bento-primary hover:text-white transition shadow-sm"
+                                 title="Edit Member"
+                              >
+                                 <Settings size={18} />
+                              </button>
+                              <button 
+                                 onClick={() => deleteCommitteeMember(m.id)} 
+                                 className="p-3 bg-gray-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition shadow-sm"
+                                 title="Delete Member"
+                              >
+                                 <Trash2 size={18} />
+                              </button>
+                           </div>
                         </div>
                      ))}
+                     {committee.length === 0 && (
+                        <div className="py-32 text-center space-y-4 opacity-30">
+                           <Users size={64} className="mx-auto" />
+                           <p className="italic font-serif">কোনো সদস্য তথ্য পাওয়া যায়নি...</p>
+                        </div>
+                     )}
                   </div>
                </div>
             </div>

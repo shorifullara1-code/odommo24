@@ -2083,7 +2083,10 @@ const AdminDashboard = () => {
   };
 
   const createProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return;
+    if (!newProduct.name || !newProduct.price) {
+      showFeedback('error', 'পণ্যের নাম এবং মূল্য আবশ্যক');
+      return;
+    }
     try {
       const res = await fetch('/api/admin/products', {
         method: 'POST',
@@ -2094,9 +2097,12 @@ const AdminDashboard = () => {
         showFeedback('success', 'পণ্য সফলভাবে যোগ করা হয়েছে');
         setNewProduct({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
         fetchData();
+      } else {
+        const errData = await res.json();
+        showFeedback('error', errData.error || 'যোগ করা সম্ভব হয়নি');
       }
     } catch (err) {
-      showFeedback('error', 'যোগ করা সম্ভব হয়নি');
+      showFeedback('error', 'সার্ভারে সমস্যা হয়েছে');
     }
   };
 
@@ -2113,9 +2119,12 @@ const AdminDashboard = () => {
         setEditingProduct(null);
         setNewProduct({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
         fetchData();
+      } else {
+        const errData = await res.json();
+        showFeedback('error', errData.error || 'আপডেট করা সম্ভব হয়নি');
       }
     } catch (err) {
-      showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
+      showFeedback('error', 'সার্ভারে সমস্যা হয়েছে');
     }
   };
 
@@ -2126,9 +2135,11 @@ const AdminDashboard = () => {
       if (res.ok) {
         showFeedback('success', 'Product deleted');
         fetchData();
+      } else {
+        showFeedback('error', 'Delete failed');
       }
     } catch (err) {
-      showFeedback('error', 'Delete failed');
+      showFeedback('error', 'Server error during delete');
     }
   };
 

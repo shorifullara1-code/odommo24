@@ -499,7 +499,12 @@ app.post('/api/auth/login', async (req, res) => {
         stock_status: stock_status || 'available',
         created_at: new Date().toISOString()
       }]);
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01') {
+          return res.status(404).json({ error: 'Products table does not exist. Please run the setup SQL.' });
+        }
+        throw error;
+      }
       res.status(201).json({ message: 'Product created successfully' });
     } catch (err: any) {
       console.error('Error creating product:', err.message || err);
@@ -513,7 +518,12 @@ app.post('/api/auth/login', async (req, res) => {
       const { error } = await supabase.from('products')
         .update({ name, description, price: parseFloat(price) || 0, image_url, category, stock_status })
         .eq('id', req.params.id);
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01') {
+          return res.status(404).json({ error: 'Products table does not exist.' });
+        }
+        throw error;
+      }
       res.json({ message: 'Product updated successfully' });
     } catch (err: any) {
       console.error('Error updating product:', err.message || err);
@@ -524,7 +534,12 @@ app.post('/api/auth/login', async (req, res) => {
   app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
       const { error } = await supabase.from('products').delete().eq('id', req.params.id);
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01') {
+          return res.status(404).json({ error: 'Products table does not exist.' });
+        }
+        throw error;
+      }
       res.json({ message: 'Product deleted successfully' });
     } catch (err: any) {
       console.error('Error deleting product:', err.message || err);

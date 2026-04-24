@@ -2414,7 +2414,7 @@ const AdminDashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[55] md:hidden"
+            className="fixed inset-0 bg-black/60 z-[90] md:hidden backdrop-blur-sm"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -2422,10 +2422,10 @@ const AdminDashboard = () => {
 
       {/* Admin Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-[58] w-72 bg-white border-r border-bento-border shadow-2xl flex flex-col transition-transform duration-300 md:static md:translate-x-0
+        fixed inset-y-0 left-0 z-[100] w-72 bg-white border-r border-bento-border shadow-2xl flex flex-col transition-transform duration-500 ease-in-out md:static md:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-8 border-b border-bento-border text-center hidden md:block">
+        <div className="p-8 border-b border-bento-border text-center">
             <h1 className="text-2xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
             <p className="text-[9px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-50">Authorized Portal Only</p>
         </div>
@@ -2564,7 +2564,7 @@ const AdminDashboard = () => {
               <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar">
                  {users.filter(u => u.status === 'pending').map(u => (
                     <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:shadow-xl transition-all">
-                       <div className="flex items-center gap-6">
+                       <div className="flex flex-col md:flex-row items-center text-center md:text-left gap-6">
                           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border border-bento-border">
                              {u.profile_image ? <img src={u.profile_image} className="w-full h-full object-cover" /> : <UserIcon className="text-bento-light" />}
                           </div>
@@ -2587,7 +2587,7 @@ const AdminDashboard = () => {
 
         {activeTab === 'notices' && (
         <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 bento-card bg-white p-10 shadow-2xl space-y-8">
+          <div className="lg:col-span-5 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-8">
               <h3 className="text-xl font-black italic border-b pb-4">{t('admin_add_notice')}</h3>
               <div className="space-y-6">
                  <InputField label="টাইটেল" value={newNotice.title} onChange={(e:any)=>setNewNotice({...newNotice, title: e.target.value})} placeholder="নোটিশের শিরোনাম..." />
@@ -2604,16 +2604,18 @@ const AdminDashboard = () => {
                  <button onClick={createNotice} className="w-full bg-bento-accent text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-green-500/20 active:scale-95 transition">পাবলিশ নোটিশ</button>
               </div>
           </div>
-          <div className="lg:col-span-7 bento-card bg-white p-10 shadow-2xl space-y-6">
+          <div className="lg:col-span-7 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-6">
               <h3 className="text-xl font-black italic border-b pb-4">বর্তমান নোটিশসমূহ</h3>
               <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                  {notices.map(n => (
-                    <div key={n.id} className="p-6 bg-gray-50 rounded-[2rem] border border-bento-border flex justify-between items-start group">
+                    <div key={n.id} className="p-6 bg-gray-50 rounded-[2rem] border border-bento-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
                        <div className="space-y-2">
                           <p className="font-bold text-base italic leading-tight">{n.title}</p>
                           <p className="text-[9px] font-black uppercase tracking-widest opacity-40">{new Date(n.created_at).toLocaleDateString()}</p>
                        </div>
-                       <button onClick={() => deleteNotice(n.id)} className="p-3 bg-white text-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition shadow-sm"><Trash2 size={16} /></button>
+                       <div className="flex gap-2">
+                          <button onClick={() => deleteNotice(n.id)} className="p-3 bg-white text-red-500 rounded-xl sm:opacity-0 group-hover:opacity-100 transition shadow-sm border border-bento-border/50"><Trash2 size={16} /></button>
+                       </div>
                     </div>
                  ))}
                  {notices.length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো নোটিশ পাওয়া যায়নি...</p>}
@@ -2635,30 +2637,32 @@ const AdminDashboard = () => {
             </div>
             
             <div className="bento-card border border-bento-border bg-white overflow-hidden !p-0">
-               <table className="w-full text-left border-collapse">
-                  <thead className="bg-gray-50 border-b border-bento-border text-[10px] font-black uppercase tracking-widest text-bento-light">
-                    <tr>
-                      <th className="px-8 py-5">তারিখ</th>
-                      <th className="px-8 py-5">দাতার নাম</th>
-                      <th className="px-8 py-5">ধরন</th>
-                      <th className="px-8 py-5">মবলগ</th>
-                      <th className="px-8 py-5">যোগাযোগ</th>
-                      <th className="px-8 py-5">পদ্ধতি</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-bento-border">
-                    {donations.map(d => (
-                      <tr key={d.id} className="hover:bg-gray-50 transition">
-                        <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
-                        <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
-                        <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
-                        <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
-                        <td className="px-8 py-5 text-xs italic">{d.phone_email}</td>
-                        <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead className="bg-gray-50 border-b border-bento-border text-[10px] font-black uppercase tracking-widest text-bento-light">
+                      <tr>
+                        <th className="px-8 py-5">তারিখ</th>
+                        <th className="px-8 py-5">দাতার নাম</th>
+                        <th className="px-8 py-5">ধরন</th>
+                        <th className="px-8 py-5">মবলগ</th>
+                        <th className="px-8 py-5">যোগাযোগ</th>
+                        <th className="px-8 py-5">পদ্ধতি</th>
                       </tr>
-                    ))}
-                  </tbody>
-               </table>
+                    </thead>
+                    <tbody className="divide-y divide-bento-border">
+                      {donations.map(d => (
+                        <tr key={d.id} className="hover:bg-gray-50 transition">
+                          <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
+                          <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
+                          <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
+                          <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
+                          <td className="px-8 py-5 text-xs italic">{d.phone_email}</td>
+                          <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                 </table>
+               </div>
                {donations.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অনুদান পাওয়া যায়নি...</p>}
             </div>
           </div>
@@ -2675,9 +2679,9 @@ const AdminDashboard = () => {
                   </div>
                </div>
             </div>
-            <div className="lg:col-span-8 bento-card bg-white p-10 shadow-2xl space-y-6 min-h-[500px]">
+            <div className="lg:col-span-8 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-6 min-h-[500px]">
                <h3 className="text-xl font-black italic border-b pb-4">বর্তমান ইভেন্টসমূহ</h3>
-               <div className="grid sm:grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {events.map(e => (
                     <div key={e.id} className="p-6 bg-gray-50 rounded-3xl border border-bento-border group relative overflow-hidden">
                        <div className="absolute top-0 right-0 p-4 opacity-10"><Calendar size={40} /></div>
@@ -2685,7 +2689,7 @@ const AdminDashboard = () => {
                        <h4 className="font-bold text-lg italic text-bento-dark leading-tight">{e.title}</h4>
                     </div>
                   ))}
-                  {events.length === 0 && <p className="col-span-2 text-center py-20 text-bento-light italic font-serif">কোনো ইভেন্ট পরিকল্পনা করা নেই...</p>}
+                  {events.length === 0 && <p className="col-span-1 sm:col-span-2 text-center py-20 text-bento-light italic font-serif">কোনো ইভেন্ট পরিকল্পনা করা নেই...</p>}
                </div>
             </div>
           </div>

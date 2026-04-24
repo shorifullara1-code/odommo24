@@ -11,7 +11,7 @@ import {
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
-  AlertCircle, CheckCircle
+  AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -2394,7 +2394,11 @@ const AdminDashboard = () => {
       tableRows.push(orderData);
     });
 
-    (doc as any).autoTable(tableColumn, tableRows, { startY: 30 });
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30
+    });
     doc.text("Adomyo 24 - Order Report", 14, 20);
     doc.save(`orders_report_${new Date().toISOString().split('T')[0]}.pdf`);
   };
@@ -2438,17 +2442,22 @@ const AdminDashboard = () => {
 
       {/* Admin Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-[100] w-72 bg-white border-r border-bento-border shadow-2xl flex flex-col transition-transform duration-500 ease-in-out md:static md:translate-x-0
+        fixed inset-y-0 left-0 z-[100] w-72 bg-gradient-to-b from-[#0f172a] via-[#1e1b4b] to-[#0f172a] border-r border-white/5 shadow-2xl flex flex-col transition-transform duration-500 ease-in-out md:static md:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-8 border-b border-bento-border text-center">
-            <h1 className="text-2xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
-            <p className="text-[9px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-50">Authorized Portal Only</p>
+        <div className="p-8 border-b border-white/5 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-full bg-bento-primary/5 -translate-y-full group-hover:translate-y-0 transition-transform duration-700"></div>
+            <div className="flex items-center gap-3 mb-1 relative z-10">
+               <div className="w-8 h-8 bg-bento-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-bento-primary/30"><Shield size={16} /></div>
+               <h1 className="text-xl font-black italic text-white tracking-tight">অদম্য ২৪ <span className="text-bento-primary">Admin</span></h1>
+            </div>
+            <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 relative z-10">Pro Management • v2.0</p>
         </div>
-        <nav className="p-4 flex-grow space-y-2 overflow-y-auto">
+        <nav className="p-6 flex-grow space-y-1.5 overflow-y-auto custom-scrollbar">
             {[
+              { id: 'dashboard', label: 'এডমিন ড্যাশবোর্ড', icon: Activity },
               { id: 'members', label: t('nav_member_list'), icon: Users },
-              { id: 'pending', label: t('admin_pending_members'), icon: Shield },
+              { id: 'pending', label: t('admin_pending_members'), icon: ShieldAlert },
               { id: 'orders', label: 'অর্ডার ম্যানেজমেন্ট', icon: ShoppingCart },
               { id: 'shop', label: t('admin_manage_shop'), icon: ShoppingBag },
               { id: 'notices', label: t('admin_manage_notices'), icon: Bell },
@@ -2464,27 +2473,35 @@ const AdminDashboard = () => {
                   setActiveTab(item.id as any);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${activeTab === item.id ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-bento-light hover:bg-gray-50'}`}
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-mono text-[10px] uppercase tracking-wider transition-all duration-300 border ${activeTab === item.id ? 'bg-white/10 text-white border-white/10 shadow-xl shadow-black/20' : 'text-white/40 border-transparent hover:text-white hover:bg-white/5'}`}
               >
-                <item.icon size={18} />
+                <div className={`transition-colors duration-300 ${activeTab === item.id ? 'text-bento-primary' : 'text-current'}`}>
+                  <item.icon size={16} />
+                </div>
                 <span>{item.label}</span>
               </button>
             ))}
         </nav>
-        <div className="p-4 mt-auto border-t border-bento-border bg-white">
-          <Link to="/" className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-500 hover:bg-red-50 transition">
-             <Globe size={18} />
+        <div className="p-6 mt-auto border-t border-white/5">
+          <Link to="/" className="w-full flex items-center gap-3 px-5 py-4 rounded-xl font-mono text-[10px] uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition border border-transparent hover:border-red-500/30 group">
+             <Globe size={16} className="group-hover:rotate-12 transition-transform" />
              <span>ওয়েবসাইটে ফিরে যান</span>
           </Link>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-grow p-4 md:p-12 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto space-y-12">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl border border-bento-border gap-6">
-               <div>
-                  <h2 className="text-2xl sm:text-3xl font-black italic text-bento-dark">
+      <main className="flex-grow p-4 md:p-8 overflow-y-auto bg-[#f8f9fa]">
+        <div className="max-w-[1400px] mx-auto space-y-8">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-[2rem] border border-gray-200 shadow-sm relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-bento-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+               <div className="relative z-10">
+                  <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-400 mb-2">
+                     <span className="text-bento-primary">Dashboard</span>
+                     <span>/</span>
+                     <span className="text-gray-900">{activeTab}</span>
+                  </div>
+                  <h2 className="text-3xl font-black italic text-gray-900 tracking-tight flex items-center gap-4">
                     {activeTab === 'members' && t('nav_member_list')}
                     {activeTab === 'pending' && t('admin_pending_members')}
                     {activeTab === 'orders' && 'অর্ডার ম্যানেজমেন্ট'}
@@ -2496,14 +2513,43 @@ const AdminDashboard = () => {
                     {activeTab === 'settings' && t('admin_site_settings')}
                     {activeTab === 'live' && t('admin_manage_live')}
                   </h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-60">
-                    Control Center / Dashboard / {activeTab}
-                  </p>
                </div>
-               <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-bento-light border border-bento-border shadow-inner"><Bell size={20} /></div>
-                  <div className="w-12 h-12 rounded-2xl bg-bento-primary text-white flex items-center justify-center shadow-lg font-black italic">A24</div>
+               <div className="flex items-center gap-4 mt-6 md:mt-0 relative z-10">
+                  <div className="flex flex-col items-end mr-4 hidden sm:flex">
+                     <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Admin User</span>
+                     <span className="text-sm font-black italic text-gray-900">System Admin</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-2xl border border-gray-200">
+                     <div className="w-10 h-10 rounded-[0.8rem] bg-white flex items-center justify-center text-gray-400 shadow-sm border border-gray-200"><Bell size={18} /></div>
+                     <div className="w-10 h-10 rounded-[0.8rem] bg-bento-primary text-white flex items-center justify-center shadow-md font-black italic">A2</div>
+                  </div>
                </div>
+            </header>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+               {[
+                 { label: 'মোট সদস্য', value: users.filter(u=>u.status==='approved').length, icon: Users, color: 'blue' },
+                 { label: 'অপেক্ষমাণ', value: users.filter(u=>u.status==='pending').length, icon: Shield, color: 'orange' },
+                 { label: 'মোট অনুদান', value: `৳${donations.reduce((acc,d)=>acc+Number(d.amount), 0)}`, icon: DollarSign, color: 'green' },
+                 { label: 'সক্রিয় অর্ডার', value: orders.filter(o=>o.status==='pending').length, icon: ShoppingCart, color: 'red' }
+               ].map((stat, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    key={i} 
+                    className="bg-white p-6 rounded-[2rem] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-bento-primary/30 transition-colors"
+                  >
+                     <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-400 mb-1">{stat.label}</p>
+                        <h4 className="text-2xl font-black italic text-gray-900 mono">{stat.value}</h4>
+                     </div>
+                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-50 text-gray-400 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500 shadow-inner`}>
+                        <stat.icon size={20} />
+                     </div>
+                  </motion.div>
+               ))}
             </div>
 
             {/* Error/Success Feedback */}
@@ -2522,64 +2568,211 @@ const AdminDashboard = () => {
             </AnimatePresence>
             
             <AnimatePresence mode="wait">
-              {activeTab === 'members' && (
+              {activeTab === 'dashboard' && (
                 <motion.div 
-                  key="members" 
+                  key="dashboard-home" 
                   initial={{ opacity: 0, y: 20 }} 
                   animate={{ opacity: 1, y: 0 }} 
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="grid lg:grid-cols-12 gap-8"
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8"
                 >
-                   <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
-               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition duration-1000"><Users size={200} /></div>
-               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-bento-border pb-6">
-                 <h2 className="text-2xl font-black italic flex items-center gap-3"><Users className="text-bento-primary" /> অনুমোদিত সদস্য তালিকা</h2>
-                 <div className="relative w-full md:w-72">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-bento-light" size={16} />
-                    <input 
-                      type="text" 
-                      placeholder="Phone বা Name দিয়ে খুঁজুন..." 
-                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-bento-border rounded-xl focus:border-bento-primary outline-none transition text-sm italic"
-                      value={searchTerm}
-                      onChange={e => setSearchTerm(e.target.value)}
-                    />
-                 </div>
-               </div>
-               <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar relative z-10">
-                  {filteredUsers.filter(u => u.status === 'approved').map(u => (
-                     <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:border-bento-primary hover:shadow-xl transition-all duration-500">
-                        <div className="flex items-center gap-6">
-                           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-inner border border-bento-border">
-                              {u.profile_image ? (
-                                 <img src={u.profile_image} className="w-full h-full object-cover" />
-                              ) : (
-                                 <span className="font-serif text-3xl text-bento-primary">{u.name ? u.name[0] : '?'}</span>
-                              )}
-                           </div>
-                           <div>
-                              <p className="font-black text-xl italic text-bento-dark">{u.name}</p>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">ID: @{u.userId} | Phone: {u.phone}</p>
-                           </div>
+                  <div className="lg:col-span-8 space-y-8">
+                     <div className="bg-[#1a1a1a] rounded-[2.5rem] p-10 text-white relative overflow-hidden group shadow-2xl">
+                        <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition duration-1000">
+                           <Activity size={180} />
                         </div>
-                        <div className="flex items-center gap-3">
-                           <button onClick={() => setSelectedUser(u)} className="p-3 bg-white border-2 border-bento-border rounded-xl text-bento-light hover:text-bento-primary hover:border-bento-primary transition"><Info size={20} /></button>
-                           <button onClick={() => toggleRole(u.id, u.role)} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition active:scale-95 ${u.role === 'admin' ? 'bg-bento-primary text-white' : 'bg-white border-2 border-bento-border text-bento-light hover:border-bento-primary hover:text-bento-primary'}`}>{u.role}</button>
+                        <div className="relative z-10 space-y-6">
+                           <div>
+                              <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-gray-400">System Performance</span>
+                              <h2 className="text-4xl font-black italic mt-2">Welcome Back, Admin.</h2>
+                           </div>
+                           <p className="text-gray-400 text-sm italic max-w-lg leading-relaxed">
+                              সংগঠনের কার্যক্রম বর্তমানে স্থিতিশীল রয়েছে। আজ নতুন {users.filter(u=>u.status==='pending').length} জন সদস্য আবেদনের অপেক্ষায় আছেন এবং {orders.filter(o=>o.status==='pending').length} টি অর্ডার পেন্ডিং।
+                           </p>
+                           <div className="flex gap-4 pt-4">
+                              <button onClick={() => setActiveTab('pending')} className="bg-bento-primary text-white border border-white/10 px-8 py-3.5 rounded-2xl font-mono text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all active:scale-95">Review Requests</button>
+                              <button onClick={() => setActiveTab('orders')} className="bg-white/5 text-white border border-white/10 px-8 py-3.5 rounded-2xl font-mono text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95">Manage Sales</button>
+                           </div>
                         </div>
                      </div>
-                  ))}
-                  {filteredUsers.filter(u => u.status === 'approved').length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোন সদস্য পাওয়া যায়নি...</p>}
-               </div>
-           </div>
-           <div className="lg:col-span-4 space-y-8">
-              <div className="rounded-[24px] bg-[#2f3640] text-white p-12 shadow-2xl space-y-8 relative overflow-hidden text-center justify-center flex flex-col items-center">
-                 <div className="w-20 h-20 bg-[rgba(192,57,43,0.1)] rounded-full flex items-center justify-center text-bento-primary"><Shield size={40} /></div>
-                 <h3 className="text-2xl font-black italic">সদস্য তথ্য যাচাই</h3>
-                 <p className="text-xs text-[rgba(255,255,255,0.4)] leading-relaxed italic uppercase tracking-widest">ভেরিফিকেশন এর জন্য নিচের তালিকা দেখুন</p>
-              </div>
-           </div>
-        </motion.div>
-        )}
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm space-y-6">
+                           <div className="flex items-center justify-between">
+                              <h3 className="text-lg font-black italic flex items-center gap-2 italic uppercase tracking-tighter">
+                                 <Clock className="text-bento-primary" size={20} /> Recent Activity
+                              </h3>
+                              <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Live Feed</span>
+                           </div>
+                           <div className="space-y-6">
+                              {[
+                                { title: 'New Member Registered', time: '2m ago', desc: 'Samiul joined the community', icon: UserPlus },
+                                { title: 'Order Completed', time: '15m ago', desc: 'Order #8293 shipped', icon: CheckCircle },
+                                { title: 'Donation Received', time: '1h ago', desc: '৳৫০০ from Anonymous', icon: Heart }
+                              ].map((item, i) => (
+                                 <div key={i} className="flex gap-4 group">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-bento-primary/10 group-hover:text-bento-primary transition-colors">
+                                       <item.icon size={16} />
+                                    </div>
+                                    <div className="flex-grow border-b border-gray-50 pb-4">
+                                       <div className="flex justify-between items-start">
+                                          <p className="text-sm font-black italic">{item.title}</p>
+                                          <span className="text-[9px] font-mono text-gray-300 uppercase">{item.time}</span>
+                                       </div>
+                                       <p className="text-[10px] text-gray-400 font-mono mt-1">{item.desc}</p>
+                                    </div>
+                                 </div>
+                              ))}
+                           </div>
+                        </div>
+
+                        <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm flex flex-col justify-between">
+                           <div className="space-y-2">
+                              <h3 className="text-lg font-black italic uppercase tracking-tighter">Community Reach</h3>
+                              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-[0.2em] mb-4">Database Engagement</p>
+                           </div>
+                           <div className="flex-grow flex items-center justify-center py-6">
+                              <div className="relative w-32 h-32">
+                                 <svg className="w-full h-full -rotate-90">
+                                    <circle cx="64" cy="64" r="58" fill="transparent" stroke="#f3f4f6" strokeWidth="12" />
+                                    <circle cx="64" cy="64" r="58" fill="transparent" stroke="#ff0000" strokeWidth="12" strokeDasharray="364.4" strokeDashoffset="100" strokeLinecap="round" />
+                                 </svg>
+                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-2xl font-black italic">85%</span>
+                                    <span className="text-[8px] font-mono text-gray-400 uppercase tracking-[0.1em]">Target</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <p className="text-[10px] text-center text-gray-400 font-mono italic">সংগঠনের এই মাসের লক্ষ্যমাত্রার ৮৫% পূরণ হয়েছে।</p>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="lg:col-span-4 space-y-8">
+                     <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm">
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 decoration-bento-primary decoration-2 underline-offset-8 underline">System Status</h3>
+                        <div className="space-y-4">
+                           {[
+                             { label: 'Database', status: 'Optimal', active: true },
+                             { label: 'Auth Service', status: 'Online', active: true },
+                             { label: 'Cloud Store', status: 'Active', active: true },
+                             { label: 'Live Stream', status: 'Idle', active: false }
+                           ].map((s, i) => (
+                              <div key={i} className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                 <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">{s.label}</span>
+                                 <div className="flex items-center gap-2">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${s.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
+                                    <span className="text-[10px] font-black italic">{s.status}</span>
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="bg-gradient-to-br from-bento-primary to-red-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-bento-primary/20">
+                        <h3 className="text-xl font-black italic mb-4">সংরক্ষণ করুন</h3>
+                        <p className="text-[10px] text-white/60 leading-relaxed font-mono italic uppercase mb-6 tracking-widest">সকল ডাটা নিয়মিত ডাউনলোড করে রাখুন যাতে নিরাপত্তার কোনো ঘাটতি না হয়।</p>
+                        <button className="w-full bg-white text-black py-4 rounded-2xl font-mono text-[10px] uppercase tracking-widest font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all">Download Full Backup</button>
+                     </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'members' && (
+                <motion.div 
+                   key="members" 
+                   initial={{ opacity: 0, y: 20 }} 
+                   animate={{ opacity: 1, y: 0 }} 
+                   exit={{ opacity: 0, y: -20 }}
+                   transition={{ duration: 0.3 }}
+                   className="space-y-8"
+                >
+                   <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
+                      <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-gray-50/50">
+                         <div>
+                            <h2 className="text-xl font-black italic text-gray-900 flex items-center gap-3">
+                               <Users className="text-bento-primary" size={24} /> 
+                               অনুমোদিত সদস্য তালিকা
+                            </h2>
+                            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Verified Community Database</p>
+                         </div>
+                         <div className="relative w-full md:w-96">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input 
+                               type="text" 
+                               placeholder="Phone বা Name দিয়ে খুঁজুন..." 
+                               className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:border-bento-primary focus:ring-4 focus:ring-bento-primary/5 outline-none transition text-sm font-medium"
+                               value={searchTerm}
+                               onChange={e => setSearchTerm(e.target.value)}
+                            />
+                         </div>
+                      </div>
+
+                      <div className="flex-grow">
+                         <div className="grid grid-cols-12 px-10 py-5 bg-white border-b border-gray-100 hidden md:grid">
+                            <div className="col-span-5 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Member Identity</div>
+                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
+                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Role Status</div>
+                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
+                         </div>
+                         <div className="divide-y divide-gray-50">
+                            {filteredUsers.filter(u => u.status === 'approved').map(u => (
+                               <motion.div 
+                                  layout
+                                  key={u.id} 
+                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/80 transition-all group"
+                               >
+                                  <div className="col-span-12 md:col-span-5 flex items-center gap-5">
+                                     <div className="relative">
+                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover:border-bento-primary/30 transition-colors">
+                                           {u.profile_image ? (
+                                              <img src={u.profile_image} className="w-full h-full object-cover" />
+                                           ) : (
+                                              <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
+                                           )}
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                                     </div>
+                                     <div>
+                                        <p className="font-black text-lg italic text-gray-900 group-hover:text-bento-primary transition-colors">{u.name}</p>
+                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                     </div>
+                                  </div>
+                                  
+                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+                                     <div className="inline-flex flex-col items-center">
+                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+                                        <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
+                                     </div>
+                                  </div>
+
+                                  <div className="col-span-6 md:col-span-2 flex justify-center">
+                                     <button 
+                                       onClick={() => toggleRole(u.id, u.role)}
+                                       className={`px-4 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] border transition-all active:scale-95 ${u.role === 'admin' ? 'bg-bento-primary/10 text-bento-primary border-bento-primary/20 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-gray-300'}`}
+                                     >
+                                        {u.role}
+                                     </button>
+                                  </div>
+
+                                  <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
+                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-bento-primary hover:border-bento-primary hover:shadow-lg hover:shadow-bento-primary/5 transition-all"><Info size={16} /></button>
+                                     <button className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Trash2 size={16} /></button>
+                                  </div>
+                               </motion.div>
+                            ))}
+                            {filteredUsers.filter(u => u.status === 'approved').length === 0 && (
+                               <div className="flex flex-col items-center justify-center py-32 text-center">
+                                  <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-6 border border-dashed border-gray-300"><Users size={32} /></div>
+                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching records found in database</p>
+                               </div>
+                            )}
+                         </div>
+                      </div>
+                   </div>
+                </motion.div>
+              )}
 
         {activeTab === 'pending' && (
         <motion.div 
@@ -2588,30 +2781,72 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, y: 0 }} 
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="grid lg:grid-cols-12 gap-8"
+          className="space-y-8"
         >
-          <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl border border-gray-100">
-              <h2 className="text-2xl font-black italic flex items-center gap-3 mb-10 border-b pb-6"><Shield className="text-bento-accent" /> {t('admin_pending_members')}</h2>
-              <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar">
-                 {users.filter(u => u.status === 'pending').map(u => (
-                    <div key={u.id} className="bg-gray-50 p-6 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 border border-bento-border hover:bg-white hover:shadow-xl transition-all">
-                       <div className="flex flex-col md:flex-row items-center text-center md:text-left gap-6">
-                          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border border-bento-border">
-                             {u.profile_image ? <img src={u.profile_image} className="w-full h-full object-cover" /> : <UserIcon className="text-bento-light" />}
-                          </div>
-                          <div>
-                             <p className="font-black text-xl italic text-bento-dark">{u.name}</p>
-                             <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">Phone: {u.phone} | NID: {u.nid_number}</p>
-                          </div>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <button onClick={() => setSelectedUser(u)} className="p-3 bg-white border-2 border-bento-border rounded-xl text-bento-light hover:text-bento-primary transition"><Info size={20} /></button>
-                          <button onClick={() => approveUser(u.id)} className="px-8 py-3 bg-bento-accent text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-500/20 active:scale-95 transition">{t('admin_approve')}</button>
-                       </div>
-                    </div>
-                 ))}
-                 {users.filter(u => u.status === 'pending').length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো অপেক্ষমান সদস্য নেই...</p>}
-              </div>
+          <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
+             <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-orange-50/30">
+                <div>
+                   <h2 className="text-xl font-black italic text-gray-900 flex items-center gap-3">
+                      <ShieldAlert className="text-orange-500" size={24} /> 
+                      {t('admin_pending_members')}
+                   </h2>
+                   <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Review & Verification Queue</p>
+                </div>
+                <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-[0.2em]">
+                   {users.filter(u => u.status === 'pending').length} Actions Required
+                </div>
+             </div>
+
+             <div className="divide-y divide-gray-50">
+                {users.filter(u => u.status === 'pending').map(u => (
+                   <motion.div 
+                      layout
+                      key={u.id} 
+                      className="px-10 py-8 flex flex-col md:flex-row justify-between items-center bg-white hover:bg-orange-50/10 transition-all border-l-4 border-transparent hover:border-orange-500"
+                   >
+                      <div className="flex items-center gap-6">
+                         <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner">
+                            {u.profile_image ? (
+                               <img src={u.profile_image} className="w-full h-full object-cover" />
+                            ) : (
+                               <UserIcon className="text-gray-300" size={32} />
+                            )}
+                         </div>
+                         <div>
+                            <p className="font-black text-xl italic text-gray-900 mb-1">{u.name}</p>
+                            <div className="flex flex-wrap gap-2">
+                               <span className="text-[9px] font-mono text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded bg-gray-50">Phone: {u.phone}</span>
+                               <span className="text-[9px] font-mono text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded bg-gray-50">NID: {u.nid_number || 'PENDING'}</span>
+                            </div>
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 mt-6 md:mt-0">
+                         <button 
+                           onClick={() => setSelectedUser(u)} 
+                           className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-bento-primary hover:border-bento-primary transition-all font-mono text-[10px] uppercase tracking-widest"
+                         >
+                            <Info size={14} /> View Details
+                         </button>
+                         <button 
+                           onClick={() => approveUser(u.id)} 
+                           className="flex items-center gap-2 px-8 py-3 bg-orange-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                         >
+                            <CheckCircle size={14} /> {t('admin_approve')}
+                         </button>
+                         <button className="p-3 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 transition-all">
+                            <X size={18} />
+                         </button>
+                      </div>
+                   </motion.div>
+                ))}
+                {users.filter(u => u.status === 'pending').length === 0 && (
+                   <div className="flex flex-col items-center justify-center py-32 text-center">
+                      <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-6 border border-dashed border-gray-300"><ShieldCheck size={32} /></div>
+                      <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">Great! No pending requests at the moment</p>
+                   </div>
+                )}
+             </div>
           </div>
         </motion.div>
         )}

@@ -11,7 +11,7 @@ import {
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
-  AlertCircle, CheckCircle, Menu, X
+  AlertCircle, CheckCircle
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -1824,8 +1824,8 @@ const Navbar = () => {
   const isHome = location.pathname === "/";
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
-      <div className="container mx-auto px-4 sm:px-8">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8">
         <div className="flex items-center justify-between">
            <Link to="/" className="flex items-center gap-4 group">
               <motion.div 
@@ -1916,7 +1916,7 @@ const Navbar = () => {
                     <button onClick={() => setIsOpen(false)} className="p-2 text-white/50 hover:text-white"><X size={24} /></button>
                   </div>
                   
-                    <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
+                    <div className="p-8 space-y-4 overflow-y-auto flex-grow">
                      {[
                        { to: "/", label: t('nav_home'), icon: LayoutGrid },
                        { to: "/live", label: t('nav_live'), icon: Tv },
@@ -2400,17 +2400,28 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-bento-bg">
-      {/* Mobile Sidebar Toggle */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-bento-border sticky top-0 z-[60]">
-        <h1 className="text-xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
+    <div className="flex flex-col md:flex-row min-h-screen bg-bento-bg relative">
+      {/* Mobile Header Toggle */}
+      <div className="md:hidden flex items-center justify-between p-5 bg-white border-b border-bento-border sticky top-0 z-[60] shadow-sm">
+        <div className="flex items-center gap-3">
+           <div className="w-10 h-10 bg-bento-primary rounded-xl flex items-center justify-center text-white shadow-lg"><Settings size={20} /></div>
+           <h1 className="text-xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
+        </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-3 bg-gray-50 rounded-xl text-bento-dark hover:bg-gray-100 transition"
+          className="p-3 bg-gray-50 rounded-xl text-bento-dark hover:bg-gray-100 transition border border-bento-border"
         >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
+
+      {/* Floating Mobile Toggle (Bottom Right) */}
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="md:hidden fixed bottom-8 right-8 z-[110] w-16 h-16 bg-bento-primary text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white active:scale-90 transition-transform"
+      >
+        {isSidebarOpen ? <X size={28} /> : <Menu size={28} />}
+      </button>
 
       {/* Mobile Overlay */}
       <AnimatePresence>

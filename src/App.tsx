@@ -513,10 +513,8 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-7xl lg:text-[7rem] font-serif italic text-white font-black leading-none drop-shadow-2xl">
-                        {t('hero_title').split(' ').map((word, i) => (
-                           <span key={i} className={i === 1 ? 'text-bento-primary' : ''}>{word} </span>
-                        ))}
+                     <h1 className="text-4xl sm:text-7xl lg:text-[7rem] font-serif italic text-bento-primary font-black leading-none drop-shadow-2xl">
+                        {t('hero_title')}
                      </h1>
                      <p className="text-lg md:text-xl text-white/80 font-serif font-bold italic max-w-xl mx-auto lg:mx-0 leading-relaxed pt-4">
                         {t('hero_subtitle')}
@@ -736,7 +734,7 @@ const HomeOverview = () => {
           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
                 <span className="text-[10px] font-black uppercase text-bento-primary tracking-[0.4em] drop-shadow-sm">{t('core_mission')}</span>
-                <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, <span className="bg-gradient-to-r from-bento-primary to-bento-accent bg-clip-text text-transparent">অদম্য ২৪</span> জানে।</h2>
+                <h2 className="text-3xl md:text-7xl font-serif text-bento-dark italic leading-tight">মানবতার টানে, <span className="text-bento-primary">অদম্য ২৪</span> জানে।</h2>
                 <p className="text-base md:text-2xl text-bento-light font-serif italic leading-relaxed">
                    {t('mission_desc')}
                 </p>
@@ -1102,7 +1100,7 @@ const Register = () => {
       <div className="max-w-2xl mx-auto py-32 px-6 text-center space-y-8">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-32 h-32 bg-green-50 rounded-[2.5rem] flex items-center justify-center mx-auto ring-8 ring-green-100 mb-6 text-bento-accent"><Heart size={64} fill="currentColor" className="animate-pulse" /></motion.div>
         <div className="space-y-4">
-           <h2 className="text-5xl font-serif text-bento-dark italic">অদম্য ২৪-এ আপনাকে স্বাগতম!</h2>
+           <h2 className="text-5xl font-serif text-bento-dark italic"><span className="text-bento-primary">অদম্য ২৪</span>-এ আপনাকে স্বাগতম!</h2>
            <p className="text-bento-light italic text-xl leading-relaxed max-w-md mx-auto">পরবর্তী অদম্য সদস্য হিসেবে আপনার নাম অন্তর্ভুক্ত হলো। শীঘ্রই লগইন পেজে নিয়ে যাওয়া হচ্ছে...</p>
         </div>
         <div className="flex justify-center gap-3">
@@ -3098,7 +3096,7 @@ const ShopPage = () => {
          >
            {t('shop_title')}
          </motion.span>
-         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic">{t('shop_title')}</h1>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic"><span className="text-bento-primary">অদম্য</span> শপ</h1>
          <p className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto leading-relaxed">
            {t('shop_subtitle')}
          </p>
@@ -3974,7 +3972,7 @@ export default function App() {
             transition={{ delay: 0.5 }}
             className="text-4xl font-black text-white tracking-[0.5em] uppercase italic"
           >
-            অদম্য <span className="text-bento-primary">২৪</span>
+            <span className="text-bento-primary">অদম্য ২৪</span>
           </motion.h1>
           <div className="flex items-center justify-center gap-2">
             <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce"></span>

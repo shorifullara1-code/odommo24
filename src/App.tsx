@@ -366,16 +366,6 @@ const NoticeBoardPage = () => {
   );
 };
 
-const DeviceMonitor = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative mx-auto border-gray-800 bg-gray-800 border-[8px] rounded-t-[2.5rem] h-[172px] max-w-[301px] md:h-[294px] md:max-w-[512px] shadow-2xl">
-    <div className="rounded-[2rem] overflow-hidden h-[156px] md:h-[278px] bg-white">
-      {children}
-    </div>
-    <div className="relative mx-auto bg-gray-900 rounded-b-xl h-[24px] max-w-[301px] md:h-[42px] md:max-w-[512px]"></div>
-    <div className="relative mx-auto bg-gray-800 rounded-b-xl h-[6px] max-w-[197px] md:h-[12px] md:max-w-[334px]"></div>
-  </div>
-);
-
 const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
@@ -503,9 +493,9 @@ const HomeOverview = () => {
             </motion.div>
          </AnimatePresence>
 
-         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-               <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="space-y-10 text-center lg:text-left flex-1">
+         <div className="container mx-auto px-4 sm:px-6 relative z-10 text-center">
+            <div className="flex flex-col items-center justify-center">
+               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-10 max-w-4xl">
                   <div className="space-y-6">
                      <motion.span 
                         initial={{ opacity: 0, y: 10 }}
@@ -514,15 +504,15 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-7xl lg:text-[7rem] font-serif italic text-bento-primary font-black leading-none drop-shadow-2xl">
+                     <h1 className="text-4xl sm:text-7xl lg:text-[8rem] font-serif italic text-bento-primary font-black leading-none drop-shadow-2xl">
                         {t('hero_title')}
                      </h1>
-                     <p className="text-lg md:text-xl text-white/80 font-serif font-bold italic max-w-xl mx-auto lg:mx-0 leading-relaxed pt-4">
+                     <p className="text-xl md:text-2xl text-white/90 font-serif font-bold italic max-w-2xl mx-auto leading-relaxed pt-4">
                         {t('hero_subtitle')}
                      </p>
                   </div>
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-4">
-                     <Link to="/register" className="vibrant-gradient text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
+                  <div className="flex flex-wrap justify-center gap-6 pt-4">
+                     <Link to="/register" className="vibrant-gradient text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
                         <span className="relative z-10">{t('member_apply')}</span>
                         <motion.div 
                           initial={{ x: '-100%' }}
@@ -531,39 +521,8 @@ const HomeOverview = () => {
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                         />
                      </Link>
-                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark transition-all">{t('donate_now')}</Link>
+                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark transition-all">{t('donate_now')}</Link>
                   </div>
-               </motion.div>
-
-               <motion.div 
-                 initial={{ opacity: 0, x: 50, rotateY: -20 }}
-                 animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                 transition={{ delay: 0.2, duration: 0.8 }}
-                 className="flex-1 w-full max-w-2xl hidden md:block perspective-1000"
-               >
-                  <DeviceMonitor>
-                     <div className="w-full h-full relative overflow-hidden">
-                        <AnimatePresence mode="wait">
-                           <motion.img 
-                             key={currentImgIdx}
-                             initial={{ scale: 1.2, opacity: 0 }}
-                             animate={{ scale: 1, opacity: 1 }}
-                             exit={{ scale: 1.1, opacity: 0 }}
-                             transition={{ duration: 1.5 }}
-                             src={heroImages[currentImgIdx]} 
-                             className="w-full h-full object-cover"
-                             referrerPolicy="no-referrer"
-                           />
-                        </AnimatePresence>
-                        <div className="absolute inset-0 bg-gradient-to-t from-bento-dark/40 to-transparent flex items-end p-6">
-                           <div className="flex gap-2">
-                              {heroImages.map((_, i) => (
-                                 <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === currentImgIdx ? 'w-8 bg-bento-primary' : 'w-2 bg-white/30'}`} />
-                              ))}
-                           </div>
-                        </div>
-                     </div>
-                  </DeviceMonitor>
                </motion.div>
             </div>
          </div>

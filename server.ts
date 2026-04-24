@@ -21,6 +21,11 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  console.log(`[Server] ${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
+});
+
 // --- API Routes ---
 
 // Health Check
@@ -226,7 +231,12 @@ app.post('/api/auth/login', async (req, res) => {
         .select('id, name, profile_image, member_id_number')
         .eq('status', 'approved')
         .order('name', { ascending: true });
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
       res.json(members);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -252,7 +262,12 @@ app.post('/api/auth/login', async (req, res) => {
         .select('*')
         .eq('is_active', 1)
         .order('created_at', { ascending: false });
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
       res.json(notices);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -293,9 +308,18 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Events CRUD
   app.get('/api/events', async (req, res) => {
-    const { data: events, error } = await supabase.from('events').select('*').order('date', { ascending: false });
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(events);
+    try {
+      const { data: events, error } = await supabase.from('events').select('*').order('date', { ascending: false });
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(events);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post('/api/events', authenticateToken, isAdmin, async (req, res) => {
@@ -307,9 +331,18 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Donations CRUD
   app.get('/api/donations', async (req, res) => {
-    const { data: donations, error } = await supabase.from('donations').select('*').order('date', { ascending: false });
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(donations);
+    try {
+      const { data: donations, error } = await supabase.from('donations').select('*').order('date', { ascending: false });
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(donations);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post('/api/donations', async (req, res) => {
@@ -330,13 +363,22 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Site Settings
   app.get('/api/site-settings', async (req, res) => {
-    const { data: settings, error } = await supabase.from('site_settings').select('*');
-    if (error) return res.status(500).json({ error: error.message });
-    const settingsMap = settings.reduce((acc: any, s: any) => {
-      acc[s.key] = s.value;
-      return acc;
-    }, {});
-    res.json(settingsMap);
+    try {
+      const { data: settings, error } = await supabase.from('site_settings').select('*');
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json({});
+        }
+        throw error;
+      }
+      const settingsMap = settings.reduce((acc: any, s: any) => {
+        acc[s.key] = s.value;
+        return acc;
+      }, {});
+      res.json(settingsMap);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post('/api/admin/site-settings', authenticateToken, isAdmin, async (req, res) => {
@@ -357,7 +399,12 @@ app.post('/api/auth/login', async (req, res) => {
         .select('*')
         .eq('is_active', 1)
         .order('sort_order', { ascending: true });
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
       res.json(members);
     } catch (err: any) {
       console.error('Error fetching committee:', err);
@@ -420,6 +467,76 @@ app.post('/api/auth/login', async (req, res) => {
 
   // --- Vite Middleware ---
 
+  // --- Products CRUD ---
+  app.get('/api/products', async (req, res) => {
+    try {
+      const { data: products, error } = await supabase.from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          console.warn('Products table does not exist in Supabase.');
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(products || []);
+    } catch (err: any) {
+      console.error('Error fetching products:', err.message || err);
+      res.status(500).json({ error: err.message || 'Database error' });
+    }
+  });
+
+  app.post('/api/admin/products', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { name, description, price, image_url, category, stock_status } = req.body;
+      const { error } = await supabase.from('products').insert([{ 
+        name, 
+        description, 
+        price: parseFloat(price) || 0, 
+        image_url, 
+        category, 
+        stock_status: stock_status || 'available',
+        created_at: new Date().toISOString()
+      }]);
+      if (error) throw error;
+      res.status(201).json({ message: 'Product created successfully' });
+    } catch (err: any) {
+      console.error('Error creating product:', err.message || err);
+      res.status(500).json({ error: err.message || 'Failed to create product' });
+    }
+  });
+
+  app.put('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { name, description, price, image_url, category, stock_status } = req.body;
+      const { error } = await supabase.from('products')
+        .update({ name, description, price: parseFloat(price) || 0, image_url, category, stock_status })
+        .eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Product updated successfully' });
+    } catch (err: any) {
+      console.error('Error updating product:', err.message || err);
+      res.status(500).json({ error: err.message || 'Failed to update product' });
+    }
+  });
+
+  app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Product deleted successfully' });
+    } catch (err: any) {
+      console.error('Error deleting product:', err.message || err);
+      res.status(500).json({ error: err.message || 'Failed to delete product' });
+    }
+  });
+
+  // --- API Catch-all ---
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
+  });
+
   // --- Vite / Static Middleware ---
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const { createServer: createViteServer } = await import('vite');
@@ -428,6 +545,12 @@ app.post('/api/auth/login', async (req, res) => {
       appType: 'spa',
     });
     app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
   }
 
 // Export the app for Vercel

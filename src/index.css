@@ -63,6 +63,10 @@
   @apply bg-black/40 backdrop-blur-md md:backdrop-blur-2xl border border-white/10 shadow-2xl transition-all duration-700 hover:bg-black/50;
 }
 
+.perspective-1000 {
+  perspective: 1000px;
+}
+
 .performance-safe {
   backface-visibility: hidden;
   transform: translateZ(0);

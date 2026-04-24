@@ -10,7 +10,7 @@ import {
   Mars, Venus, Youtube, Play, Facebook, Tv,
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
-  Instagram, Rss, Music
+  Instagram, Rss, Music, ShoppingBag
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -144,7 +144,7 @@ const CommitteePage = () => {
                         >
                            <div className="relative aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
                               {c.image_url ? (
-                                <img src={c.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" alt={c.name} referrerPolicy="no-referrer" />
+                                <img src={c.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt={c.name} referrerPolicy="no-referrer" />
                               ) : (
                                 <div className="flex flex-col items-center justify-center space-y-4">
                                    <div className={`p-8 rounded-full ${isFemale(c.name) ? 'bg-pink-50 text-pink-400' : 'bg-blue-50 text-blue-400'}`}>
@@ -183,7 +183,7 @@ const CommitteePage = () => {
                            >
                               <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
                                  {c.image_url ? (
-                                   <img src={c.image_url} className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" />
+                                   <img src={c.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" />
                                  ) : (
                                    <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
                                       {isFemale(c.name) ? <Venus size={40} /> : <Mars size={40} />}
@@ -277,7 +277,7 @@ const MemberListPage = () => {
             transition={{ delay: idx * 0.05 }}
             className="bg-white border-2 border-bento-border rounded-[2.5rem] p-8 text-center space-y-6 hover:border-bento-primary hover:shadow-2xl transition-all duration-500 group"
           >
-            <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500">
+            <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border group-hover:scale-105 transition-all duration-500">
                {m.profile_image ? (
                  <img src={m.profile_image} className="w-full h-full object-cover" alt={m.name} />
                ) : (
@@ -364,6 +364,16 @@ const NoticeBoardPage = () => {
     </div>
   );
 };
+
+const DeviceMonitor = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative mx-auto border-gray-800 bg-gray-800 border-[8px] rounded-t-[2.5rem] h-[172px] max-w-[301px] md:h-[294px] md:max-w-[512px] shadow-2xl">
+    <div className="rounded-[2rem] overflow-hidden h-[156px] md:h-[278px] bg-white">
+      {children}
+    </div>
+    <div className="relative mx-auto bg-gray-900 rounded-b-xl h-[24px] max-w-[301px] md:h-[42px] md:max-w-[512px]"></div>
+    <div className="relative mx-auto bg-gray-800 rounded-b-xl h-[6px] max-w-[197px] md:h-[12px] md:max-w-[334px]"></div>
+  </div>
+);
 
 const HomeOverview = () => {
   const [events, setEvents] = useState<any[]>([]);
@@ -493,8 +503,8 @@ const HomeOverview = () => {
          </AnimatePresence>
 
          <div className="container mx-auto px-4 sm:px-6 relative z-10">
-            <div className="flex items-center justify-center text-center">
-               <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+               <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="space-y-10 text-center lg:text-left flex-1">
                   <div className="space-y-6">
                      <motion.span 
                         initial={{ opacity: 0, y: 10 }}
@@ -503,15 +513,17 @@ const HomeOverview = () => {
                      >
                         Since 2024 • Ashulia, Savar
                      </motion.span>
-                     <h1 className="text-4xl sm:text-8xl lg:text-[9rem] font-serif italic text-bento-primary font-black leading-none drop-shadow-2xl px-4">
-                        {t('hero_title')}
+                     <h1 className="text-4xl sm:text-7xl lg:text-[7rem] font-serif italic text-white font-black leading-none drop-shadow-2xl">
+                        {t('hero_title').split(' ').map((word, i) => (
+                           <span key={i} className={i === 1 ? 'text-bento-primary' : ''}>{word} </span>
+                        ))}
                      </h1>
-                     <p className="text-lg md:text-2xl text-white font-serif font-bold italic max-w-2xl mx-auto leading-relaxed pt-4">
+                     <p className="text-lg md:text-xl text-white/80 font-serif font-bold italic max-w-xl mx-auto lg:mx-0 leading-relaxed pt-4">
                         {t('hero_subtitle')}
                      </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-6 pt-4">
-                     <Link to="/register" className="vibrant-gradient text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-4">
+                     <Link to="/register" className="vibrant-gradient text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(192,57,43,0.3)] hover:scale-105 hover:shadow-[0_20px_60px_rgba(192,57,43,0.5)] transition-all relative overflow-hidden group">
                         <span className="relative z-10">{t('member_apply')}</span>
                         <motion.div 
                           initial={{ x: '-100%' }}
@@ -520,10 +532,40 @@ const HomeOverview = () => {
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                         />
                      </Link>
-                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark hover:shadow-[0_20px_40px_rgba(255,255,255,0.1)] transition-all">{t('donate_now')}</Link>
+                     <Link to="/donations" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white hover:text-bento-dark transition-all">{t('donate_now')}</Link>
                   </div>
                </motion.div>
 
+               <motion.div 
+                 initial={{ opacity: 0, x: 50, rotateY: -20 }}
+                 animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                 transition={{ delay: 0.2, duration: 0.8 }}
+                 className="flex-1 w-full max-w-2xl hidden md:block perspective-1000"
+               >
+                  <DeviceMonitor>
+                     <div className="w-full h-full relative overflow-hidden">
+                        <AnimatePresence mode="wait">
+                           <motion.img 
+                             key={currentImgIdx}
+                             initial={{ scale: 1.2, opacity: 0 }}
+                             animate={{ scale: 1, opacity: 1 }}
+                             exit={{ scale: 1.1, opacity: 0 }}
+                             transition={{ duration: 1.5 }}
+                             src={heroImages[currentImgIdx]} 
+                             className="w-full h-full object-cover"
+                             referrerPolicy="no-referrer"
+                           />
+                        </AnimatePresence>
+                        <div className="absolute inset-0 bg-gradient-to-t from-bento-dark/40 to-transparent flex items-end p-6">
+                           <div className="flex gap-2">
+                              {heroImages.map((_, i) => (
+                                 <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === currentImgIdx ? 'w-8 bg-bento-primary' : 'w-2 bg-white/30'}`} />
+                              ))}
+                           </div>
+                        </div>
+                     </div>
+                  </DeviceMonitor>
+               </motion.div>
             </div>
          </div>
       </section>
@@ -1804,6 +1846,7 @@ const Navbar = () => {
            <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
             <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
             <NavLink to="/live" icon={Tv}>{t('nav_live')}</NavLink>
+            <NavLink to="/shop" icon={ShoppingBag}>{t('nav_shop')}</NavLink>
             <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
             <NavLink to="/members" icon={ClipboardList}>{t('nav_member_list')}</NavLink>
             <NavLink to="/notices" icon={Bell}>{t('nav_notices')}</NavLink>
@@ -1874,29 +1917,30 @@ const Navbar = () => {
                     <button onClick={() => setIsOpen(false)} className="p-2 text-white/50 hover:text-white"><X size={24} /></button>
                   </div>
                   
-                  <div className="p-8 pt-12 space-y-4 overflow-y-auto flex-grow flex flex-col justify-start">
-                    {[
-                      { to: "/", label: t('nav_home'), icon: LayoutGrid },
-                      { to: "/live", label: t('nav_live'), icon: Tv },
-                      { to: "/committee", label: t('nav_committee'), icon: Users },
-                      { to: "/members", label: t('nav_member_list'), icon: ClipboardList },
-                      { to: "/notices", label: t('nav_notices'), icon: Bell },
-                      { to: "/events", label: t('nav_events'), icon: Calendar },
-                      { to: "/donations", label: t('nav_donations'), icon: Heart },
-                      { to: "/rules", label: t('nav_rules'), icon: Info },
-                      { to: "/contact", label: t('nav_contact'), icon: Phone }
-                    ].map((item) => (
-                      <Link 
-                        key={item.label}
-                        to={item.to} 
-                        className={`flex items-center gap-4 p-6 rounded-3xl transition-all border border-transparent ${location.pathname === item.to ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-white/60 hover:bg-white/5 hover:border-white/5'}`} 
-                        onClick={()=>setIsOpen(false)}
-                      >
-                        <item.icon size={24} />
-                        <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
-                      </Link>
-                    ))}
-                  </div>
+                    <div className="p-8 space-y-4 overflow-y-auto flex-grow flex flex-col justify-center">
+                     {[
+                       { to: "/", label: t('nav_home'), icon: LayoutGrid },
+                       { to: "/live", label: t('nav_live'), icon: Tv },
+                       { to: "/shop", label: t('nav_shop'), icon: ShoppingBag },
+                       { to: "/committee", label: t('nav_committee'), icon: Users },
+                       { to: "/members", label: t('nav_member_list'), icon: ClipboardList },
+                       { to: "/notices", label: t('nav_notices'), icon: Bell },
+                       { to: "/events", label: t('nav_events'), icon: Calendar },
+                       { to: "/donations", label: t('nav_donations'), icon: Heart },
+                       { to: "/rules", label: t('nav_rules'), icon: Info },
+                       { to: "/contact", label: t('nav_contact'), icon: Phone }
+                     ].map((item) => (
+                       <Link 
+                         key={item.label}
+                         to={item.to} 
+                         className={`flex items-center gap-4 p-6 rounded-3xl transition-all border border-transparent ${location.pathname === item.to ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-white/60 hover:bg-white/5 hover:border-white/5'}`} 
+                         onClick={()=>setIsOpen(false)}
+                       >
+                         <item.icon size={24} />
+                         <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
+                       </Link>
+                     ))}
+                   </div>
 
                   <div className="p-8 border-t border-white/10 bg-black/20">
                     {user ? (
@@ -1932,33 +1976,22 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [notices, setNotices] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEvenTitle, setNewEventTitle] = useState('');
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop'>('members');
   const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
+  const [editingCommitteeMember, setEditingCommitteeMember] = useState<any>(null);
   const [donations, setDonations] = useState<any[]>([]);
   const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
-  const [editingMember, setEditingMember] = useState<any>(null);
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
-  
-  /* 
-    DORKARI SQL CODE:
-    
-    CREATE TABLE committee_members (
-      id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-      name TEXT NOT NULL,
-      role TEXT NOT NULL,
-      image_url TEXT,
-      sort_order INT DEFAULT 0,
-      is_active INT DEFAULT 1,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-  */
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
@@ -1969,6 +2002,7 @@ const AdminDashboard = () => {
     fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
     fetch('/api/admin/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
+    fetch('/api/products').then(r => r.ok ? r.json() : []).then(data => setProducts(Array.isArray(data) ? data : []));
   };
 
   useEffect(() => {
@@ -1993,6 +2027,12 @@ const AdminDashboard = () => {
     } catch (err) {
       showFeedback('error', 'Approval failed');
     }
+  };
+
+  const toggleRole = async (uId: number, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'member' : 'admin';
+    await fetch(`/api/admin/users/${uId}/role`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) });
+    fetchData();
   };
 
   const createNotice = async () => {
@@ -2042,36 +2082,64 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCommitteeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (editingMember) {
-        setEditingMember({ ...editingMember, image_url: reader.result as string });
-      } else {
-        setNewMember({ ...newMember, image_url: reader.result as string });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const updateCommitteeMember = async () => {
-    if (!editingMember || !editingMember.name || !editingMember.role) return;
+  const createProduct = async () => {
+    if (!newProduct.name || !newProduct.price) return;
     try {
-      const res = await fetch(`/api/admin/committee/${editingMember.id}`, {
-        method: 'PUT',
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingMember)
+        body: JSON.stringify(newProduct)
       });
       if (res.ok) {
-        showFeedback('success', 'তথ্য সফলভাবে আপডেট হয়েছে');
-        setEditingMember(null);
+        showFeedback('success', 'পণ্য সফলভাবে যোগ করা হয়েছে');
+        setNewProduct({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'যোগ করা সম্ভব হয়নি');
+    }
+  };
+
+  const updateProduct = async () => {
+    if (!editingProduct) return;
+    try {
+      const res = await fetch(`/api/admin/products/${editingProduct.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
+      });
+      if (res.ok) {
+        showFeedback('success', 'পণ্য সফলভাবে আপডেট করা হয়েছে');
+        setEditingProduct(null);
+        setNewProduct({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
         fetchData();
       }
     } catch (err) {
       showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
     }
+  };
+
+  const deleteProduct = async (id: number) => {
+    if (!confirm('Are you sure?')) return;
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'Product deleted');
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Delete failed');
+    }
+  };
+
+  const handleCommitteeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewMember({ ...newMember, image_url: reader.result as string });
+    };
+    reader.readAsDataURL(file);
   };
 
   const downloadDonationsPDF = () => {
@@ -2186,12 +2254,6 @@ const AdminDashboard = () => {
     fetch('/api/events').then(r => r.json()).then(setEvents);
   };
 
-  const toggleRole = async (uId: number, currentRole: string) => {
-    const newRole = currentRole === 'admin' ? 'member' : 'admin';
-    await fetch(`/api/admin/users/${uId}/role`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) });
-    fetch('/api/admin/users').then(r => r.ok ? r.json() : []).then(data => setUsers(Array.isArray(data) ? data : []));
-  };
-
   const addCommitteeMember = async () => {
     if (!newMember.name || !newMember.role) return;
     try {
@@ -2208,6 +2270,35 @@ const AdminDashboard = () => {
     } catch (err) {
       showFeedback('error', 'যোগ করা সম্ভব হয়নি');
     }
+  };
+
+  const updateCommitteeMember = async () => {
+    if (!editingCommitteeMember || !newMember.name || !newMember.role) return;
+    try {
+      const res = await fetch(`/api/admin/committee/${editingCommitteeMember.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMember)
+      });
+      if (res.ok) {
+        showFeedback('success', 'সদস্য সফলভাবে আপডেট করা হয়েছে');
+        setEditingCommitteeMember(null);
+        setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
+    }
+  };
+
+  const handleCommitteeEdit = (member: any) => {
+    setEditingCommitteeMember(member);
+    setNewMember({
+      name: member.name,
+      role: member.role,
+      image_url: member.image_url || '',
+      sort_order: member.sort_order || 0
+    });
   };
   const formatLiveLink = (url: string) => {
     if (!url) return '';
@@ -2256,17 +2347,25 @@ const AdminDashboard = () => {
               <p className="text-xs font-black uppercase tracking-[0.4em] text-bento-light">Control Center / Adomyo 24</p>
            </div>
            
-           <div className="flex flex-wrap gap-4 border-b border-bento-border pb-4 w-full">
-             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings', 'live'].map((tab) => (
+            <div className="flex flex-wrap gap-4 border-b border-bento-border pb-4 w-full">
+             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings', 'live', 'shop'].map((tab) => (
                 <button 
                   key={tab} 
                   onClick={() => setActiveTab(tab as any)}
                   className={`px-4 md:px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
                 >
-                  {tab === 'members' ? t('nav_member_list') : tab === 'pending' ? t('admin_pending_members') : tab === 'notices' ? t('admin_manage_notices') : tab === 'donations' ? t('admin_manage_donations') : tab === 'events' ? t('admin_manage_events') : tab === 'committee' ? t('admin_manage_committee') : tab === 'settings' ? t('admin_site_settings') : t('admin_manage_live')}
+                  {tab === 'members' ? t('nav_member_list') : 
+                   tab === 'pending' ? t('admin_pending_members') : 
+                   tab === 'notices' ? t('admin_manage_notices') : 
+                   tab === 'donations' ? t('admin_manage_donations') : 
+                   tab === 'events' ? t('admin_manage_events') : 
+                   tab === 'committee' ? t('admin_manage_committee') : 
+                   tab === 'settings' ? t('admin_site_settings') : 
+                   tab === 'live' ? t('admin_manage_live') : 
+                   t('admin_manage_shop')}
                 </button>
              ))}
-           </div>
+            </div>
         </div>
 
         {activeTab === 'members' && (
@@ -2456,34 +2555,21 @@ const AdminDashboard = () => {
         )}
 
       {activeTab === 'committee' && (
-         <div className="bento-card border-none bg-white p-8 md:p-12 shadow-2xl space-y-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-bento-border pb-8">
-               <h3 className="text-3xl font-serif italic text-bento-dark">কেন্দ্রীয় আহ্বায়ক কমিটি ম্যানেজমেন্ট</h3>
-               {editingMember && (
-                  <button 
-                    onClick={() => { setEditingMember(null); setNewMember({ name: '', role: '', image_url: '', sort_order: 0 }); }}
-                    className="px-6 py-2 bg-gray-100 text-bento-light rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition"
-                  >
-                    নতুন মেম্বার যোগ করুন
-                  </button>
-               )}
-            </div>
-
+         <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-12">
+            <h3 className="text-3xl font-serif italic text-bento-dark border-b pb-6">কেন্দ্রীয় আহ্বায়ক কমিটি ম্যানেজমেন্ট</h3>
             <div className="grid md:grid-cols-12 gap-12">
-               {/* Form Column */}
-               <div className="md:col-span-5 space-y-8 bg-gray-50/50 p-8 rounded-[2.5rem] border border-gray-100">
+               <div className="md:col-span-5 space-y-8">
                   <h4 className="text-xs font-black uppercase tracking-widest text-bento-primary">
-                    {editingMember ? 'সদস্যের তথ্য সংশোধন করুন' : 'নতুন মেম্বার যোগ করুন'}
+                     {editingCommitteeMember ? 'সদস্যর তথ্য পরিবর্তন করুন' : 'নতুন মেম্বার যোগ করুন'}
                   </h4>
-                  
                   <div className="space-y-6">
-                     <div className="flex flex-col items-center gap-4">
+                     <div className="flex justify-center gap-6 items-end">
                         <div 
                            onClick={() => committeeFileInputRef.current?.click()}
-                           className="w-32 h-32 bg-white rounded-3xl border-2 border-dashed border-bento-border flex flex-col items-center justify-center cursor-pointer hover:border-bento-primary transition overflow-hidden group shadow-inner"
+                           className="w-32 h-32 bg-gray-50 rounded-3xl border-2 border-dashed border-bento-border flex flex-col items-center justify-center cursor-pointer hover:border-bento-primary transition overflow-hidden group shadow-inner"
                         >
-                           {(editingMember ? editingMember.image_url : newMember.image_url) ? (
-                              <img src={editingMember ? editingMember.image_url : newMember.image_url} className="w-full h-full object-cover" />
+                           {newMember.image_url ? (
+                              <img src={newMember.image_url} className="w-full h-full object-contain" />
                            ) : (
                               <>
                                  <Camera size={24} className="text-bento-light group-hover:text-bento-primary transition" />
@@ -2491,97 +2577,72 @@ const AdminDashboard = () => {
                               </>
                            )}
                         </div>
-                        <p className="text-[8px] font-black uppercase tracking-[0.2em] text-bento-light/60">ক্লিক করে ছবি আপলোড করুন</p>
+                        <div className="flex-grow space-y-4">
+                           <InputField 
+                              label="ছবি URL (বিকল্প)" 
+                              value={newMember.image_url} 
+                              onChange={(e:any)=>setNewMember({...newMember, image_url: e.target.value})} 
+                              placeholder="https://example.com/image.jpg" 
+                           />
+                        </div>
                         <input type="file" ref={committeeFileInputRef} className="hidden" accept="image/*" onChange={handleCommitteeImageUpload} />
                      </div>
-
-                     <InputField 
-                        label="সদস্যের ছবি (URL)" 
-                        value={editingMember ? editingMember.image_url : newMember.image_url} 
-                        onChange={(e:any) => editingMember ? setEditingMember({...editingMember, image_url: e.target.value}) : setNewMember({...newMember, image_url: e.target.value})} 
-                        placeholder="বা ছবির লিঙ্ক সরাসরি এখানে দিন..." 
-                     />
+                     <InputField label="সদস্যের নাম" value={newMember.name} onChange={(e:any)=>setNewMember({...newMember, name: e.target.value})} placeholder="উদা: মোহাম্মদ সজীব আহমেদ" />
+                     <InputField label="পদবী" value={newMember.role} onChange={(e:any)=>setNewMember({...newMember, role: e.target.value})} placeholder="উদা: কোষাধ্যক্ষ" />
+                     <InputField label="ক্রম (Sort Order)" type="number" value={newMember.sort_order} onChange={(e:any)=>setNewMember({...newMember, sort_order: parseInt(e.target.value) || 0})} placeholder="0, 1, 2..." />
                      
-                     <InputField 
-                        label="সদস্যের নাম" 
-                        value={editingMember ? editingMember.name : newMember.name} 
-                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, name: e.target.value}) : setNewMember({...newMember, name: e.target.value})} 
-                        placeholder="উদা: মোহাম্মদ সজীব আহমেদ" 
-                     />
+                     <div className="flex gap-4">
+                        <button 
+                           onClick={editingCommitteeMember ? updateCommitteeMember : addCommitteeMember} 
+                           className={`flex-grow ${editingCommitteeMember ? 'bg-bento-accent' : 'bg-bento-primary'} text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:scale-[1.02] active:scale-95`}
+                        >
+                           {editingCommitteeMember ? 'আপডেট করুন' : 'সংরক্ষণ করুন'}
+                        </button>
+                        {editingCommitteeMember && (
+                           <button 
+                              onClick={() => {
+                                 setEditingCommitteeMember(null);
+                                 setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
+                              }}
+                              className="px-6 bg-gray-100 text-bento-light py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition"
+                           >
+                              বাতিল
+                           </button>
+                        )}
+                     </div>
                      
-                     <InputField 
-                        label="পদবী" 
-                        value={editingMember ? editingMember.role : newMember.role} 
-                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, role: e.target.value}) : setNewMember({...newMember, role: e.target.value})} 
-                        placeholder="উদা: কোষাধ্যক্ষ" 
-                     />
-                     
-                     <InputField 
-                        label="ক্রম (Sort Order)" 
-                        type="number" 
-                        value={editingMember ? editingMember.sort_order : newMember.sort_order} 
-                        onChange={(e:any)=> editingMember ? setEditingMember({...editingMember, sort_order: parseInt(e.target.value) || 0}) : setNewMember({...newMember, sort_order: parseInt(e.target.value) || 0})} 
-                        placeholder="0, 1, 2..." 
-                     />
-                     
-                     <button 
-                        onClick={editingMember ? updateCommitteeMember : addCommitteeMember} 
-                        className={`w-full text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:scale-[1.02] active:scale-95 ${editingMember ? 'bg-bento-accent shadow-green-500/20' : 'bg-bento-primary shadow-[rgba(192,57,43,0.2)]'}`}
-                     >
-                        {editingMember ? 'আপডেট করুন' : 'সংরক্ষণ করুন'}
-                     </button>
-                     
-                     {adminStats.success && <p className="text-green-500 text-[10px] font-black uppercase text-center animate-pulse">{adminStats.success}</p>}
+                     {adminStats.success && <p className="text-green-500 text-[10px] font-black uppercase text-center">{adminStats.success}</p>}
                      {adminStats.error && <p className="text-red-500 text-[10px] font-black uppercase text-center">{adminStats.error}</p>}
                   </div>
                </div>
-
-               {/* List Column */}
                <div className="md:col-span-7 space-y-6">
-                  <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                     <h4 className="text-xs font-black uppercase tracking-widest text-bento-light italic">কমিটি সদস্যবৃন্দ ({committee.length})</h4>
-                     <button onClick={() => fetchData()} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition flex items-center gap-2">রিফ্রেশ</button>
+                  <div className="flex justify-between items-center">
+                     <h4 className="text-xs font-black uppercase tracking-widest text-bento-light">কমিটি সদস্যবৃন্দ ({committee.length})</h4>
+                     <button onClick={() => fetch('/api/committee').then(r => r.json()).then(setCommittee)} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition">রিফ্রেশ</button>
                   </div>
-                  
-                  <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                      {committee.map(m => (
-                        <div key={m.id} className={`p-5 bg-white rounded-3xl border transition-all duration-300 flex justify-between items-center group shadow-sm hover:shadow-xl ${editingMember?.id === m.id ? 'border-bento-primary ring-2 ring-bento-primary/10' : 'border-gray-100'}`}>
-                           <div className="flex items-center gap-5">
-                              <div className="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform">
-                                 <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" alt={m.name} referrerPolicy="no-referrer" />
+                        <div key={m.id} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex justify-between items-center group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
+                           <div className="flex items-center gap-4">
+                              <div className="w-16 h-16 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-sm">
+                                 <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" />
                               </div>
                               <div>
-                                 <p className="font-black text-base italic text-bento-dark">{m.name}</p>
-                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-bento-primary bg-bento-primary/5 px-2 py-0.5 rounded-md">{m.role}</span>
-                                    <span className="text-[8px] font-black text-bento-light uppercase">Order: {m.sort_order}</span>
-                                 </div>
+                                 <p className="font-bold text-sm italic">{m.name}</p>
+                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-primary">{m.role}</p>
+                                 <p className="text-[8px] text-gray-400 font-mono">Order: {m.sort_order}</p>
                               </div>
                            </div>
-                           <div className="flex items-center gap-2">
-                              <button 
-                                 onClick={() => { setEditingMember(m); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                 className="p-3 bg-gray-50 text-bento-light rounded-xl hover:bg-bento-primary hover:text-white transition shadow-sm"
-                                 title="Edit Member"
-                              >
+                           <div className="flex gap-2">
+                              <button onClick={() => handleCommitteeEdit(m)} className="p-4 bg-white text-bento-primary rounded-2xl opacity-0 group-hover:opacity-100 transition hover:bg-bento-primary hover:text-white shadow-sm border border-bento-border/50">
                                  <Settings size={18} />
                               </button>
-                              <button 
-                                 onClick={() => deleteCommitteeMember(m.id)} 
-                                 className="p-3 bg-gray-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition shadow-sm"
-                                 title="Delete Member"
-                              >
+                              <button onClick={() => deleteCommitteeMember(m.id)} className="p-4 bg-white text-red-500 rounded-2xl opacity-0 group-hover:opacity-100 transition hover:bg-red-50 shadow-sm border border-bento-border/50">
                                  <Trash2 size={18} />
                               </button>
                            </div>
                         </div>
                      ))}
-                     {committee.length === 0 && (
-                        <div className="py-32 text-center space-y-4 opacity-30">
-                           <Users size={64} className="mx-auto" />
-                           <p className="italic font-serif">কোনো সদস্য তথ্য পাওয়া যায়নি...</p>
-                        </div>
-                     )}
                   </div>
                </div>
             </div>
@@ -2762,6 +2823,119 @@ const AdminDashboard = () => {
              </div>
           </div>
         )}
+
+        {activeTab === 'shop' && (
+          <div className="grid lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-12 xl:col-span-5 bento-card bg-white p-10 shadow-2xl space-y-8">
+               <div className="flex items-center gap-4 border-b pb-6">
+                  <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center shadow-lg"><ShoppingBag size={24} /></div>
+                  <h3 className="text-2xl font-black italic">{editingProduct ? 'পণ্য এডিট করুন' : t('admin_manage_shop')}</h3>
+               </div>
+               <div className="space-y-6">
+                  <InputField label={t('product_name')} value={newProduct.name} onChange={(e:any)=>setNewProduct({...newProduct, name: e.target.value})} placeholder="উদা: সংগঠনের টি-শার্ট" />
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-bento-light">{t('product_desc')}</label>
+                     <textarea 
+                       value={newProduct.description} 
+                       onChange={(e:any)=>setNewProduct({...newProduct, description: e.target.value})} 
+                       className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:border-bento-primary h-24 outline-none transition text-sm italic"
+                       placeholder="পণ্যের বিস্তারিত তথ্য..."
+                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <InputField label={t('product_price')} type="number" value={newProduct.price} onChange={(e:any)=>setNewProduct({...newProduct, price: e.target.value})} placeholder="৫০০" />
+                     <InputField label={t('product_category')} value={newProduct.category} onChange={(e:any)=>setNewProduct({...newProduct, category: e.target.value})} placeholder="Merchandise" />
+                  </div>
+                  <InputField label={t('product_image')} value={newProduct.image_url} onChange={(e:any)=>setNewProduct({...newProduct, image_url: e.target.value})} placeholder="https://..." />
+                  
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-bento-light">{t('product_stock')}</label>
+                     <div className="flex gap-4">
+                        {['available', 'out_of_stock'].map(status => (
+                           <button 
+                             key={status}
+                             onClick={() => setNewProduct({...newProduct, stock_status: status})}
+                             className={`flex-grow py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition border-2 ${newProduct.stock_status === status ? 'bg-bento-primary text-white border-bento-primary shadow-lg' : 'bg-gray-50 text-bento-light border-bento-border hover:border-bento-primary'}`}
+                           >
+                              {status === 'available' ? t('available') : t('out_of_stock')}
+                           </button>
+                        ))}
+                     </div>
+                  </div>
+                  
+                  <button 
+                    onClick={editingProduct ? updateProduct : createProduct} 
+                    className={`w-full text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-xl transition-all ${editingProduct ? 'bg-bento-primary shadow-bento-primary/20' : 'bg-bento-accent shadow-green-500/20'} hover:scale-[1.02] active:scale-95`}
+                  >
+                     {editingProduct ? 'আপডেট করুন' : t('add_product')}
+                  </button>
+                  {editingProduct && (
+                    <button 
+                      onClick={() => {
+                        setEditingProduct(null);
+                        setNewProduct({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
+                      }} 
+                      className="w-full bg-gray-100 text-bento-light py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition"
+                    >
+                       বাতিল করুন
+                    </button>
+                  )}
+               </div>
+            </div>
+
+            <div className="lg:col-span-12 xl:col-span-7 bento-card bg-white p-10 shadow-2xl space-y-8 min-h-[600px]">
+               <h3 className="text-xl font-black italic border-b pb-4">পণ্য তালিকা ({products.length})</h3>
+               <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                  {products.map(p => (
+                     <div key={p.id} className="p-6 bg-gray-50 rounded-[2.5rem] border border-bento-border flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all duration-500">
+                        <div className="flex items-center gap-6">
+                           <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                              <img src={p.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                           </div>
+                           <div className="space-y-1">
+                              <p className="font-bold text-lg italic text-bento-dark leading-tight">{p.name}</p>
+                              <div className="flex items-center gap-3">
+                                 <span className="text-[9px] font-black uppercase tracking-widest text-bento-primary">৳{p.price}</span>
+                                 <span className="text-[9px] font-black uppercase tracking-widest text-bento-light opacity-40">|</span>
+                                 <span className={`text-[9px] font-black uppercase tracking-widest ${p.stock_status === 'available' ? 'text-bento-accent' : 'text-red-500'}`}>
+                                    {p.stock_status === 'available' ? t('available') : t('out_of_stock')}
+                                 </span>
+                              </div>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <button 
+                             onClick={() => {
+                               setEditingProduct(p);
+                               setNewProduct({
+                                 name: p.name,
+                                 description: p.description,
+                                 price: p.price.toString(),
+                                 image_url: p.image_url,
+                                 category: p.category,
+                                 stock_status: p.stock_status
+                               });
+                             }} 
+                             className="p-4 bg-white text-bento-primary rounded-2xl opacity-0 group-hover:opacity-100 transition-all hover:bg-bento-primary hover:text-white shadow-sm"
+                           >
+                              <Settings size={18} />
+                           </button>
+                           <button onClick={() => deleteProduct(p.id)} className="p-4 bg-white text-red-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm">
+                              <Trash2 size={18} />
+                           </button>
+                        </div>
+                     </div>
+                  ))}
+                  {products.length === 0 && (
+                     <div className="py-32 text-center space-y-6 opacity-30">
+                        <ShoppingBag size={48} className="mx-auto" />
+                        <p className="text-xl font-serif italic">কোনো পণ্য তালিকাভুক্ত নেই</p>
+                     </div>
+                  )}
+               </div>
+            </div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
     </div>
@@ -2874,6 +3048,125 @@ const EventsPage = () => {
           </motion.div>
         ))}
       </div>
+    </div>
+  );
+};
+
+const ShopPage = () => {
+  const { t, lang } = useLanguage();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(async r => {
+        if (!r.ok) {
+          const errorData = await r.json().catch(() => ({}));
+          throw new Error(errorData.error || `Server responded with ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Frontend Error fetching products:', err.message);
+        setProducts([]);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16 min-h-screen">
+      <div className="text-center space-y-6">
+         <motion.span 
+           initial={{ opacity: 0 }} 
+           animate={{ opacity: 1 }}
+           className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]"
+         >
+           {t('shop_title')}
+         </motion.span>
+         <h1 className="text-4xl md:text-8xl font-serif text-bento-dark italic">{t('shop_title')}</h1>
+         <p className="text-lg md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto leading-relaxed">
+           {t('shop_subtitle')}
+         </p>
+         <div className="w-48 h-2 bg-bento-primary mx-auto rounded-full"></div>
+      </div>
+
+      {loading ? (
+        <div className="py-32 text-center">
+           <div className="w-16 h-16 border-4 border-bento-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+           <p className="mt-8 text-bento-light italic font-serif">একটু অপেক্ষা করুন...</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 pb-20">
+           {products.map((p, i) => (
+              <motion.div 
+                key={p.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative flex flex-col bg-white rounded-[2.5rem] border border-bento-border overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+              >
+                <div className="aspect-square bg-gray-50 overflow-hidden relative">
+                   <img 
+                     src={p.image_url || "https://picsum.photos/seed/product/400/400"} 
+                     alt={p.name} 
+                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                     referrerPolicy="no-referrer"
+                   />
+                   <div className="absolute top-6 left-6 flex flex-col gap-2">
+                     <span className="bg-bento-dark/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                        {p.category}
+                     </span>
+                     {p.stock_status === 'out_of_stock' ? (
+                        <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                           {t('out_of_stock')}
+                        </span>
+                     ) : (
+                        <span className="bg-bento-accent text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                           {t('available')}
+                        </span>
+                     )}
+                   </div>
+                </div>
+                
+                <div className="p-8 flex-grow flex flex-col justify-between">
+                   <div className="space-y-3">
+                      <h3 className="text-xl font-bold italic text-bento-dark leading-tight group-hover:text-bento-primary transition-colors">
+                        {p.name}
+                      </h3>
+                      <p className="text-xs text-bento-light italic line-clamp-2 leading-relaxed">
+                        {p.description}
+                      </p>
+                   </div>
+                   
+                   <div className="pt-8 flex items-center justify-between">
+                      <div className="space-y-0.5">
+                         <p className="text-[8px] font-black uppercase tracking-widest text-bento-light">{t('product_price')}</p>
+                         <p className="text-2xl font-black text-bento-primary">৳{p.price}</p>
+                      </div>
+                      <Link 
+                        to="/contact" 
+                        className={`p-4 rounded-2xl shadow-lg transition-all active:scale-95 ${p.stock_status === 'out_of_stock' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-bento-dark text-white hover:bg-bento-primary hover:shadow-[0_15px_30px_rgba(192,57,43,0.3)]'}`}
+                      >
+                         <CreditCard size={20} />
+                      </Link>
+                   </div>
+                </div>
+              </motion.div>
+           ))}
+           {products.length === 0 && (
+              <div className="col-span-full py-32 text-center space-y-10 border-2 border-dashed border-bento-border rounded-[3rem] bg-gray-50/50">
+                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto shadow-xl text-bento-light opacity-50"><Briefcase size={40} /></div>
+                <p className="text-2xl font-serif italic text-bento-light">আপাতত কোনো পণ্য তালিকাভুক্ত নেই...</p>
+                 <Link to="/" className="inline-block px-12 py-5 bg-bento-dark text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition">হোম পেইজে ফিরে যান</Link>
+              </div>
+           )}
+        </div>
+      )}
     </div>
   );
 };
@@ -3728,6 +4021,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<HomeOverview />} />
                 <Route path="/live" element={<LiveStreamPage />} />
+                <Route path="/shop" element={<ShopPage />} />
                 <Route path="/committee" element={<CommitteePage />} />
                 <Route path="/members" element={<PublicMembersPage />} />
                 <Route path="/notices" element={<NoticeBoardPage />} />
@@ -3812,6 +4106,10 @@ export default function App() {
                         <Link to="/live" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
                            {t('nav_live')}
+                        </Link>
+                        <Link to="/shop" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />
+                           {t('nav_shop')}
                         </Link>
                         <Link to="/committee" className="text-white/60 hover:text-bento-primary transition-all font-medium text-sm flex items-center gap-2 group">
                            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -ml-4 group-hover:ml-0" />

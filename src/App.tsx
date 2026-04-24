@@ -1824,9 +1824,9 @@ const Navbar = () => {
   const isHome = location.pathname === "/";
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${scrolled ? 'py-4' : 'py-8'}`}>
-      <div className="container mx-auto px-2 sm:px-6">
-        <div className={`flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 rounded-[2rem] sm:rounded-[2.5rem] transition-all duration-500 border border-white/10 ${scrolled || !isHome ? 'bg-bento-dark/80 backdrop-blur-3xl shadow-2xl shadow-black/40 ring-1 ring-white/5' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
+      <div className="container mx-auto px-4 sm:px-8">
+        <div className="flex items-center justify-between">
            <Link to="/" className="flex items-center gap-4 group">
               <motion.div 
                 whileHover={{ rotate: 12, scale: 1.1 }}
@@ -2010,6 +2010,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Scroll to top when tab changes
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm) return users;
@@ -2504,10 +2509,18 @@ const AdminDashboard = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-        {activeTab === 'members' && (
-        <div className="grid lg:grid-cols-12 gap-8">
-           <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
+            
+            <AnimatePresence mode="wait">
+              {activeTab === 'members' && (
+                <motion.div 
+                  key="members" 
+                  initial={{ opacity: 0, y: 20 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid lg:grid-cols-12 gap-8"
+                >
+                   <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl relative overflow-hidden group border border-gray-100">
                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition duration-1000"><Users size={200} /></div>
                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-bento-border pb-6">
                  <h2 className="text-2xl font-black italic flex items-center gap-3"><Users className="text-bento-primary" /> অনুমোদিত সদস্য তালিকা</h2>
@@ -2554,11 +2567,18 @@ const AdminDashboard = () => {
                  <p className="text-xs text-[rgba(255,255,255,0.4)] leading-relaxed italic uppercase tracking-widest">ভেরিফিকেশন এর জন্য নিচের তালিকা দেখুন</p>
               </div>
            </div>
-        </div>
+        </motion.div>
         )}
 
         {activeTab === 'pending' && (
-        <div className="grid lg:grid-cols-12 gap-8">
+        <motion.div 
+          key="pending" 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="grid lg:grid-cols-12 gap-8"
+        >
           <div className="lg:col-span-8 rounded-[24px] bg-white p-6 md:p-12 shadow-2xl border border-gray-100">
               <h2 className="text-2xl font-black italic flex items-center gap-3 mb-10 border-b pb-6"><Shield className="text-bento-accent" /> {t('admin_pending_members')}</h2>
               <div className="max-h-[600px] overflow-y-auto space-y-6 pr-4 custom-scrollbar">
@@ -2582,11 +2602,18 @@ const AdminDashboard = () => {
                  {users.filter(u => u.status === 'pending').length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো অপেক্ষমান সদস্য নেই...</p>}
               </div>
           </div>
-        </div>
+        </motion.div>
         )}
 
         {activeTab === 'notices' && (
-        <div className="grid lg:grid-cols-12 gap-8">
+        <motion.div 
+          key="notices" 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="grid lg:grid-cols-12 gap-8"
+        >
           <div className="lg:col-span-5 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-8">
               <h3 className="text-xl font-black italic border-b pb-4">{t('admin_add_notice')}</h3>
               <div className="space-y-6">
@@ -2621,11 +2648,18 @@ const AdminDashboard = () => {
                  {notices.length === 0 && <p className="text-center py-20 text-bento-light italic">কোনো নোটিশ পাওয়া যায়নি...</p>}
               </div>
           </div>
-        </div>
+        </motion.div>
         )}
 
         {activeTab === 'donations' && (
-          <div className="space-y-10">
+          <motion.div 
+            key="donations" 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-10"
+          >
             <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
                <div className="space-y-1">
                   <h3 className="text-2xl font-black italic">অনুদান রিপোর্ট</h3>
@@ -2665,11 +2699,18 @@ const AdminDashboard = () => {
                </div>
                {donations.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অনুদান পাওয়া যায়নি...</p>}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'events' && (
-          <div className="grid lg:grid-cols-12 gap-10">
+          <motion.div 
+            key="events" 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="grid lg:grid-cols-12 gap-10"
+          >
             <div className="lg:col-span-4 space-y-8">
                <div className="bento-card bg-white p-10 shadow-2xl space-y-8">
                   <h3 className="text-xl font-black italic border-b pb-4">নতুন ইভেন্ট যোগ করুন</h3>
@@ -2692,11 +2733,18 @@ const AdminDashboard = () => {
                   {events.length === 0 && <p className="col-span-1 sm:col-span-2 text-center py-20 text-bento-light italic font-serif">কোনো ইভেন্ট পরিকল্পনা করা নেই...</p>}
                </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
       {activeTab === 'committee' && (
-         <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-12">
+         <motion.div 
+            key="committee" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="bento-card border-none bg-white p-12 shadow-2xl space-y-12"
+         >
             <h3 className="text-3xl font-serif italic text-bento-dark border-b pb-6">কেন্দ্রীয় আহ্বায়ক কমিটি ম্যানেজমেন্ট</h3>
             <div className="grid md:grid-cols-12 gap-12">
                <div className="md:col-span-5 space-y-8">
@@ -2787,11 +2835,18 @@ const AdminDashboard = () => {
                   </div>
                </div>
             </div>
-         </div>
+         </motion.div>
       )}
 
       {activeTab === 'settings' && (
-         <div className="grid lg:grid-cols-2 gap-10">
+         <motion.div 
+            key="settings" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="grid lg:grid-cols-2 gap-10"
+         >
             {/* Logo Settings */}
             <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-8 relative">
                <h3 className="text-2xl font-black italic flex items-center gap-3 border-b-2 border-bento-border pb-4">
@@ -2849,7 +2904,7 @@ const AdminDashboard = () => {
             </div>
             
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-         </div>
+         </motion.div>
       )}
 
       <AnimatePresence>
@@ -2912,8 +2967,16 @@ const AdminDashboard = () => {
             </motion.div>
           </div>
         )}
+      </AnimatePresence>
         {activeTab === 'live' && (
-          <div className="grid lg:grid-cols-2 gap-12 pb-20">
+          <motion.div 
+            key="live" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="grid lg:grid-cols-2 gap-12 pb-20"
+          >
              <div className="bg-gray-50 p-10 rounded-[3rem] border border-bento-border space-y-8">
                 <div className="flex items-center gap-4">
                    <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Tv size={24} /></div>
@@ -2962,11 +3025,18 @@ const AdminDashboard = () => {
                    )}
                 </div>
              </div>
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'shop' && (
-          <div className="grid lg:grid-cols-12 gap-10">
+          <motion.div 
+            key="shop" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="grid lg:grid-cols-12 gap-10"
+          >
             <div className="lg:col-span-12 xl:col-span-5 bento-card bg-white p-10 shadow-2xl space-y-8">
                <div className="flex items-center gap-4 border-b pb-6">
                   <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center shadow-lg"><ShoppingBag size={24} /></div>
@@ -3075,10 +3145,17 @@ const AdminDashboard = () => {
                   )}
                </div>
             </div>
-          </div>
+          </motion.div>
         )}
         {activeTab === 'orders' && (
-          <div className="space-y-10">
+          <motion.div 
+            key="orders" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="space-y-10"
+          >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-bento-border gap-6">
                <div className="space-y-1">
                   <h3 className="text-xl sm:text-2xl font-black italic">অর্ডার রিপোর্ট</h3>
@@ -3140,7 +3217,7 @@ const AdminDashboard = () => {
                </div>
                {orders.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অর্ডার পাওয়া যায়নি...</p>}
             </div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

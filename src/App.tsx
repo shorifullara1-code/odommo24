@@ -10,7 +10,8 @@ import {
   Mars, Venus, Youtube, Play, Facebook, Tv,
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
-  Instagram, Rss, Music, ShoppingBag
+  Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
+  AlertCircle, CheckCircle
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -1975,13 +1976,14 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [notices, setNotices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEvenTitle, setNewEventTitle] = useState('');
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('members');
   const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
@@ -2001,6 +2003,7 @@ const AdminDashboard = () => {
     fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
     fetch('/api/admin/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
     fetch('/api/products').then(r => r.ok ? r.json() : []).then(data => setProducts(Array.isArray(data) ? data : []));
+    fetch('/api/admin/orders').then(r => r.ok ? r.json() : []).then(data => setOrders(Array.isArray(data) ? data : []));
   };
 
   useEffect(() => {
@@ -2347,35 +2350,129 @@ const AdminDashboard = () => {
     }
   }, [siteSettings?.live_stream_link]);
 
+  const updateOrderStatus = async (id: number, status: string) => {
+    const res = await fetch(`/api/admin/orders/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    if (res.ok) {
+      fetchData();
+      showFeedback('success', 'অর্ডারের স্ট্যাটাস আপডেট হয়েছে');
+    }
+  };
+
+  const deleteOrder = async (id: number) => {
+    if (!confirm('আপনি কি নিশ্চিতভাবে এই অর্ডারটি ডিলিট করতে চান?')) return;
+    const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      fetchData();
+      showFeedback('success', 'অর্ডার ডিলিট হয়েছে');
+    }
+  };
+
+  const downloadOrdersPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["Order ID", "Customer", "Phone", "Amount", "Status", "Date"];
+    const tableRows: any[] = [];
+
+    orders.forEach(order => {
+      const orderData = [
+        order.id,
+        order.customer_name,
+        order.phone,
+        `৳${order.total_amount}`,
+        order.status,
+        new Date(order.created_at).toLocaleDateString()
+      ];
+      tableRows.push(orderData);
+    });
+
+    (doc as any).autoTable(tableColumn, tableRows, { startY: 30 });
+    doc.text("Adomyo 24 - Order Report", 14, 20);
+    doc.save(`orders_report_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-20 min-h-screen">
-      <div className="bento-card bg-white p-6 md:p-12 shadow-2xl space-y-12 mt-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-bento-border pb-12">
-           <div className="space-y-2">
-              <h1 className="text-4xl md:text-6xl font-serif italic text-bento-dark">{t('admin_dashboard_title')}</h1>
-              <p className="text-xs font-black uppercase tracking-[0.4em] text-bento-light">Control Center / Adomyo 24</p>
-           </div>
-           
-            <div className="flex flex-wrap gap-4 border-b border-bento-border pb-4 w-full">
-             {['members', 'pending', 'notices', 'donations', 'events', 'committee', 'settings', 'live', 'shop'].map((tab) => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab as any)}
-                  className={`px-4 md:px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition whitespace-nowrap ${activeTab === tab ? 'bg-bento-primary text-white shadow-lg shadow-[rgba(192,57,43,0.2)]' : 'text-bento-light hover:bg-gray-100'}`}
-                >
-                  {tab === 'members' ? t('nav_member_list') : 
-                   tab === 'pending' ? t('admin_pending_members') : 
-                   tab === 'notices' ? t('admin_manage_notices') : 
-                   tab === 'donations' ? t('admin_manage_donations') : 
-                   tab === 'events' ? t('admin_manage_events') : 
-                   tab === 'committee' ? t('admin_manage_committee') : 
-                   tab === 'settings' ? t('admin_site_settings') : 
-                   tab === 'live' ? t('admin_manage_live') : 
-                   t('admin_manage_shop')}
-                </button>
-             ))}
-            </div>
+    <div className="flex flex-col md:flex-row min-h-screen bg-bento-bg">
+      {/* Admin Sidebar */}
+      <aside className="w-full md:w-72 bg-white border-r border-bento-border shadow-xl z-50 flex flex-col sticky top-0 h-screen overflow-y-auto">
+        <div className="p-8 border-b border-bento-border text-center">
+            <h1 className="text-2xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
+            <p className="text-[9px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-50">Authorized Portal Only</p>
         </div>
+        <nav className="p-4 flex-grow space-y-2">
+            {[
+              { id: 'members', label: t('nav_member_list'), icon: Users },
+              { id: 'pending', label: t('admin_pending_members'), icon: Shield },
+              { id: 'orders', label: 'অর্ডার ম্যানেজমেন্ট', icon: ShoppingCart },
+              { id: 'shop', label: t('admin_manage_shop'), icon: ShoppingBag },
+              { id: 'notices', label: t('admin_manage_notices'), icon: Bell },
+              { id: 'events', label: t('admin_manage_events'), icon: Calendar },
+              { id: 'committee', label: t('admin_manage_committee'), icon: UserCheck },
+              { id: 'donations', label: t('admin_manage_donations'), icon: DollarSign },
+              { id: 'settings', label: t('admin_site_settings'), icon: Settings },
+              { id: 'live', label: t('admin_manage_live'), icon: Tv }
+            ].map(item => (
+              <button 
+                key={item.id} 
+                onClick={() => setActiveTab(item.id as any)}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${activeTab === item.id ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-bento-light hover:bg-gray-50'}`}
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+              </button>
+            ))}
+        </nav>
+        <div className="p-4 mt-auto border-t border-bento-border">
+          <Link to="/" className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-500 hover:bg-red-50 transition">
+             <Globe size={18} />
+             <span>ওয়েবসাইটে ফিরে যান</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-grow p-4 md:p-12 overflow-y-auto">
+        <div className="max-w-[1400px] mx-auto space-y-12">
+            <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] shadow-xl border border-bento-border">
+               <div>
+                  <h2 className="text-3xl font-black italic text-bento-dark">
+                    {activeTab === 'members' && t('nav_member_list')}
+                    {activeTab === 'pending' && t('admin_pending_members')}
+                    {activeTab === 'orders' && 'অর্ডার ম্যানেজমেন্ট'}
+                    {activeTab === 'shop' && t('admin_manage_shop')}
+                    {activeTab === 'notices' && t('admin_manage_notices')}
+                    {activeTab === 'events' && t('admin_manage_events')}
+                    {activeTab === 'committee' && t('admin_manage_committee')}
+                    {activeTab === 'donations' && t('admin_manage_donations')}
+                    {activeTab === 'settings' && t('admin_site_settings')}
+                    {activeTab === 'live' && t('admin_manage_live')}
+                  </h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-60">
+                    Control Center / Dashboard / {activeTab}
+                  </p>
+               </div>
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-bento-light border border-bento-border shadow-inner"><Bell size={20} /></div>
+                  <div className="w-12 h-12 rounded-2xl bg-bento-primary text-white flex items-center justify-center shadow-lg font-black italic">A24</div>
+               </div>
+            </div>
+
+            {/* Error/Success Feedback */}
+            <AnimatePresence>
+                {(adminStats.success || adminStats.error) && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className={`fixed top-8 right-8 z-[200] p-6 rounded-2xl shadow-2xl flex items-center gap-4 border ${adminStats.success ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}
+                    >
+                        {adminStats.success ? <CheckCircle size={24} /> : <AlertCircle size={24} />}
+                        <p className="text-sm font-bold italic">{adminStats.success || adminStats.error}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
         {activeTab === 'members' && (
         <div className="grid lg:grid-cols-12 gap-8">
@@ -2945,8 +3042,230 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+        {activeTab === 'orders' && (
+          <div className="space-y-10">
+            <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
+               <div className="space-y-1">
+                  <h3 className="text-2xl font-black italic">অর্ডার রিপোর্ট</h3>
+                  <p className="text-xs text-bento-light uppercase tracking-widest">মোট অর্ডার সংখ্যা: {orders.length}</p>
+               </div>
+               <button onClick={downloadOrdersPDF} className="flex items-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
+                  <Download size={16} /> পিডিএফ ডাউনলোড
+               </button>
+            </div>
+            
+            <div className="bento-card border border-bento-border bg-white overflow-hidden !p-0">
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50 border-b border-bento-border text-[10px] font-black uppercase tracking-widest text-bento-light">
+                      <tr>
+                        <th className="px-8 py-5">অর্ডার ID</th>
+                        <th className="px-8 py-5">গ্রাহক</th>
+                        <th className="px-8 py-5">ঠিকানা</th>
+                        <th className="px-8 py-5">মবলগ</th>
+                        <th className="px-8 py-5">পদ্ধতি</th>
+                        <th className="px-8 py-5">স্ট্যাটাস</th>
+                        <th className="px-8 py-5">অ্যাকশন</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-bento-border">
+                      {orders.map(o => (
+                        <tr key={o.id} className="hover:bg-gray-50 transition">
+                          <td className="px-8 py-5 text-xs font-black text-bento-primary">#{o.id}</td>
+                          <td className="px-8 py-5">
+                             <p className="font-bold italic text-bento-dark">{o.customer_name}</p>
+                             <p className="text-[10px] text-bento-light">{o.phone}</p>
+                          </td>
+                          <td className="px-8 py-5 text-xs italic max-w-xs truncate">{o.address}</td>
+                          <td className="px-8 py-5 font-black text-bento-dark">৳{o.total_amount}</td>
+                          <td className="px-8 py-5 font-black text-bento-dark italic uppercase text-[9px]">{o.payment_method}</td>
+                          <td className="px-8 py-5">
+                             <select 
+                               value={o.status} 
+                               onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                               className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border-2 outline-none ${
+                                 o.status === 'completed' ? 'bg-green-50 text-green-600 border-green-200' : 
+                                 o.status === 'shipping' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
+                                 'bg-yellow-50 text-yellow-600 border-yellow-200'
+                               }`}
+                             >
+                                <option value="pending">Pending</option>
+                                <option value="shipping">Shipping</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                             </select>
+                          </td>
+                          <td className="px-8 py-5">
+                             <button onClick={() => deleteOrder(o.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 size={16} /></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                 </table>
+               </div>
+               {orders.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অর্ডার পাওয়া যায়নি...</p>}
+            </div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
+    </main>
+    </div>
+  );
+};
+
+const CheckoutPage = () => {
+  const { t, lang } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<any>(location.state?.product || null);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    email: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!product) {
+      navigate('/shop');
+    }
+  }, [product, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          email: formData.email,
+          total_amount: Number(product.price),
+          items: [product],
+          payment_method: 'Cash on Delivery'
+        })
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+      } else {
+        alert('অর্ডার সম্পন্ন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('সার্ভারে সমস্যা হয়েছে।');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!product) return null;
+
+  if (success) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center space-y-10">
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-32 h-32 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-xl">
+           <CheckCircle size={64} />
+        </motion.div>
+        <div className="space-y-4">
+           <h2 className="text-4xl font-serif italic text-bento-dark">অর্ডার সফলভাবে সম্পন্ন হয়েছে!</h2>
+           <p className="text-bento-light italic">আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব। আমাদের ওপর আস্থা রাখার জন্য ধন্যবাদ।</p>
+        </div>
+        <Link to="/shop" className="inline-block px-12 py-5 bg-bento-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition">আরও শপিং করুন</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-32 max-w-6xl space-y-16">
+       <div className="text-center space-y-4">
+          <h1 className="text-4xl md:text-6xl font-serif italic text-bento-dark">চেকআউট</h1>
+          <div className="w-24 h-1 bg-bento-primary mx-auto rounded-full"></div>
+       </div>
+
+       <div className="grid lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-12 xl:col-span-7 bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-gray-100 space-y-10">
+             <h3 className="text-2xl font-black italic flex items-center gap-3"><MapPin className="text-bento-primary" /> শিপিং তথ্য দিন</h3>
+             <form onSubmit={handleSubmit} className="space-y-8">
+                <InputField label="পূর্ণ নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} placeholder="আপনার নাম এখানে লিখুন..." required />
+                <div className="grid md:grid-cols-2 gap-8">
+                   <InputField label="মোবাইল নাম্বার" value={formData.phone} onChange={(e:any)=>setFormData({...formData, phone: e.target.value})} placeholder="০১৭..." required />
+                   <InputField label="ইমেইল (ঐচ্ছিক)" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} placeholder="example@gmail.com" />
+                </div>
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-bento-light">বিস্তারিত ঠিকানা</label>
+                   <textarea 
+                     value={formData.address} 
+                     onChange={(e:any)=>setFormData({...formData, address: e.target.value})} 
+                     className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:border-bento-primary h-24 outline-none transition text-sm"
+                     placeholder="গ্রাম, পোস্ট, উপজেলা, জেলা..."
+                     required
+                   />
+                </div>
+                <div className="bg-gray-50 p-8 rounded-3xl border-2 border-bento-primary/10 flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-bento-primary text-white rounded-full flex items-center justify-center"><CreditCard size={20} /></div>
+                      <div>
+                        <p className="font-bold text-bento-dark italic">Cash on Delivery</p>
+                        <p className="text-[10px] text-bento-light uppercase tracking-widest font-black">পণ্য পাওয়ার পর মূল্য পরিশোধ করুন</p>
+                      </div>
+                   </div>
+                   <Zap size={24} className="text-bento-primary animate-pulse" />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-bento-primary text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl shadow-bento-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4"
+                >
+                   {loading ? 'প্রসেসিং হচ্ছে...' : (
+                      <>অর্ডার কনফার্ম করুন <ArrowRight size={18} /></>
+                   )}
+                </button>
+             </form>
+          </div>
+
+          <div className="lg:col-span-12 xl:col-span-5 space-y-8 sticky top-24">
+             <div className="bg-bento-dark text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+                <ShoppingBag size={200} className="absolute -bottom-10 -right-10 opacity-5 group-hover:scale-110 transition duration-1000" />
+                <h3 className="text-xl font-black italic border-b border-white/10 pb-4 mb-8">অর্ডার সামারি</h3>
+                <div className="space-y-6">
+                   <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-white/10 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                         <img src={product.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                      <div className="space-y-1">
+                         <p className="font-bold text-lg italic leading-tight">{product.name}</p>
+                         <p className="text-xs text-white/40 italic">{product.category}</p>
+                      </div>
+                      <p className="ml-auto font-black italic">৳{product.price}</p>
+                   </div>
+                   <div className="pt-6 border-t border-white/10 space-y-4">
+                      <div className="flex justify-between items-center text-sm font-medium text-white/40 italic">
+                         <span>Subtotal</span>
+                         <span>৳{product.price}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm font-medium text-white/40 italic">
+                         <span>Delivery Charge</span>
+                         <span className="text-bento-accent">Free</span>
+                      </div>
+                      <div className="pt-6 flex justify-between items-center border-t border-white/20">
+                         <span className="text-xl font-serif italic">Total</span>
+                         <span className="text-3xl font-black text-bento-primary">৳{product.price}</span>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <p className="text-[10px] text-center text-bento-light font-black uppercase tracking-widest italic flex items-center justify-center gap-2">
+                <Lock size={12} /> 100% SECURE CHECKOUT AT ADOMYO 24
+             </p>
+          </div>
+       </div>
     </div>
   );
 };
@@ -3157,12 +3476,13 @@ const ShopPage = () => {
                          <p className="text-[8px] font-black uppercase tracking-widest text-bento-light">{t('product_price')}</p>
                          <p className="text-2xl font-black text-bento-primary">৳{p.price}</p>
                       </div>
-                      <Link 
-                        to="/contact" 
+                      <button 
+                        onClick={() => navigate('/checkout', { state: { product: p } })}
+                        disabled={p.stock_status === 'out_of_stock'}
                         className={`p-4 rounded-2xl shadow-lg transition-all active:scale-95 ${p.stock_status === 'out_of_stock' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-bento-dark text-white hover:bg-bento-primary hover:shadow-[0_15px_30px_rgba(192,57,43,0.3)]'}`}
                       >
                          <CreditCard size={20} />
-                      </Link>
+                      </button>
                    </div>
                 </div>
               </motion.div>
@@ -4038,6 +4358,7 @@ export default function App() {
                 <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
                 <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
                 <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/donations" element={<DonationsPage />} />
                 <Route path="/contact" element={<ContactUsPage />} />

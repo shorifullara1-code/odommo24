@@ -547,6 +547,90 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
+  // --- Orders CRUD ---
+  app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { data: orders, error } = await supabase.from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(orders || []);
+    } catch (err: any) {
+      console.error('Error fetching orders:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/orders', async (req, res) => {
+    try {
+      const { 
+        customer_name, 
+        phone, 
+        address, 
+        email, 
+        total_amount, 
+        items, 
+        payment_method 
+      } = req.body;
+
+      if (!customer_name || !phone || !address || !items || items.length === 0) {
+        return res.status(400).json({ error: 'Missing required order fields' });
+      }
+
+      const { data, error } = await supabase.from('orders').insert([{
+        customer_name,
+        phone,
+        address,
+        email,
+        total_amount: parseFloat(total_amount),
+        items: JSON.stringify(items),
+        payment_method: payment_method || 'Cash on Delivery',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      }]).select().single();
+
+      if (error) {
+        if (error.code === '42P01') {
+          return res.status(404).json({ error: 'Orders table does not exist. Contact site admin.' });
+        }
+        throw error;
+      }
+
+      res.status(201).json({ message: 'Order placed successfully', order: data });
+    } catch (err: any) {
+      console.error('Error placing order:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.patch('/api/admin/orders/:id/status', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const { error } = await supabase.from('orders')
+        .update({ status })
+        .eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Order status updated' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/admin/orders/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('orders').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Order deleted' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // --- API Catch-all ---
   app.all('/api/*', (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });

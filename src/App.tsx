@@ -11,7 +11,8 @@ import {
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
-  AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock
+  AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
+  Eye, EyeOff
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -717,7 +718,7 @@ const HomeOverview = () => {
              </div>
              <div className="relative group">
                 <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl relative">
-                   <img src="https://picsum.photos/seed/vision/1200/800" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-1000" />
+                   <img src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/670792740_122129138001153564_5669189710902295044_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeEDwTsEG7bC7iRPIuZjYYh_tUff-z5TUq-1R9_7PlNSr2py7YW2LBPGtr9Ab7e0DheqKFKEcUUxuc5pW3kJ2FfS&_nc_ohc=MNObgtNf9w4Q7kNvwFlSG1m&_nc_oc=AdoYu_U2JCIGh7S0xXNqa9Jel3kGrbCpBnwKN1URxYLExm8NQ3zL7BeYi30SceU4zsI&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=L3XahDl_hvh_K9yKV4zJDQ&oh=00_Af0V-nDeQSp0Ojp-hpL8H3bFRMdNbjnISKKCQBuOivCNiA&oe=69F140A8" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-1000" referrerPolicy="no-referrer" />
                    <div className="absolute inset-0 bg-bento-primary/10 group-hover:bg-transparent transition duration-1000"></div>
                 </div>
                 <div className="absolute -bottom-8 -right-8 bg-bento-dark text-white p-10 rounded-[2.5rem] shadow-2xl space-y-2 hidden md:block">
@@ -943,15 +944,105 @@ const HomeOverview = () => {
   );
 };
 
+const Guardian = ({ focusedField, usernameLength, mousePos }: { focusedField: string | null, usernameLength: number, mousePos: { x: number, y: number } }) => {
+  return (
+    <div className="relative w-48 h-48 mx-auto mb-10">
+      {/* Head/Mask with enhanced realism */}
+      <div className="absolute inset-0 bg-white/[0.04] rounded-[3rem] border border-white/10 backdrop-blur-3xl shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden">
+        {/* Internal Glow - More Colorful */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 bg-gradient-to-r from-bento-primary/20 via-indigo-500/20 to-purple-500/20 blur-[70px] rounded-full" />
+        
+        {/* Eyes Container - Larger & More Centered */}
+        <div className="absolute top-[35%] left-0 w-full flex justify-center gap-12 px-8">
+          {[0, 1].map((i) => (
+            <div key={i} className="relative w-14 h-8 group">
+              {/* Eye Socket with Inner Shadow */}
+              <div className="absolute inset-0 bg-[#050505] rounded-full shadow-[inset_0_2px_15px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden border border-white/5">
+                {/* Pupil - Following Mouse */}
+                <motion.div 
+                  animate={{ 
+                    x: focusedField === 'username' 
+                      ? Math.min(Math.max(usernameLength * 1.5 - 12, -15), 15) 
+                      : (focusedField === 'password' ? 0 : mousePos.x),
+                    y: focusedField === 'password' ? 10 : mousePos.y,
+                    scale: focusedField === 'password' ? 0.3 : 1
+                  }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  className="w-7 h-7 bg-gradient-to-br from-bento-primary to-orange-500 rounded-full relative shadow-[0_0_25px_rgba(192,57,43,1)]"
+                >
+                   {/* Realistic Reflexion */}
+                   <div className="w-2.5 h-2.5 bg-white rounded-full absolute top-1 left-1 opacity-80" />
+                   <div className="w-1 h-1 bg-white rounded-full absolute bottom-1.5 right-1.5 opacity-40" />
+                </motion.div>
+              </div>
+
+              {/* Upper Eyelid (Privacy Mode) */}
+              <motion.div 
+                animate={{ 
+                  height: focusedField === 'password' ? '100%' : '0%',
+                }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                className="absolute inset-x-0 top-0 bg-[#0a0a0a] z-20 rounded-b-full border-b border-white/15"
+              />
+              
+              {/* Lower Eyelid (Squinting Effect) */}
+              <motion.div 
+                animate={{ 
+                  height: focusedField === 'password' ? '20%' : '0%',
+                }}
+                className="absolute inset-x-0 bottom-0 bg-[#0a0a0a] z-20 rounded-t-full"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Dynamic Scanning Mouth */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-20 flex flex-col items-center gap-1">
+          <motion.div 
+            animate={{ 
+              width: focusedField === 'username' ? ['40%', '80%', '40%'] : '30%',
+              opacity: focusedField === 'username' ? [0.4, 1, 0.4] : 0.2,
+              backgroundColor: focusedField === 'username' ? '#c0392b' : '#334155'
+            }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="h-[2px] rounded-full"
+          />
+        </div>
+      </div>
+      
+      {/* Floor reflection shadow */}
+      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-6 bg-bento-primary/10 blur-[30px] rounded-full" />
+    </div>
+  );
+};
+
 const Login = () => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    // Get container relative mouse position
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    
+    // Normalize for pupil movement limits (approx +/- 15px)
+    const factor = 25;
+    setMousePos({
+      x: Math.min(Math.max(x / factor, -18), 18),
+      y: Math.min(Math.max(y / factor, -8), 8)
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -966,7 +1057,7 @@ const Login = () => {
       } else {
         const text = await res.text();
         console.error('Non-JSON response:', text);
-        setError(`Server error: Expected JSON but got ${contentType || 'text'}. Check if API route is correct.`);
+        setError(`Server error: Expected JSON but got ${contentType || 'text'}.`);
         return;
       }
 
@@ -977,30 +1068,223 @@ const Login = () => {
         setError(data.error || `Login failed (Status: ${res.status})`);
       }
     } catch (err) {
-      console.error('Login connection error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(`Connection failed: ${errorMessage}. (Check Vercel logs or /api/health)`);
+      console.error('Login error:', err);
+      setError('Connection failed. Please check your internet connection.');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto py-20 px-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-10 bento-card border-none shadow-2xl space-y-8">
-        <div className="text-center space-y-2">
-           <div className="w-20 h-20 bg-[rgba(192,57,43,0.05)] rounded-full flex items-center justify-center mx-auto text-bento-primary"><LogIn size={40} /></div>
-           <h2 className="text-3xl font-serif text-bento-dark italic">সদস্য লগইন</h2>
+    <div 
+      onMouseMove={handleMouseMove}
+      className="min-h-screen flex items-center justify-center p-4 bg-[#02040a] relative overflow-hidden font-sans"
+    >
+      {/* Cinematic Animated Background with Layers - Richer Colors */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div 
+          animate={{ 
+            x: [0, 150, -150, 0],
+            y: [0, -100, 100, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[20%] -left-[10%] w-[100%] h-[100%] bg-bento-primary/15 blur-[180px] rounded-full mix-blend-screen"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -120, 120, 0],
+            y: [0, 80, -80, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute bottom-0 right-0 w-[80%] h-[80%] bg-indigo-500/10 blur-[150px] rounded-full mix-blend-screen"
+        />
+        <motion.div 
+          animate={{ x: [-100, 100, -100], y: [100, -100, 100] }}
+          transition={{ duration: 45, repeat: Infinity }}
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/5 blur-[120px] rounded-full"
+        />
+        {/* Grain Overlay */}
+        <div className="absolute inset-0 opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] blend-overlay"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-[1150px] grid lg:grid-cols-2 bg-white/[0.012] backdrop-blur-[80px] rounded-[4rem] border border-white/[0.07] shadow-[0_50px_150px_-30px_rgba(0,0,0,0.8)] overflow-hidden z-10 relative"
+      >
+        {/* Floating Accent */}
+        <div className="absolute top-0 right-0 w-80 h-[2px] bg-gradient-to-l from-bento-primary/30 via-indigo-500/20 to-transparent"></div>
+
+        {/* Left Side: Brand Experience */}
+        <div className="hidden lg:flex flex-col justify-between p-24 relative overflow-hidden bg-gradient-to-br from-indigo-500/[0.03] to-transparent">
+          <div className="relative z-10">
+             <motion.div 
+               initial={{ opacity: 0, x: -30 }}
+               animate={{ opacity: 1, x: 0 }}
+               transition={{ delay: 0.5 }}
+               className="flex items-center gap-5 mb-24"
+             >
+               <div className="w-14 h-14 bg-gradient-to-br from-white to-gray-200 rounded-2xl flex items-center justify-center p-3 shadow-2xl relative">
+                  <div className="absolute inset-0 bg-bento-primary/20 blur-md rounded-2xl animate-pulse"></div>
+                  <Shield size={28} className="text-gray-900 relative z-10" />
+               </div>
+               <span className="text-3xl font-black text-white tracking-widest italic uppercase">অদম্য ২৪</span>
+             </motion.div>
+             
+             <div className="space-y-12">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                >
+                  <h2 className="text-7xl font-serif font-black text-white leading-[1.05] tracking-tighter">
+                    Visionary <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-bento-primary via-orange-400 to-indigo-400">Justice.</span>
+                  </h2>
+                </motion.div>
+                <div className="space-y-6">
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="text-gray-300 font-serif italic text-2xl max-w-sm leading-relaxed"
+                  >
+                    Standing for integrity, transparency, and humanitarian values in Ashulia.
+                  </motion.p>
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: 80 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                    className="h-1 bg-gradient-to-r from-bento-primary to-transparent rounded-full"
+                  />
+                </div>
+             </div>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="relative z-10 flex flex-col gap-6"
+          >
+             <div className="flex gap-2.5">
+               <div className="w-20 h-2 rounded-full bg-gradient-to-r from-bento-primary to-orange-500 shadow-[0_0_20px_rgba(192,57,43,0.4)]"></div>
+               {[1, 2, 3].map(i => (
+                 <div key={i} className="w-5 h-2 rounded-full bg-white/10" />
+               ))}
+             </div>
+             <p className="text-[12px] font-mono text-gray-500 uppercase tracking-[0.6em] font-black">Secure Node • Node-Auth.v24</p>
+          </motion.div>
+
+          {/* Large Abstract Background Element */}
+          <Activity size={500} strokeWidth={0.15} className="absolute bottom-[-10%] right-[-10%] text-bento-primary opacity-[0.05] -rotate-12" />
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField label="ইউজার আইডি" value={userId} onChange={(e: any) => setUserId(e.target.value)} placeholder="@username" required />
-          <InputField label="পাসওয়ার্ড" value={password} onChange={(e: any) => setPassword(e.target.value)} type="password" placeholder="••••••••" required />
-          {error && <p className="text-red-500 text-sm font-bold bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>}
-          <button type="submit" className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[rgba(192,57,43,0.2)] hover:scale-[1.02] active:scale-100 transition">
-            প্রবেশ করুন
-          </button>
-        </form>
-        <p className="text-center text-xs font-bold text-bento-light uppercase tracking-widest">
-          নতুন সদস্য? <Link to="/register" className="text-bento-primary">আবেদন করুন</Link>
-        </p>
+
+        {/* Right Side: Modern Login Field */}
+        <div className="p-12 md:p-20 lg:p-24 bg-black/[0.2] border-l border-white/[0.03] flex flex-col justify-center">
+          <div className="max-w-md mx-auto w-full space-y-12">
+            <Guardian focusedField={focusedField} usernameLength={userId.length} mousePos={mousePos} />
+            
+            <div className="space-y-4 text-center">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex items-center justify-center gap-4"
+              >
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10"></div>
+                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-bento-primary/80">Security Gate</span>
+                <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10"></div>
+              </motion.div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-6">
+                <div className="space-y-3 px-2">
+                  <label className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500">Identity Identifier</label>
+                  <div className="relative group">
+                    <div className={`absolute inset-0 bg-bento-primary/5 blur-xl rounded-[2rem] transition-opacity duration-500 ${focusedField === 'username' ? 'opacity-100' : 'opacity-0'}`}></div>
+                    <UserIcon className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'username' ? 'text-bento-primary scale-110' : 'text-gray-700'}`} size={18} />
+                    <input 
+                      type="text" 
+                      value={userId}
+                      onChange={(e) => setUserId(e.target.value)}
+                      onFocus={() => setFocusedField('username')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="e.g. @odommo_root"
+                      required
+                      className="w-full pl-18 pr-6 py-6 bg-white/[0.015] border border-white/[0.05] rounded-[2.25rem] focus:bg-white/[0.04] focus:border-bento-primary/40 focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 px-2">
+                  <label className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500">Access Key</label>
+                  <div className="relative group">
+                    <div className={`absolute inset-0 bg-bento-primary/5 blur-xl rounded-[2rem] transition-opacity duration-500 ${focusedField === 'password' ? 'opacity-100' : 'opacity-0'}`}></div>
+                    <Lock className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'password' ? 'text-bento-primary scale-110' : 'text-gray-700'}`} size={18} />
+                    <input 
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full pl-18 pr-18 py-6 bg-white/[0.015] border border-white/[0.05] rounded-[2.25rem] focus:bg-white/[0.04] focus:border-bento-primary/40 focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10"
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-7 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-all p-2 z-20"
+                    >
+                      {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-500/5 border border-red-500/20 p-6 rounded-[2rem] flex items-start gap-4 backdrop-blur-md"
+                >
+                  <AlertCircle size={24} className="text-red-500 shrink-0" />
+                  <p className="text-xs font-black text-red-500/70 leading-relaxed italic uppercase tracking-wider">{error}</p>
+                </motion.div>
+              )}
+
+              <motion.button 
+                whileHover={{ scale: 1.02, y: -4 }}
+                whileTap={{ scale: 0.98, y: 0 }}
+                type="submit" 
+                className="w-full group bg-white text-black py-7 rounded-[2.5rem] font-black text-[13px] uppercase tracking-[0.6em] overflow-hidden relative shadow-[0_40px_80px_-20px_rgba(255,255,255,0.05)] transition-all duration-500"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-bento-primary via-orange-500 to-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.23, 1, 0.32, 1]" />
+                
+                {/* Subtle Shimmer Effect */}
+                <motion.div 
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none"
+                />
+
+                <span className="relative z-10 group-hover:text-white transition-colors duration-500 flex items-center justify-center gap-5">
+                  Establish Link <ArrowRight size={18} className="group-hover:translate-x-3 transition-transform duration-700" />
+                </span>
+              </motion.button>
+            </form>
+
+            <div className="text-center pt-12 border-t border-white/[0.04]">
+              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-600">
+                New Identity? <Link to="/register" className="text-white hover:text-bento-primary transition-all ml-2 underline underline-offset-[12px] decoration-gray-800 hover:decoration-bento-primary/50 font-bold">Apply for Enrollment</Link>
+              </p>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

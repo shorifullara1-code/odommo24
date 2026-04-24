@@ -11,7 +11,7 @@ import {
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
-  AlertCircle, CheckCircle
+  AlertCircle, CheckCircle, Menu, X
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -1992,6 +1992,7 @@ const AdminDashboard = () => {
   const [donations, setDonations] = useState<any[]>([]);
   const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
@@ -2395,13 +2396,40 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-bento-bg">
+      {/* Mobile Sidebar Toggle */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-bento-border sticky top-0 z-[60]">
+        <h1 className="text-xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-3 bg-gray-50 rounded-xl text-bento-dark hover:bg-gray-100 transition"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-[55] md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Admin Sidebar */}
-      <aside className="w-full md:w-72 bg-white border-r border-bento-border shadow-xl z-50 flex flex-col sticky top-0 h-screen overflow-y-auto">
-        <div className="p-8 border-b border-bento-border text-center">
+      <aside className={`
+        fixed inset-y-0 left-0 z-[58] w-72 bg-white border-r border-bento-border shadow-2xl flex flex-col transition-transform duration-300 md:static md:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-8 border-b border-bento-border text-center hidden md:block">
             <h1 className="text-2xl font-black italic text-bento-dark">অদম্য ২৪ <span className="text-bento-primary">এডমিন</span></h1>
             <p className="text-[9px] font-black uppercase tracking-widest text-bento-light mt-1 opacity-50">Authorized Portal Only</p>
         </div>
-        <nav className="p-4 flex-grow space-y-2">
+        <nav className="p-4 flex-grow space-y-2 overflow-y-auto">
             {[
               { id: 'members', label: t('nav_member_list'), icon: Users },
               { id: 'pending', label: t('admin_pending_members'), icon: Shield },
@@ -2416,7 +2444,10 @@ const AdminDashboard = () => {
             ].map(item => (
               <button 
                 key={item.id} 
-                onClick={() => setActiveTab(item.id as any)}
+                onClick={() => {
+                  setActiveTab(item.id as any);
+                  setIsSidebarOpen(false);
+                }}
                 className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${activeTab === item.id ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-bento-light hover:bg-gray-50'}`}
               >
                 <item.icon size={18} />
@@ -2424,7 +2455,7 @@ const AdminDashboard = () => {
               </button>
             ))}
         </nav>
-        <div className="p-4 mt-auto border-t border-bento-border">
+        <div className="p-4 mt-auto border-t border-bento-border bg-white">
           <Link to="/" className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-red-500 hover:bg-red-50 transition">
              <Globe size={18} />
              <span>ওয়েবসাইটে ফিরে যান</span>
@@ -2435,9 +2466,9 @@ const AdminDashboard = () => {
       {/* Main Content Area */}
       <main className="flex-grow p-4 md:p-12 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto space-y-12">
-            <div className="flex justify-between items-center bg-white p-8 rounded-[2.5rem] shadow-xl border border-bento-border">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl border border-bento-border gap-6">
                <div>
-                  <h2 className="text-3xl font-black italic text-bento-dark">
+                  <h2 className="text-2xl sm:text-3xl font-black italic text-bento-dark">
                     {activeTab === 'members' && t('nav_member_list')}
                     {activeTab === 'pending' && t('admin_pending_members')}
                     {activeTab === 'orders' && 'অর্ডার ম্যানেজমেন্ট'}
@@ -2728,8 +2759,8 @@ const AdminDashboard = () => {
                   </div>
                   <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                      {committee.map(m => (
-                        <div key={m.id} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex justify-between items-center group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
-                           <div className="flex items-center gap-4">
+                        <div key={m.id} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
+                           <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4">
                               <div className="w-16 h-16 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-sm">
                                  <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" />
                               </div>
@@ -2993,8 +3024,8 @@ const AdminDashboard = () => {
                <h3 className="text-xl font-black italic border-b pb-4">পণ্য তালিকা ({products.length})</h3>
                <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                   {products.map(p => (
-                     <div key={p.id} className="p-6 bg-gray-50 rounded-[2.5rem] border border-bento-border flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all duration-500">
-                        <div className="flex items-center gap-6">
+                     <div key={p.id} className="p-6 bg-gray-50 rounded-[2.5rem] border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-500">
+                        <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-6">
                            <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-inner shrink-0 group-hover:scale-105 transition-transform">
                               <img src={p.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                            </div>
@@ -3044,12 +3075,12 @@ const AdminDashboard = () => {
         )}
         {activeTab === 'orders' && (
           <div className="space-y-10">
-            <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-bento-border gap-6">
                <div className="space-y-1">
-                  <h3 className="text-2xl font-black italic">অর্ডার রিপোর্ট</h3>
+                  <h3 className="text-xl sm:text-2xl font-black italic">অর্ডার রিপোর্ট</h3>
                   <p className="text-xs text-bento-light uppercase tracking-widest">মোট অর্ডার সংখ্যা: {orders.length}</p>
                </div>
-               <button onClick={downloadOrdersPDF} className="flex items-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
+               <button onClick={downloadOrdersPDF} className="w-full sm:w-auto flex items-center justify-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
                   <Download size={16} /> পিডিএফ ডাউনলোড
                </button>
             </div>
@@ -3189,9 +3220,9 @@ const CheckoutPage = () => {
           <div className="w-24 h-1 bg-bento-primary mx-auto rounded-full"></div>
        </div>
 
-       <div className="grid lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-12 xl:col-span-7 bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-gray-100 space-y-10">
-             <h3 className="text-2xl font-black italic flex items-center gap-3"><MapPin className="text-bento-primary" /> শিপিং তথ্য দিন</h3>
+       <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-12 xl:col-span-7 bg-white p-6 sm:p-10 md:p-14 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-gray-100 space-y-10">
+             <h3 className="text-xl sm:text-2xl font-black italic flex items-center gap-3"><MapPin className="text-bento-primary" /> শিপিং তথ্য দিন</h3>
              <form onSubmit={handleSubmit} className="space-y-8">
                 <InputField label="পূর্ণ নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} placeholder="আপনার নাম এখানে লিখুন..." required />
                 <div className="grid md:grid-cols-2 gap-8">
@@ -3230,8 +3261,8 @@ const CheckoutPage = () => {
              </form>
           </div>
 
-          <div className="lg:col-span-12 xl:col-span-5 space-y-8 sticky top-24">
-             <div className="bg-bento-dark text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+          <div className="lg:col-span-12 xl:col-span-5 space-y-8 xl:sticky xl:top-24">
+             <div className="bg-bento-dark text-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
                 <ShoppingBag size={200} className="absolute -bottom-10 -right-10 opacity-5 group-hover:scale-110 transition duration-1000" />
                 <h3 className="text-xl font-black italic border-b border-white/10 pb-4 mb-8">অর্ডার সামারি</h3>
                 <div className="space-y-6">
@@ -3382,6 +3413,7 @@ const EventsPage = () => {
 
 const ShopPage = () => {
   const { t, lang } = useLanguage();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

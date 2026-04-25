@@ -1482,7 +1482,7 @@ const Register = () => {
 
 const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings: any }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const logoUrl = siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100";
+  const logoUrl = siteSettings?.logo_url || "https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=ne_FHi7l58UQ7kNvwFGdqRp&_nc_oc=AdpQpWG9Ap4Z85Ni5FGJjahJ9HQHzLDr-0B-nnvW_UGMHAu6QowUSInwGBrSfY0bDuA&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=X3eFKy0cWGVoCPMwutqwkA&oh=00_Af1SRllmiRxUm_xEB-aanSYmUIHfvc9Qr8WCllW47FwNwA&oe=69F1794F";
 
   const downloadCard = async () => {
     if (cardRef.current) {
@@ -2039,7 +2039,7 @@ const Navbar = () => {
   const { lang, setLang, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const logoUrl = siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100";
+  const logoUrl = siteSettings?.logo_url || "https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=ne_FHi7l58UQ7kNvwFGdqRp&_nc_oc=AdpQpWG9Ap4Z85Ni5FGJjahJ9HQHzLDr-0B-nnvW_UGMHAu6QowUSInwGBrSfY0bDuA&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=X3eFKy0cWGVoCPMwutqwkA&oh=00_Af1SRllmiRxUm_xEB-aanSYmUIHfvc9Qr8WCllW47FwNwA&oe=69F1794F";
   const location = useLocation();
 
   useEffect(() => {
@@ -4842,64 +4842,91 @@ export default function App() {
   };
 
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center font-serif bg-bento-dark relative overflow-hidden">
-      {/* Decorative Orbs - Substantially simplified for mobile */}
-      {!isMobile && (
-        <>
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-bento-primary/20 rounded-full blur-[80px] animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-bento-accent/20 rounded-full blur-[100px] animate-pulse [animation-delay:1s]"></div>
-        </>
-      )}
+    <div className="h-screen flex flex-col items-center justify-center font-sans bg-[#02040a] relative overflow-hidden">
+      {/* Cinematic Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <motion.div 
+          animate={{ 
+            opacity: [0.1, 0.2, 0.1],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-bento-primary/10 blur-[150px] rounded-full"
+        />
+        <motion.div 
+          animate={{ 
+            opacity: [0.05, 0.15, 0.05],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/5 blur-[180px] rounded-full"
+        />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
+      </div>
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 flex flex-col items-center"
       >
-        <div className="relative group">
+        <div className="relative">
+          {/* Logo Container with Glassmorphism */}
           <motion.div
-            animate={shouldReduceMotion ? {} : { 
-              scale: [1, 1.05, 1],
-              rotate: [0, 5, -5, 0]
+            animate={{ 
+              y: [0, -10, 0],
             }}
             transition={{ 
               duration: 4, 
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="w-40 h-40 md:w-48 md:h-48 bg-white p-4 rounded-[2.5rem] md:rounded-[3rem] shadow-[0_0_50px_rgba(192,57,43,0.3)] border-4 border-bento-primary/20"
+            className="w-44 h-44 md:w-56 md:h-56 p-1 bg-white/[0.03] backdrop-blur-2xl rounded-[3rem] border border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] relative"
           >
-            <img 
-              src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=APUOphrvjyAQ7kNvwGiWCXm&_nc_oc=AdozKFFO5KC-D8xj6FAby8f1XkhGHR1-uUxzgoPnhzJTyhrtEC7g14w5N3kfJapq8nE&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=ZqaJ0_gCwgN_0LBT0_sNlg&_nc_ss=7a3a8&oh=00_Af04M6sGidVzOcANnjbpaS2oyuMlJNeNLNN-MYHexR-c0A&oe=69E9580F" 
-              alt="Adomyo 24 Logo" 
-              className="w-full h-full object-contain rounded-[2rem]"
-              referrerPolicy="no-referrer"
-            />
+            <div className="w-full h-full rounded-[2.8rem] overflow-hidden bg-white/5 relative">
+              <img 
+                src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=ne_FHi7l58UQ7kNvwFGdqRp&_nc_oc=AdpQpWG9Ap4Z85Ni5FGJjahJ9HQHzLDr-0B-nnvW_UGMHAu6QowUSInwGBrSfY0bDuA&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=X3eFKy0cWGVoCPMwutqwkA&oh=00_Af1SRllmiRxUm_xEB-aanSYmUIHfvc9Qr8WCllW47FwNwA&oe=69F1794F" 
+                alt="Adomyo 24 Loading logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              {/* Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            </div>
+
+            {/* Glowing Ring */}
+            <div className="absolute -inset-2 bg-bento-primary/20 blur-2xl rounded-[4rem] -z-10 animate-pulse"></div>
           </motion.div>
-          {/* Scanning Effect - simplified for mobile */}
-          {!shouldReduceMotion && (
+
+          {/* Dynamic Progress Bar Under Logo */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
             <motion.div 
-              animate={{ top: ['0%', '100%', '0%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-bento-primary to-transparent z-20 blur-sm brightness-150"
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-full h-full bg-gradient-to-r from-transparent via-bento-primary to-transparent"
             />
-          )}
+          </div>
         </div>
 
-        <div className="mt-12 space-y-4 text-center">
-          <motion.h1 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="text-4xl font-black text-white tracking-[0.5em] uppercase italic"
-          >
-            <span className="text-bento-primary">অদম্য ২৪</span>
-          </motion.h1>
-          <div className="flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce"></span>
-            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce [animation-delay:0.2s]"></span>
-            <span className="w-1.5 h-1.5 bg-bento-primary rounded-full animate-bounce [animation-delay:0.4s]"></span>
+        <div className="mt-20 space-y-6 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <motion.h1 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-2xl md:text-3xl font-black text-white tracking-[0.6em] uppercase italic bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500"
+            >
+              অদম্য ২৪
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              transition={{ delay: 0.8 }}
+              className="text-[10px] font-mono text-white uppercase tracking-[0.5em] font-black"
+            >
+              System Initializing • v2.4a
+            </motion.p>
           </div>
         </div>
       </motion.div>

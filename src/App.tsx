@@ -906,6 +906,65 @@ const HomeOverview = () => {
          </motion.div>
       </section>
 
+      {/* Justice For Hadi Vai Section - Modern Glassmorphism with High Visibility Typography */}
+      <section className="container mx-auto px-4 sm:px-6 mb-32">
+        <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[3rem] md:rounded-[5rem] p-10 md:p-28 overflow-hidden relative group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]">
+          {/* Intense Red Glow FX for Presence */}
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[140px] -z-10 group-hover:bg-red-600/15 transition-all duration-1000"></div>
+          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-bento-primary/5 rounded-full blur-[140px] -z-10"></div>
+          
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
+            <motion.div 
+               initial={{ opacity: 0, x: -30 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true }}
+               transition={{ duration: 0.8 }}
+               className="space-y-10 md:space-y-16"
+            >
+              <div className="space-y-6">
+                <span className="inline-block px-8 py-3 bg-red-600 text-white rounded-full text-[11px] font-[1000] uppercase tracking-[0.5em] shadow-2xl animate-pulse">In Solidarity</span>
+                <h2 className="text-6xl md:text-9xl font-serif font-black italic text-white leading-none tracking-tighter">
+                  Justice For <br />
+                  <span className="text-red-600 drop-shadow-[0_0_30px_rgba(220,38,38,0.6)]">Hadi Vai</span>
+                </h2>
+              </div>
+              
+              <div className="space-y-6 border-l-8 border-red-600 pl-10">
+                <p className="text-4xl md:text-7xl font-[1000] italic text-red-500 tracking-tight leading-none drop-shadow-lg">
+                  "Ideas Cannot Die"
+                </p>
+                <div className="h-2 w-32 bg-white/10 rounded-full"></div>
+                <p className="text-3xl md:text-5xl font-serif font-black text-white leading-relaxed drop-shadow-md">
+                  We need Justice <br /> For Hadi Vai
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               viewport={{ once: true }}
+               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+               className="relative"
+            >
+              <div className="absolute inset-0 bg-red-600/10 blur-[120px] rounded-full scale-110"></div>
+              <div className="relative z-10 w-full aspect-[4/5] rounded-[3rem] md:rounded-[4rem] overflow-hidden border-2 border-white/10 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.8)] group/portrait">
+                <img 
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmywWC7UItojCkfxrlLFU3sVKLN-Z2UVcMhA&s" 
+                  alt="Justice For Hadi Vai" 
+                  className="w-full h-full object-cover brightness-90 group-hover/portrait:scale-105 group-hover/portrait:brightness-100 transition-all duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                <div className="absolute bottom-12 left-12 right-12">
+                   <p className="text-[12px] font-black text-red-600 uppercase tracking-[0.6em] mb-4">Ashulia Youth Resilience</p>
+                   <div className="h-1.5 w-24 bg-red-600 rounded-full"></div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* 5. Committee Section Teaser */}
       <section id="committee" className="py-32 bg-white relative overflow-hidden">
          <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
@@ -4759,6 +4818,16 @@ const RuleItem = ({ text, index }: { text: string, index: string }) => (
   </motion.div>
 );
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -4937,6 +5006,7 @@ export default function App() {
     <AuthContext.Provider value={{ user, loading, login, logout, siteSettings, updateSettings }}>
       <LanguageContext.Provider value={{ lang, setLang, t }}>
         <Router>
+          <ScrollToTop />
           <div className="min-h-screen flex flex-col bg-bento-bg scroll-smooth relative overflow-hidden">
             {/* Global Background Design */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">

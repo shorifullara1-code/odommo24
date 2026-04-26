@@ -216,40 +216,6 @@ const CommitteePage = () => {
                      ))}
                   </div>
 
-                  <div className="space-y-16">
-                     <div className="flex items-center gap-6 justify-center">
-                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
-                        <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">{t('joint_secretaries')}</h3>
-                        <div className="h-px flex-grow bg-gray-100 max-w-xs"></div>
-                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
-                        {jointSecretaries.map((c, i) => (
-                           <motion.div 
-                              key={c.id} 
-                              initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.9 }} 
-                              whileInView={{ opacity: 1, scale: 1 }} 
-                              viewport={{ once: true }} 
-                              transition={{ delay: i * 0.05 }}
-                              className="group space-y-6 text-center will-change-transform"
-                           >
-                              <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
-                                 {c.image_url ? (
-                                   <img src={c.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" loading="lazy" decoding="async" />
-                                 ) : (
-                                   <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
-                                      {isFemale(c.name) ? <Venus size={40} /> : <Mars size={40} />}
-                                   </div>
-                                 )}
-                              </div>
-                              <div className="space-y-1">
-                                 <p className="font-serif italic text-lg text-bento-dark group-hover:text-bento-primary transition-colors">{c.name}</p>
-                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-light">{translateRole(c.role)}</p>
-                              </div>
-                           </motion.div>
-                        ))}
-                     </div>
-                  </div>
-
                   <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-8 md:px-20 border border-gray-100">
                      <div className="text-center space-y-4">
                         <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">{t('general_members')}</h3>

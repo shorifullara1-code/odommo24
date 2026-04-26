@@ -706,6 +706,56 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
+  // --- Visitors Stats ---
+  app.get('/api/visitors', async (req, res) => {
+    try {
+      // For a real production app, we would use a dedicated redis or stats server.
+      // Here we store a JSON in site_settings.
+      let stats: Record<string, number> = {};
+      const { data: settings } = await supabase.from('site_settings').select('*').eq('key', 'visitor_stats').single();
+      
+      const todayDate = new Date().toISOString().split('T')[0];
+      
+      if (settings && settings.value) {
+        try {
+          stats = JSON.parse(settings.value);
+        } catch(e) {}
+      }
+      
+      // Only track if not an admin? Or just track always. The `GET` doubles as tracking hit for simplicity.
+      stats[todayDate] = (stats[todayDate] || 0) + 1;
+      
+      // Prune old data more than 365 days
+      const activeStats: Record<string, number> = {};
+      const now = new Date();
+      let today = 0, weekly = 0, monthly = 0, yearly = 0;
+      
+      Object.keys(stats).forEach(dateStr => {
+         const dateObj = new Date(dateStr);
+         const diffDays = Math.ceil(Math.abs(now.getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
+         const count = stats[dateStr];
+         if (diffDays <= 366) {
+           activeStats[dateStr] = count;
+           if (dateStr === todayDate) today += count;
+           if (diffDays <= 7) weekly += count;
+           if (diffDays <= 30) monthly += count;
+           if (diffDays <= 365) yearly += count;
+         }
+      });
+      
+      // Save it back without blocking
+      supabase.from('site_settings').upsert({ 
+        key: 'visitor_stats', 
+        value: JSON.stringify(activeStats), 
+        updated_at: new Date().toISOString() 
+      }, { onConflict: 'key' }).then();
+      
+      res.json({ today, weekly, monthly, yearly });
+    } catch (err: any) {
+      res.json({ today: 1, weekly: 1, monthly: 1, yearly: 1 });
+    }
+  });
+
   // --- API Catch-all ---
   app.all('/api/*', (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });

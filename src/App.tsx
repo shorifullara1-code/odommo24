@@ -5176,6 +5176,81 @@ const ScrollToTop = () => {
   return null;
 };
 
+const VisitorStats = () => {
+  const [stats, setStats] = useState({ today: 0, weekly: 0, monthly: 0, yearly: 0 });
+
+  useEffect(() => {
+    fetch('/api/visitors')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) setStats(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <section className="py-24 relative overflow-hidden bg-bento-dark border-t border-white/5">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/2 left-1/4 w-[40rem] h-[40rem] bg-bento-primary/10 rounded-full blur-[100px] -translate-y-1/2"></div>
+        <div className="absolute top-1/2 right-1/4 w-[40rem] h-[40rem] bg-bento-accent/10 rounded-full blur-[100px] -translate-y-1/2"></div>
+      </div>
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center space-y-6 mb-20">
+          <motion.span 
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once:true }}
+            className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]"
+          >
+            Live Site Traffic
+          </motion.span>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once:true }}
+            className="text-4xl md:text-6xl font-serif text-white italic"
+          >
+            Our <span className="text-bento-primary">Global</span> Reach
+          </motion.h2>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {[
+            { label: 'Today', value: stats.today, delay: 0 },
+            { label: 'Weekly', value: stats.weekly, delay: 0.1 },
+            { label: 'Monthly', value: stats.monthly, delay: 0.2 },
+            { label: 'Yearly', value: stats.yearly, delay: 0.3 }
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: stat.delay, type: 'spring', bounce: 0.4 }}
+              viewport={{ once: true }}
+              className="relative group bg-white/5 backdrop-blur-md border border-white/10 rounded-[3rem] p-10 text-center hover:bg-white/10 transition-all duration-500 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-bento-primary/0 via-bento-primary/0 to-bento-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 mx-auto bg-white/5 rounded-2xl flex items-center justify-center mb-8 text-bento-primary group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                  <Activity size={32} />
+                </div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: stat.delay + 0.2, type: 'spring' }}
+                  viewport={{ once: true }}
+                  className="text-5xl md:text-6xl font-black italic text-white mb-4 tracking-tighter"
+                >
+                  {stat.value}
+                </motion.div>
+                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-white/50 group-hover:text-white/80 transition-colors">
+                  {stat.label}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -5322,6 +5397,7 @@ export default function App() {
                 <Route path="/rules" element={<RulesAndRegulationPage />} />
               </Routes>
             </main>
+            <VisitorStats />
             <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
               {/* Decorative Gradients */}
               <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[80px]"></div>

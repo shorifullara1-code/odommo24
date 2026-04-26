@@ -2424,6 +2424,7 @@ const AdminDashboard = () => {
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
+  const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -2469,6 +2470,16 @@ const AdminDashboard = () => {
       u.phone?.includes(searchTerm)
     );
   }, [users, searchTerm]);
+
+  useEffect(() => {
+    if (siteSettings?.logo_url) setLogoInput(siteSettings.logo_url);
+  }, [siteSettings]);
+
+  useEffect(() => {
+    if (siteSettings?.live_stream_link) {
+      setLiveLinkInput(siteSettings.live_stream_link);
+    }
+  }, [siteSettings?.live_stream_link]);
 
   if (loading) return <LoadingOverlay />;
 
@@ -2640,10 +2651,6 @@ const AdminDashboard = () => {
     setAdminStats({ ...adminStats, [type]: msg });
     setTimeout(() => setAdminStats({ success: '', error: '' }), 3000);
   };
-
-  useEffect(() => {
-    if (siteSettings?.logo_url) setLogoInput(siteSettings.logo_url);
-  }, [siteSettings]);
 
   const handleLogoUpdate = async () => {
     try {
@@ -2822,14 +2829,6 @@ const AdminDashboard = () => {
       return targetUrl;
     }
   };
-
-  const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]); // This might be missing from my previous view
-
-  useEffect(() => {
-    if (siteSettings?.live_stream_link) {
-      setLiveLinkInput(siteSettings.live_stream_link);
-    }
-  }, [siteSettings?.live_stream_link]);
 
   const updateOrderStatus = async (id: number, status: string) => {
     const res = await fetch(`/api/admin/orders/${id}/status`, {

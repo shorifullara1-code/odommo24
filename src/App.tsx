@@ -48,23 +48,51 @@ export const useLanguage = () => {
 };
 
 // --- Helper: Input Field ---
-const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder = "", required = false, disabled = false }: any) => (
-  <div className="space-y-1.5">
-    <label className="flex items-center gap-2 text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">
-      {Icon && <Icon size={12} className="text-bento-primary" />}
+const InputField = ({ label, icon: Icon, value, onChange, type = "text", placeholder = "", required = false, disabled = false, error, onBlur }: any) => (
+  <div className="space-y-1.5 group">
+    <label className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest pl-1 transition-colors ${error ? 'text-red-500' : 'text-bento-light'}`}>
+      {Icon && <Icon size={12} className={error ? 'text-red-500' : 'text-bento-primary'} />}
       {label} {required && <span className="text-bento-primary">*</span>}
     </label>
-    <input 
-      type={type} 
-      value={value}
-      placeholder={placeholder}
-      disabled={disabled}
-      className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:outline-none focus:ring-4 focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary transition text-sm font-medium disabled:opacity-50"
-      onChange={onChange}
-      required={required}
-    />
+    <div className="relative">
+      <input 
+        type={type} 
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`w-full px-5 py-4 rounded-2xl border-2 bg-gray-50 focus:outline-none focus:ring-4 transition text-sm font-medium disabled:opacity-50 ${
+          error 
+            ? 'border-red-500/50 focus:ring-red-500/5 focus:border-red-500' 
+            : 'border-bento-border focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary'
+        }`}
+        onChange={onChange}
+        onBlur={onBlur}
+        required={required}
+      />
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+          className="absolute -bottom-5 left-1 text-[9px] font-bold text-red-500 uppercase tracking-wider"
+        >
+           {error}
+        </motion.div>
+      )}
+    </div>
   </div>
 );
+
+const translateRoleHelper = (role: string, t: any) => {
+  if (!role) return '';
+  const roleMap: {[key: string]: string} = {
+    'আহ্বায়ক': 'role_convener',
+    'আহ্বায়ক': 'role_convener',
+    'সদস্য সচিব': 'role_member_secretary',
+    'যুগ্ম সদস্য সচিব': 'role_joint_secretary',
+    'সদস্য': 'role_member'
+  };
+  const key = roleMap[role];
+  return key ? t(key as any) : role;
+};
 
 // --- Pages ---
 
@@ -73,18 +101,7 @@ const CommitteePage = () => {
   const { t, lang } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
   
-  const translateRole = (role: string) => {
-    if (!role) return '';
-    const roleMap: {[key: string]: string} = {
-      'আহ্বায়ক': 'role_convener',
-      'আহ্বায়ক': 'role_convener',
-      'সদস্য সচিব': 'role_member_secretary',
-      'যুগ্ম সদস্য সচিব': 'role_joint_secretary',
-      'সদস্য': 'role_member'
-    };
-    const key = roleMap[role];
-    return key ? t(key as any) : role;
-  };
+  const translateRole = (role: string) => translateRoleHelper(role, t);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -906,65 +923,6 @@ const HomeOverview = () => {
          </motion.div>
       </section>
 
-      {/* Justice For Hadi Vai Section - Modern Glassmorphism with High Visibility Typography */}
-      <section className="container mx-auto px-4 sm:px-6 mb-32">
-        <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[3rem] md:rounded-[5rem] p-10 md:p-28 overflow-hidden relative group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]">
-          {/* Intense Red Glow FX for Presence */}
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-red-600/10 rounded-full blur-[140px] -z-10 group-hover:bg-red-600/15 transition-all duration-1000"></div>
-          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-bento-primary/5 rounded-full blur-[140px] -z-10"></div>
-          
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
-            <motion.div 
-               initial={{ opacity: 0, x: -30 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 0.8 }}
-               className="space-y-10 md:space-y-16"
-            >
-              <div className="space-y-6">
-                <span className="inline-block px-8 py-3 bg-red-600 text-white rounded-full text-[11px] font-[1000] uppercase tracking-[0.5em] shadow-2xl animate-pulse">In Solidarity</span>
-                <h2 className="text-6xl md:text-9xl font-serif font-black italic text-white leading-none tracking-tighter">
-                  Justice For <br />
-                  <span className="text-red-600 drop-shadow-[0_0_30px_rgba(220,38,38,0.6)]">Hadi Vai</span>
-                </h2>
-              </div>
-              
-              <div className="space-y-6 border-l-8 border-red-600 pl-10">
-                <p className="text-4xl md:text-7xl font-[1000] italic text-red-500 tracking-tight leading-none drop-shadow-lg">
-                  "Ideas Cannot Die"
-                </p>
-                <div className="h-2 w-32 bg-white/10 rounded-full"></div>
-                <p className="text-3xl md:text-5xl font-serif font-black text-white leading-relaxed drop-shadow-md">
-                  We need Justice <br /> For Hadi Vai
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.9 }}
-               whileInView={{ opacity: 1, scale: 1 }}
-               viewport={{ once: true }}
-               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-               className="relative"
-            >
-              <div className="absolute inset-0 bg-red-600/10 blur-[120px] rounded-full scale-110"></div>
-              <div className="relative z-10 w-full aspect-[4/5] rounded-[3rem] md:rounded-[4rem] overflow-hidden border-2 border-white/10 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.8)] group/portrait">
-                <img 
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmywWC7UItojCkfxrlLFU3sVKLN-Z2UVcMhA&s" 
-                  alt="Justice For Hadi Vai" 
-                  className="w-full h-full object-cover brightness-90 group-hover/portrait:scale-105 group-hover/portrait:brightness-100 transition-all duration-1000"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
-                <div className="absolute bottom-12 left-12 right-12">
-                   <p className="text-[12px] font-black text-red-600 uppercase tracking-[0.6em] mb-4">Ashulia Youth Resilience</p>
-                   <div className="h-1.5 w-24 bg-red-600 rounded-full"></div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* 5. Committee Section Teaser */}
       <section id="committee" className="py-32 bg-white relative overflow-hidden">
          <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
@@ -998,6 +956,71 @@ const HomeOverview = () => {
                </div>
             </div>
          </div>
+      </section>
+
+      {/* Justice For Hadi Vai Section - Integrated into Home */}
+      <section className="container mx-auto px-4 sm:px-6 mb-32">
+        <motion.div 
+           initial={{ opacity: 0, y: 50 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="bg-[#0f172a] rounded-[3.5rem] md:rounded-[5rem] p-12 md:p-32 overflow-hidden relative group shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)]"
+        >
+          {/* Intense Dramatic Red Glow */}
+          <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-red-600/20 rounded-full blur-[160px] -z-10 group-hover:bg-red-600/30 transition-all duration-1000"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.08),transparent)] pointer-events-none"></div>
+          
+          <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center relative z-10">
+            <div className="space-y-12 md:space-y-20">
+              <div className="space-y-8">
+                <motion.span 
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="inline-block px-8 py-3 bg-red-600 text-white rounded-full text-[11px] font-[1000] uppercase tracking-[0.6em] shadow-[0_0_40px_rgba(220,38,38,0.4)]"
+                >
+                  Unwavering Stand
+                </motion.span>
+                <h2 className="text-7xl md:text-[11rem] font-serif font-black italic text-white leading-none tracking-tighter">
+                  Justice <br />
+                  <span className="text-red-600 drop-shadow-[0_0_50px_rgba(220,38,38,0.8)]">Hadi Vai</span>
+                </h2>
+              </div>
+              
+              <div className="space-y-10 border-l-[12px] border-red-600 pl-12">
+                <p className="text-5xl md:text-8xl font-[1000] italic text-red-500 tracking-tight leading-none drop-shadow-xl">
+                  "Ideas Cannot Die"
+                </p>
+                <div className="h-3 w-48 bg-white/10 rounded-full"></div>
+                <p className="text-4xl md:text-6xl font-serif font-black text-white leading-tight italic">
+                  We Demand Truth. <br /> We Need <span className="text-red-500">Justice.</span>
+                </p>
+              </div>
+            </div>
+
+            <motion.div 
+               whileHover={{ rotate: -2, scale: 1.02 }}
+               transition={{ type: "spring", stiffness: 300 }}
+               className="relative"
+            >
+              <div className="absolute -inset-10 bg-red-600/20 shadow-[0_0_100px_rgba(220,38,38,0.3)] blur-[120px] rounded-full"></div>
+              <div className="relative z-10 w-full aspect-[4/5] rounded-[4rem] md:rounded-[5rem] overflow-hidden border-4 border-white/20 shadow-2xl group/portrait bg-black">
+                <img 
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmywWC7UItojCkfxrlLFU3sVKLN-Z2UVcMhA&s" 
+                  alt="Justice For Hadi Vai" 
+                  className="w-full h-full object-cover grayscale group-hover/portrait:grayscale-0 group-hover/portrait:scale-105 transition-all duration-1000 opacity-80 group-hover/portrait:opacity-100"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-90"></div>
+                <div className="absolute bottom-16 left-16 right-16">
+                   <div className="space-y-2">
+                     <p className="text-[14px] font-black text-red-600 uppercase tracking-[0.8em] mb-4">SYMBOLISED RESILIENCE</p>
+                     <div className="h-2 w-32 bg-red-600 rounded-full"></div>
+                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
       </section>
     </div>
   );
@@ -1079,11 +1102,26 @@ const Login = () => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const validateField = (name: string, value: string) => {
+    let err = '';
+    if (name === 'userId') {
+      if (!value) err = 'Member ID is required';
+      else if (value.length < 3) err = 'ID too short';
+    }
+    if (name === 'password') {
+      if (!value) err = 'Password is required';
+      else if (value.length < 6) err = 'Min 6 characters required';
+    }
+    setFieldErrors(prev => ({ ...prev, [name]: err }));
+    return err;
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     // Get container relative mouse position
@@ -1264,17 +1302,28 @@ const Login = () => {
                   <label className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500">Identity Identifier</label>
                   <div className="relative group">
                     <div className={`absolute inset-0 bg-bento-primary/5 blur-xl rounded-[2rem] transition-opacity duration-500 ${focusedField === 'username' ? 'opacity-100' : 'opacity-0'}`}></div>
-                    <UserIcon className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'username' ? 'text-bento-primary scale-110' : 'text-gray-700'}`} size={18} />
+                    <UserIcon className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'username' ? (fieldErrors.userId ? 'text-red-500 scale-110' : 'text-bento-primary scale-110') : 'text-gray-700'}`} size={18} />
                     <input 
                       type="text" 
                       value={userId}
-                      onChange={(e) => setUserId(e.target.value)}
+                      onChange={(e) => {
+                        setUserId(e.target.value);
+                        if (fieldErrors.userId) validateField('userId', e.target.value);
+                      }}
                       onFocus={() => setFocusedField('username')}
-                      onBlur={() => setFocusedField(null)}
+                      onBlur={() => {
+                        setFocusedField(null);
+                        validateField('userId', userId);
+                      }}
                       placeholder="e.g. @odommo_root"
                       required
-                      className="w-full pl-18 pr-6 py-6 bg-white/[0.015] border border-white/[0.05] rounded-[2.25rem] focus:bg-white/[0.04] focus:border-bento-primary/40 focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10"
+                      className={`w-full pl-18 pr-6 py-6 bg-white/[0.015] border rounded-[2.25rem] focus:bg-white/[0.04] focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10 ${
+                        fieldErrors.userId ? 'border-red-500 focus:border-red-500' : 'border-white/[0.05] focus:border-bento-primary/40'
+                      }`}
                     />
+                    {fieldErrors.userId && (
+                      <motion.span initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="absolute -bottom-6 left-6 text-[10px] text-red-500 font-bold uppercase tracking-wider z-20">{fieldErrors.userId}</motion.span>
+                    )}
                   </div>
                 </div>
 
@@ -1282,16 +1331,24 @@ const Login = () => {
                   <label className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-500">Access Key</label>
                   <div className="relative group">
                     <div className={`absolute inset-0 bg-bento-primary/5 blur-xl rounded-[2rem] transition-opacity duration-500 ${focusedField === 'password' ? 'opacity-100' : 'opacity-0'}`}></div>
-                    <Lock className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'password' ? 'text-bento-primary scale-110' : 'text-gray-700'}`} size={18} />
+                    <Lock className={`absolute left-7 top-1/2 -translate-y-1/2 transition-all duration-500 ${focusedField === 'password' ? (fieldErrors.password ? 'text-red-500 scale-110' : 'text-bento-primary scale-110') : 'text-gray-700'}`} size={18} />
                     <input 
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (fieldErrors.password) validateField('password', e.target.value);
+                      }}
                       onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField(null)}
+                      onBlur={() => {
+                        setFocusedField(null);
+                        validateField('password', password);
+                      }}
                       placeholder="••••••••"
                       required
-                      className="w-full pl-18 pr-18 py-6 bg-white/[0.015] border border-white/[0.05] rounded-[2.25rem] focus:bg-white/[0.04] focus:border-bento-primary/40 focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10"
+                      className={`w-full pl-18 pr-18 py-6 bg-white/[0.015] border rounded-[2.25rem] focus:bg-white/[0.04] focus:ring-[15px] focus:ring-bento-primary/5 outline-none transition-all text-white placeholder-white/10 font-medium relative z-10 ${
+                        fieldErrors.password ? 'border-red-500 focus:border-red-500' : 'border-white/[0.05] focus:border-bento-primary/40'
+                      }`}
                     />
                     <button 
                       type="button"
@@ -1300,6 +1357,9 @@ const Login = () => {
                     >
                       {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                     </button>
+                    {fieldErrors.password && (
+                      <motion.span initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="absolute -bottom-6 left-6 text-[10px] text-red-500 font-bold uppercase tracking-wider z-20">{fieldErrors.password}</motion.span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1357,8 +1417,21 @@ const Register = () => {
     nid_number: '', emergency_contact: '', profile_image: ''
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  const validateField = (name: string, value: string) => {
+    let err = '';
+    if (!value) err = 'This field is required';
+    else if (name === 'email' && !/\S+@\S+\.\S+/.test(value)) err = 'Invalid email address';
+    else if (name === 'phone' && !/^\d{11}$/.test(value)) err = 'Must be 11 digits';
+    else if (name === 'nid_number' && value.length < 10) err = 'Invalid NID length';
+    else if (name === 'password' && value.length < 6) err = 'Min 6 characters';
+    
+    setFieldErrors(prev => ({ ...prev, [name]: err }));
+    return !err;
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -2093,6 +2166,23 @@ const ProfilePage = () => {
   );
 };
 
+const NavLink = ({ to, children, icon: Icon, location, onClick }: any) => {
+    const isActive = location?.pathname === to;
+    return (
+      <Link 
+        to={to} 
+        onClick={onClick}
+        className={`flex items-center gap-1 px-3 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative group overflow-hidden ${isActive ? 'bg-white/10 text-bento-primary' : 'text-white/70 hover:text-white'}`}
+      >
+        {Icon && <Icon size={14} className={`${isActive ? 'scale-125' : 'group-hover:scale-125'} transition-transform`} />}
+        {children}
+        {isActive && (
+          <motion.div layoutId="nav-active" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-bento-primary rounded-full" />
+        )}
+      </Link>
+    );
+  };
+
 const Navbar = () => {
   const { user, logout, siteSettings } = useAuth();
   const { lang, setLang, t } = useLanguage();
@@ -2107,54 +2197,40 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const NavLink = ({ to, children, icon: Icon }: any) => {
-    const isActive = location.pathname === to;
-    return (
-      <Link 
-        to={to} 
-        className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative group overflow-hidden ${isActive ? 'bg-white/10 text-bento-primary' : 'text-white/70 hover:text-white'}`}
-      >
-        {Icon && <Icon size={14} className={`${isActive ? 'scale-125' : 'group-hover:scale-125'} transition-transform`} />}
-        {children}
-        {isActive && (
-          <motion.div layoutId="nav-active" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-bento-primary rounded-full" />
-        )}
-      </Link>
-    );
-  };
-
   const isHome = location.pathname === "/";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8">
         <div className="flex items-center justify-between">
-           <Link to="/" className="flex items-center gap-4 group">
-              <motion.div 
-                whileHover={{ rotate: 12, scale: 1.1 }}
-                className="w-12 h-12 bg-white rounded-2xl p-2 shadow-2xl relative overflow-hidden"
-              >
-                 <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                 <div className="absolute inset-0 bg-gradient-to-tr from-bento-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.div>
-              <div className="hidden sm:block">
-                 <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Adomyo 24</h2>
-                 <p className="text-[7px] font-black text-bento-primary uppercase tracking-[0.3em] mt-1 italic leading-none">The Fearless Youth</p>
-              </div>
-           </Link>
-
-           {/* Desktop Links */}
-           <div className="hidden lg:flex items-center gap-2 bg-white/5 p-1 rounded-3xl border border-white/5">
-            <NavLink to="/" icon={LayoutGrid}>{t('nav_home')}</NavLink>
-            <NavLink to="/live" icon={Tv}>{t('nav_live')}</NavLink>
-            <NavLink to="/shop" icon={ShoppingBag}>{t('nav_shop')}</NavLink>
-            <NavLink to="/committee" icon={Users}>{t('nav_committee')}</NavLink>
-            <NavLink to="/members" icon={ClipboardList}>{t('nav_member_list')}</NavLink>
-            <NavLink to="/notices" icon={Bell}>{t('nav_notices')}</NavLink>
-            <NavLink to="/events" icon={Calendar}>{t('nav_events')}</NavLink>
-            <NavLink to="/donations" icon={Heart}>{t('nav_donations')}</NavLink>
-            <NavLink to="/rules" icon={Info}>{t('nav_rules')}</NavLink>
-            <NavLink to="/contact" icon={Phone}>{t('nav_contact')}</NavLink>
+           <div className="flex items-center gap-2 md:gap-4">
+             <Link to="/" className="flex items-center gap-4 group">
+                <motion.div 
+                  whileHover={{ rotate: 12, scale: 1.1 }}
+                  className="w-12 h-12 bg-white rounded-2xl p-2 shadow-2xl relative overflow-hidden"
+                >
+                   <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                   <div className="absolute inset-0 bg-gradient-to-tr from-bento-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </motion.div>
+                <div className="hidden sm:block">
+                   <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Adomyo 24</h2>
+                   <p className="text-[7px] font-black text-bento-primary uppercase tracking-[0.3em] mt-1 italic leading-none">The Fearless Youth</p>
+                </div>
+             </Link>
+  
+             {/* Desktop Links */}
+             <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-3xl border border-white/5">
+              <NavLink to="/" icon={LayoutGrid} location={location}>{t('nav_home')}</NavLink>
+              <NavLink to="/live" icon={Tv} location={location}>{t('nav_live')}</NavLink>
+              <NavLink to="/shop" icon={ShoppingBag} location={location}>{t('nav_shop')}</NavLink>
+              <NavLink to="/committee" icon={Users} location={location}>{t('nav_committee')}</NavLink>
+              <NavLink to="/members" icon={ClipboardList} location={location}>{t('nav_member_list')}</NavLink>
+              <NavLink to="/notices" icon={Bell} location={location}>{t('nav_notices')}</NavLink>
+              <NavLink to="/events" icon={Calendar} location={location}>{t('nav_events')}</NavLink>
+              <NavLink to="/donations" icon={Heart} location={location}>{t('nav_donations')}</NavLink>
+              <NavLink to="/rules" icon={Info} location={location}>{t('nav_rules')}</NavLink>
+              <NavLink to="/contact" icon={Phone} location={location}>{t('nav_contact')}</NavLink>
+             </div>
            </div>
 
            <div className="flex items-center gap-4">
@@ -2231,15 +2307,15 @@ const Navbar = () => {
                        { to: "/rules", label: t('nav_rules'), icon: Info },
                        { to: "/contact", label: t('nav_contact'), icon: Phone }
                      ].map((item) => (
-                       <Link 
+                       <NavLink 
                          key={item.label}
                          to={item.to} 
-                         className={`flex items-center gap-4 p-6 rounded-3xl transition-all border border-transparent ${location.pathname === item.to ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/30' : 'text-white/60 hover:bg-white/5 hover:border-white/5'}`} 
+                         location={location}
+                         icon={item.icon}
                          onClick={()=>setIsOpen(false)}
                        >
-                         <item.icon size={24} />
                          <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
-                       </Link>
+                       </NavLink>
                      ))}
                    </div>
 
@@ -2274,19 +2350,19 @@ const Navbar = () => {
 
 const AdminDashboard = () => {
   const { t, lang } = useLanguage();
+  const { user, siteSettings, updateSettings } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [notices, setNotices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
-  const [newEvenTitle, setNewEventTitle] = useState('');
+  const [newEventTitle, setNewEventTitle] = useState('');
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('members');
-  const { siteSettings, updateSettings } = useAuth();
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
@@ -2295,9 +2371,12 @@ const AdminDashboard = () => {
   const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [liveLinkInput, setLiveLinkInput] = useState('');
+  const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
+
+  const translateRole = (role: string) => translateRoleHelper(role, t);
 
   const fetchData = async () => {
     fetch('/api/admin/users').then(r => r.ok ? r.json() : []).then(data => setUsers(Array.isArray(data) ? data : []));
@@ -2564,11 +2643,11 @@ const AdminDashboard = () => {
   };
 
   const createEvent = async () => {
-    if (!newEvenTitle) return;
+    if (!newEventTitle) return;
     await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newEvenTitle, description: 'New event scheduled.', date: new Date().toISOString() })
+      body: JSON.stringify({ title: newEventTitle, description: 'New event scheduled.', date: new Date().toISOString() })
     });
     setNewEventTitle('');
     fetch('/api/events').then(r => r.json()).then(setEvents);
@@ -2650,7 +2729,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const [liveLinkInput, setLiveLinkInput] = useState(siteSettings?.live_stream_link || '');
+  const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]); // This might be missing from my previous view
 
   useEffect(() => {
     if (siteSettings?.live_stream_link) {
@@ -3263,7 +3342,7 @@ const AdminDashboard = () => {
                <div className="bento-card bg-white p-10 shadow-2xl space-y-8">
                   <h3 className="text-xl font-black italic border-b pb-4">নতুন ইভেন্ট যোগ করুন</h3>
                   <div className="space-y-6">
-                     <InputField label="ইভেন্ট টাইটেল" value={newEvenTitle} onChange={(e:any) => setNewEventTitle(e.target.value)} placeholder="উদা: শীতবস্ত্র বিতরণ - ২০২৪" />
+                     <InputField label="ইভেন্ট টাইটেল" value={newEventTitle} onChange={(e:any) => setNewEventTitle(e.target.value)} placeholder="উদা: শীতবস্ত্র বিতরণ - ২০২৪" />
                      <button onClick={createEvent} className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition">ইভেন্ট তৈরি করুন</button>
                   </div>
                </div>
@@ -3366,96 +3445,41 @@ const AdminDashboard = () => {
                               </div>
                               <div>
                                  <p className="font-bold text-sm italic">{m.name}</p>
-                                 <p className="text-[9px] font-black uppercase tracking-widest text-bento-primary">{m.role}</p>
-                                 <p className="text-[8px] text-gray-400 font-mono">Order: {m.sort_order}</p>
-                              </div>
-                           </div>
-                           <div className="flex gap-2">
-                              <button onClick={() => handleCommitteeEdit(m)} className="p-4 bg-white text-bento-primary rounded-2xl opacity-0 group-hover:opacity-100 transition hover:bg-bento-primary hover:text-white shadow-sm border border-bento-border/50">
-                                 <Settings size={18} />
-                              </button>
-                              <button onClick={() => deleteCommitteeMember(m.id)} className="p-4 bg-white text-red-500 rounded-2xl opacity-0 group-hover:opacity-100 transition hover:bg-red-50 shadow-sm border border-bento-border/50">
-                                 <Trash2 size={18} />
-                              </button>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-            </div>
-         </motion.div>
-      )}
-
-      {activeTab === 'settings' && (
-         <motion.div 
-            key="settings" 
-            initial={{ opacity:0, y:20 }} 
-            animate={{ opacity:1, y:0 }} 
-            exit={{ opacity:0, y:-20 }} 
-            transition={{ duration:0.3 }}
-            className="grid lg:grid-cols-2 gap-10"
-         >
-            {/* Logo Settings */}
-            <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-8 relative">
-               <h3 className="text-2xl font-black italic flex items-center gap-3 border-b-2 border-bento-border pb-4">
-                  <Settings className="text-bento-primary" /> লোগো ম্যানেজমেন্ট
-               </h3>
-               {adminStats.success && <p className="absolute top-4 right-12 text-green-500 font-bold text-[10px] uppercase animate-bounce">{adminStats.success}</p>}
-               <div className="flex flex-col items-center gap-6">
-                  <div className="w-32 h-32 bg-gray-50 rounded-3xl border-2 border-bento-primary overflow-hidden shadow-xl">
-                     <img src={logoInput || siteSettings?.logo_url} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="w-full space-y-4">
-                     <InputField label="লোগো URL" value={logoInput} onChange={(e:any)=>setLogoInput(e.target.value)} placeholder="Image URL এখানে দিন..." />
-                     <div className="flex gap-4">
-                        <button onClick={handleLogoUpdate} className="flex-grow bg-bento-primary text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition">URL আপডেট করুন</button>
-                        <button 
-                           onClick={() => { setUploadTarget('logo'); fileInputRef.current?.click(); }} 
-                           className="bg-bento-dark text-white px-6 py-4 rounded-xl font-black text-center"
-                        >
-                           <Camera size={18} />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-            {/* Hero Slider Settings */}
-            <div className="bento-card border-none bg-white p-12 shadow-2xl space-y-8 flex flex-col relative">
-               <h3 className="text-2xl font-black italic flex items-center gap-3 border-b-2 border-bento-border pb-4">
-                  <Activity className="text-bento-accent" /> হিরো স্লাইডার ম্যানেজমেন্ট
-               </h3>
-               {adminStats.success && <p className="absolute top-4 right-12 text-green-500 font-bold text-[10px] uppercase animate-bounce">{adminStats.success}</p>}
-               {adminStats.error && <p className="absolute top-4 right-12 text-red-500 font-bold text-[10px] uppercase">{adminStats.error}</p>}
-               <div className="space-y-6 flex-grow">
-                  <div className="grid grid-cols-2 gap-4">
-                     {siteSettings?.hero_images && JSON.parse(siteSettings.hero_images).map((url: string, idx: number) => (
-                        <div key={idx} className="relative aspect-video rounded-xl overflow-hidden border border-bento-border group">
-                           <img src={url} className="w-full h-full object-cover" />
-                           <button onClick={() => removeHeroImg(idx)} className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition shadow-lg"><Trash2 size={12} /></button>
-                        </div>
-                     ))}
-                  </div>
-                  <div className="space-y-4 mt-auto pt-6 border-t">
-                     <InputField label="নতুন ইমেজ URL" value={heroInput} onChange={(e:any)=>setHeroInput(e.target.value)} placeholder="নতুন ইমেজের URL এখানে দিন..." />
-                     <div className="flex gap-4">
-                        <button onClick={handleHeroAdd} className="flex-grow bg-bento-accent text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition">ইমেজ যোগ করুন</button>
-                        <button 
-                           onClick={() => { setUploadTarget('hero'); fileInputRef.current?.click(); }} 
-                           className="bg-bento-dark text-white px-6 py-4 rounded-xl font-black text-center"
-                        >
-                           <Camera size={18} />
-                        </button>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-         </motion.div>
-      )}
-
-      <AnimatePresence>
+                                  <p className="text-[9px] font-black uppercase tracking-widest text-bento-light">{translateRole(m.role)}</p>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                               <button 
+                                 onClick={() => {
+                                   setEditingCommitteeMember(m);
+                                   setNewMember({
+                                     name: m.name,
+                                     role: m.role,
+                                     image_url: m.image_url,
+                                     sort_order: m.sort_order
+                                   });
+                                 }} 
+                                 className="p-2 text-bento-primary hover:bg-bento-primary/10 rounded-lg transition"
+                               >
+                                  <Settings size={14} />
+                               </button>
+                               <button onClick={() => deleteCommitteeMember(m.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+                                  <Trash2 size={14} />
+                               </button>
+                            </div>
+                         </div>
+                      ))}
+                      {committee.length === 0 && (
+                         <div className="py-20 text-center space-y-4 opacity-30">
+                            <Users size={32} className="mx-auto" />
+                            <p className="text-sm font-serif italic">কোনো সদস্য তালিকাভুক্ত নেই</p>
+                         </div>
+                      )}
+                   </div>
+                </div>
+              </div>
+           </motion.div>
+         )}
         {selectedUser && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="absolute inset-0 bg-[rgba(47,54,64,0.8)] backdrop-blur-xl" />
@@ -3515,7 +3539,7 @@ const AdminDashboard = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+
         {activeTab === 'live' && (
           <motion.div 
             key="live" 
@@ -3523,9 +3547,9 @@ const AdminDashboard = () => {
             animate={{ opacity:1, y:0 }} 
             exit={{ opacity:0, y:-20 }} 
             transition={{ duration:0.3 }}
-            className="grid lg:grid-cols-2 gap-12 pb-20"
+            className="grid lg:grid-cols-2 gap-12"
           >
-             <div className="bg-gray-50 p-10 rounded-[3rem] border border-bento-border space-y-8">
+             <div className="bg-white p-10 rounded-[3rem] border border-bento-border shadow-2xl space-y-8">
                 <div className="flex items-center gap-4">
                    <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Tv size={24} /></div>
                    <h3 className="text-2xl font-black italic">{t('admin_manage_live')}</h3>
@@ -3685,16 +3709,16 @@ const AdminDashboard = () => {
                         </div>
                      </div>
                   ))}
-                  {products.length === 0 && (
-                     <div className="py-32 text-center space-y-6 opacity-30">
-                        <ShoppingBag size={48} className="mx-auto" />
-                        <p className="text-xl font-serif italic">কোনো পণ্য তালিকাভুক্ত নেই</p>
-                     </div>
-                  )}
                </div>
+               {products.length === 0 && (
+                  <div className="py-32 text-center space-y-6 opacity-30">
+                     <ShoppingBag size={48} className="mx-auto" />
+                     <p className="text-xl font-serif italic">কোনো পণ্য তালিকাভুক্ত নেই</p>
+                  </div>
+               )}
             </div>
-          </motion.div>
-        )}
+         </motion.div>
+       )}
         {activeTab === 'orders' && (
           <motion.div 
             key="orders" 
@@ -3710,27 +3734,27 @@ const AdminDashboard = () => {
                   <p className="text-xs text-bento-light uppercase tracking-widest">মোট অর্ডার সংখ্যা: {orders.length}</p>
                </div>
                <button onClick={downloadOrdersPDF} className="w-full sm:w-auto flex items-center justify-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
-                  <Download size={16} /> পিডিএফ ডাউনলোড
+                  <Download size={16} /> পিডিএফ ডাউনলোড করুন
                </button>
             </div>
-            
-            <div className="bento-card border border-bento-border bg-white overflow-hidden !p-0">
+
+            <div className="bg-white rounded-[2.5rem] border border-bento-border overflow-hidden">
                <div className="overflow-x-auto">
-                 <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50 border-b border-bento-border text-[10px] font-black uppercase tracking-widest text-bento-light">
-                      <tr>
-                        <th className="px-8 py-5">অর্ডার ID</th>
-                        <th className="px-8 py-5">গ্রাহক</th>
-                        <th className="px-8 py-5">ঠিকানা</th>
-                        <th className="px-8 py-5">মবলগ</th>
-                        <th className="px-8 py-5">পদ্ধতি</th>
-                        <th className="px-8 py-5">স্ট্যাটাস</th>
-                        <th className="px-8 py-5">অ্যাকশন</th>
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b-2 border-bento-border">
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">ID</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Customer</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Address</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Amount</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Payment</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Status</th>
+                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-bento-light">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-bento-border">
-                      {orders.map(o => (
-                        <tr key={o.id} className="hover:bg-gray-50 transition">
+                    <tbody>
+                      {orders.map((o) => (
+                        <tr key={o.id} className="border-b border-bento-border hover:bg-gray-50/50 transition">
                           <td className="px-8 py-5 text-xs font-black text-bento-primary">#{o.id}</td>
                           <td className="px-8 py-5">
                              <p className="font-bold italic text-bento-dark">{o.customer_name}</p>
@@ -3785,8 +3809,18 @@ const CheckoutPage = () => {
     address: '',
     email: ''
   });
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const validateField = (name: string, value: string) => {
+    let err = '';
+    if (!value) err = 'This field is required';
+    else if (name === 'email' && !/\S+@\S+\.\S+/.test(value)) err = 'Invalid email';
+    else if (name === 'phone' && !/^\d{11}$/.test(value)) err = 'Must be 11 digits';
+    setFieldErrors(prev => ({ ...prev, [name]: err }));
+    return !err;
+  };
 
   useEffect(() => {
     if (!product) {
@@ -3796,6 +3830,13 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    let isValid = true;
+    Object.keys(formData).forEach(key => {
+      if (!validateField(key, (formData as any)[key])) isValid = false;
+    });
+    if (!isValid) return;
+
     setLoading(true);
     try {
       const res = await fetch('/api/orders', {
@@ -4822,7 +4863,15 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Handling smooth scroll issues or async content mounting
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'instant'
+      });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   return null;

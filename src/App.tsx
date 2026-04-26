@@ -96,10 +96,35 @@ const translateRoleHelper = (role: string, t: any) => {
 
 // --- Pages ---
 
+const LoadingOverlay = () => (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bento-dark/80 backdrop-blur-md">
+    <motion.div 
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: [0.8, 1.1, 1], opacity: 1 }}
+      transition={{ 
+        scale: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+        opacity: { duration: 0.5 }
+      }}
+      className="relative"
+    >
+      <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-bento-primary/30 shadow-[0_0_50px_rgba(192,57,43,0.3)] bg-white p-2">
+        <img 
+          src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=ne_FHi7l58UQ7kNvwFGdqRp&_nc_oc=AdpQpWG9Ap4Z85Ni5FGJjahJ9HQHzLDr-0B-nnvW_UGMHAu6QowUSInwGBrSfY0bDuA&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=uCVPmNz7IMXnXIraqg49rg&_nc_ss=7b2a8&oh=00_Af2yRnlB3SZXzNwR9SyHSI0qKawSCM5hZBNAckXpWpyT0Q&oe=69F3E40F" 
+          alt="Loading..." 
+          className="w-full h-full object-contain"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+      <div className="absolute -inset-4 border-2 border-bento-primary/20 rounded-[2.5rem] animate-ping" />
+    </motion.div>
+  </div>
+);
+
 const CommitteePage = () => {
   const [committee, setCommittee] = useState<any[]>([]);
   const { t, lang } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const translateRole = (role: string) => translateRoleHelper(role, t);
 
@@ -107,9 +132,16 @@ const CommitteePage = () => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
+    fetch('/api/committee')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setCommittee(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  if (loading) return <LoadingOverlay />;
 
   const isFemale = (name: string) => {
     const femaleKeywords = ['আক্তার', 'বেগম', 'মোসা:', 'মোসাম্মাৎ', 'নেছা', 'শান্তা', 'তৃষা', 'মিমি', 'রুমা', 'তাসনিম', 'অহনা', 'মুক্তা', 'সোনিয়া', 'নেহা', 'লামিয়া'];
@@ -268,10 +300,18 @@ const CommitteePage = () => {
 const MemberListPage = () => {
   const [members, setMembers] = useState<any[]>([]);
   const { t } = useLanguage();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/members').then(r => r.ok ? r.json() : []).then(setMembers);
+    fetch('/api/members')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setMembers(data);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
@@ -325,10 +365,18 @@ const MemberListPage = () => {
 const NoticeBoardPage = () => {
   const [notices, setNotices] = useState<any[]>([]);
   const { t, lang } = useLanguage();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/notices').then(r => r.ok ? r.json() : []).then(setNotices);
+    fetch('/api/notices')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setNotices(data);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
@@ -1937,11 +1985,7 @@ const ProfilePage = () => {
   };
 
   if (loading && !profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-bento-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+    return <LoadingOverlay />;
   }
 
   const profileData = profile || {};
@@ -2360,6 +2404,7 @@ const AdminDashboard = () => {
   const [notices, setNotices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEventTitle, setNewEventTitle] = useState('');
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -2383,13 +2428,27 @@ const AdminDashboard = () => {
   const translateRole = (role: string) => translateRoleHelper(role, t);
 
   const fetchData = async () => {
-    fetch('/api/admin/users').then(r => r.ok ? r.json() : []).then(data => setUsers(Array.isArray(data) ? data : []));
-    fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
-    fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
-    fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
-    fetch('/api/admin/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
-    fetch('/api/products').then(r => r.ok ? r.json() : []).then(data => setProducts(Array.isArray(data) ? data : []));
-    fetch('/api/admin/orders').then(r => r.ok ? r.json() : []).then(data => setOrders(Array.isArray(data) ? data : []));
+    setLoading(true);
+    try {
+      const [u, e, c, d, n, p, o] = await Promise.all([
+        fetch('/api/admin/users').then(r => r.ok ? r.json() : []),
+        fetch('/api/events').then(r => r.ok ? r.json() : []),
+        fetch('/api/committee').then(r => r.ok ? r.json() : []),
+        fetch('/api/donations').then(r => r.ok ? r.json() : []),
+        fetch('/api/admin/notices').then(r => r.ok ? r.json() : []),
+        fetch('/api/products').then(r => r.ok ? r.json() : []),
+        fetch('/api/admin/orders').then(r => r.ok ? r.json() : [])
+      ]);
+      setUsers(Array.isArray(u) ? u : []);
+      setEvents(Array.isArray(e) ? e : []);
+      setCommittee(Array.isArray(c) ? c : []);
+      setDonations(Array.isArray(d) ? d : []);
+      setNotices(Array.isArray(n) ? n : []);
+      setProducts(Array.isArray(p) ? p : []);
+      setOrders(Array.isArray(o) ? o : []);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -2408,6 +2467,8 @@ const AdminDashboard = () => {
       u.phone?.includes(searchTerm)
     );
   }, [users, searchTerm]);
+
+  if (loading) return <LoadingOverlay />;
 
   const approveUser = async (userId: number) => {
     try {
@@ -3993,15 +4054,23 @@ const PublicMembersPage = () => {
   const { t, lang } = useLanguage();
   const [members, setMembers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/members').then(r => r.ok ? r.json() : []).then(data => setMembers(Array.isArray(data) ? data : []));
+    fetch('/api/members')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setMembers(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
   }, []);
 
   const filteredMembers = useMemo(() => {
     if (!searchTerm) return members;
     return members.filter(m => m.name?.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [members, searchTerm]);
+
+  if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-24 min-h-screen">
@@ -4056,9 +4125,18 @@ const PublicMembersPage = () => {
 const EventsPage = () => {
   const { t, lang } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
+    fetch('/api/events')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setEvents(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-20 space-y-16">
@@ -4129,10 +4207,7 @@ const ShopPage = () => {
       </div>
 
       {loading ? (
-        <div className="py-32 text-center">
-           <div className="w-16 h-16 border-4 border-bento-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-           <p className="mt-8 text-bento-light italic font-serif">একটু অপেক্ষা করুন...</p>
-        </div>
+        <LoadingOverlay />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 pb-20">
            {products.map((p, i) => (
@@ -4963,97 +5038,7 @@ export default function App() {
     }
   };
 
-  if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center font-sans bg-[#02040a] relative overflow-hidden">
-      {/* Cinematic Background Elements */}
-      <div className="absolute inset-0 z-0">
-        <motion.div 
-          animate={{ 
-            opacity: [0.1, 0.2, 0.1],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-bento-primary/10 blur-[80px] rounded-full"
-        />
-        <motion.div 
-          animate={{ 
-            opacity: [0.05, 0.15, 0.05],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear", delay: 2 }}
-          className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/5 blur-[80px] rounded-full"
-        />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
-      </div>
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 flex flex-col items-center"
-      >
-        <div className="relative">
-          {/* Logo Container with Glassmorphism */}
-          <motion.div
-            animate={{ 
-              y: [0, -10, 0],
-            }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="w-44 h-44 md:w-56 md:h-56 p-1 bg-white/[0.03] backdrop-blur-xl rounded-[3rem] border border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] relative"
-          >
-            <div className="w-full h-full rounded-[2.8rem] overflow-hidden bg-white/5 relative">
-              <img 
-                src="https://scontent.fdac207-1.fna.fbcdn.net/v/t39.30808-6/600325065_122105978607153564_2431888853554226083_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeHJ7ZaEPusVkByoCIbB_Hz_JzgHKhNoMoknOAcqE2gyidseH5fmTVXb5oAV_9QNKELdYtPeFST0ATocVHw0WmgX&_nc_ohc=ne_FHi7l58UQ7kNvwFGdqRp&_nc_oc=AdpQpWG9Ap4Z85Ni5FGJjahJ9HQHzLDr-0B-nnvW_UGMHAu6QowUSInwGBrSfY0bDuA&_nc_zt=23&_nc_ht=scontent.fdac207-1.fna&_nc_gid=X3eFKy0cWGVoCPMwutqwkA&oh=00_Af1SRllmiRxUm_xEB-aanSYmUIHfvc9Qr8WCllW47FwNwA&oe=69F1794F" 
-                alt="Adomyo 24 Loading logo" 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-              {/* Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            </div>
-
-            {/* Glowing Ring */}
-            <div className="absolute -inset-2 bg-bento-primary/20 blur-2xl rounded-[4rem] -z-10 animate-pulse"></div>
-          </motion.div>
-
-          {/* Dynamic Progress Bar Under Logo */}
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/5 rounded-full overflow-hidden border border-white/5">
-            <motion.div 
-              initial={{ x: "-100%" }}
-              animate={{ x: "100%" }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-full h-full bg-gradient-to-r from-transparent via-bento-primary to-transparent"
-            />
-          </div>
-        </div>
-
-        <div className="mt-20 space-y-6 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <motion.h1 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-2xl md:text-3xl font-black text-white tracking-[0.6em] uppercase italic bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500"
-            >
-              অদম্য ২৪
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 0.8 }}
-              className="text-[10px] font-mono text-white uppercase tracking-[0.5em] font-black"
-            >
-              System Initializing • v2.4a
-            </motion.p>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
+  if (loading) return <LoadingOverlay />;
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, siteSettings, updateSettings }}>

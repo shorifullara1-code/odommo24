@@ -213,6 +213,32 @@ app.post('/api/auth/login', async (req, res) => {
     res.json(users);
   });
 
+  // Admin: Create user manually
+  app.post('/api/admin/users/create', authenticateToken, isAdmin, async (req, res) => {
+    const { 
+      userId, password, name, email, phone, role, status,
+      blood_group, profession
+    } = req.body;
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).single();
+      const nextIdNumber = lastUser ? (1001 + lastUser.id) : 1001;
+      const memberIdNumber = `OD24-${String(nextIdNumber).padStart(4, '0')}`;
+
+      const { data, error } = await supabase.from('users').insert([{
+        userId, password: hashedPassword, name, email, phone, role: role || 'member',
+        blood_group, profession, member_id_number: memberIdNumber,
+        status: status || 'approved'
+      }]).select().single();
+
+      if (error) throw error;
+      res.status(201).json({ message: 'User created successfully', user: data });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Admin: Approve user
   app.patch('/api/admin/users/:id/approve', authenticateToken, isAdmin, async (req, res) => {
     try {
@@ -414,14 +440,46 @@ app.post('/api/auth/login', async (req, res) => {
 
   app.post('/api/admin/committee', authenticateToken, isAdmin, async (req, res) => {
     try {
-      const { name, role, image_url, sort_order } = req.body;
+      const { name, role, image_url, sort_order, userId, password } = req.body;
       if (!name || !role) {
         return res.status(400).json({ error: 'Name and Role are required' });
       }
-      const { error } = await supabase.from('committee_members')
-        .insert([{ name, role, image_url, sort_order: sort_order || 0 }]);
+      
+      let hashedPassword = null;
+      if (password) {
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
+
+      const { data, error } = await supabase.from('committee_members')
+        .insert([{ 
+          name, 
+          role, 
+          image_url, 
+          sort_order: sort_order || 0,
+          user_id: userId || null,
+          password: hashedPassword || null
+        }]).select().single();
+        
       if (error) throw error;
-      res.status(201).json({ message: 'Committee member added' });
+
+      // If credentials provided, also create a record in users table for login
+      if (userId && password) {
+        const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).single();
+        const nextIdNumber = lastUser ? (1001 + lastUser.id) : 1001;
+        const memberIdNumber = `OD24-${String(nextIdNumber).padStart(4, '0')}`;
+
+        await supabase.from('users').insert([{
+          userId,
+          password: hashedPassword,
+          name,
+          role: 'member',
+          member_id_number: memberIdNumber,
+          status: 'approved',
+          profile_image: image_url
+        }]);
+      }
+
+      res.status(201).json({ message: 'Committee member added', member: data });
     } catch (err: any) {
       console.error('Error creating committee member:', err);
       res.status(500).json({ error: err.message });
@@ -430,11 +488,33 @@ app.post('/api/auth/login', async (req, res) => {
 
   app.put('/api/admin/committee/:id', authenticateToken, isAdmin, async (req, res) => {
     try {
-      const { name, role, image_url, sort_order, is_active } = req.body;
+      const { name, role, image_url, sort_order, is_active, userId, password } = req.body;
+      
+      const updateData: any = { 
+        name, 
+        role, 
+        image_url, 
+        sort_order, 
+        is_active: is_active === undefined ? 1 : is_active,
+        user_id: userId || null
+      };
+
+      if (password) {
+        updateData.password = await bcrypt.hash(password, 10);
+      }
+
       const { error } = await supabase.from('committee_members')
-        .update({ name, role, image_url, sort_order, is_active: is_active === undefined ? 1 : is_active })
+        .update(updateData)
         .eq('id', req.params.id);
+
       if (error) throw error;
+
+      // Update user password if provided
+      if (userId && password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await supabase.from('users').update({ password: hashedPassword }).eq('userId', userId);
+      }
+
       res.json({ message: 'Committee member updated' });
     } catch (err: any) {
       console.error('Error updating committee member:', err);

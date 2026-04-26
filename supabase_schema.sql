@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS committee_members (
   name TEXT NOT NULL,
   role TEXT NOT NULL,
   image_url TEXT,
+  userId TEXT, -- Connected userId for synchronization
+  password TEXT, -- Hashed password for committee member login
   sort_order INTEGER DEFAULT 0,
   is_active INTEGER DEFAULT 1,
   created_at TIMESTAMPTZ DEFAULT NOW()

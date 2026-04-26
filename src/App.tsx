@@ -2417,11 +2417,13 @@ const AdminDashboard = () => {
   const [committee, setCommittee] = useState<any[]>([]);
   const [editingCommitteeMember, setEditingCommitteeMember] = useState<any>(null);
   const [donations, setDonations] = useState<any[]>([]);
-  const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0 });
+  const [newMember, setNewMember] = useState({ name: '', role: '', image_url: '', sort_order: 0, userId: '', password: '' });
   const [adminStats, setAdminStats] = useState({ success: '', error: '' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [liveLinkInput, setLiveLinkInput] = useState('');
   const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -2728,7 +2730,7 @@ const AdminDashboard = () => {
       });
       if (res.ok) {
         showFeedback('success', 'সদস্য সফলভাবে যোগ করা হয়েছে');
-        setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
+        setNewMember({ name: '', role: '', image_url: '', sort_order: 0, userId: '', password: '' });
         fetchData();
       }
     } catch (err) {
@@ -2747,11 +2749,36 @@ const AdminDashboard = () => {
       if (res.ok) {
         showFeedback('success', 'সদস্য সফলভাবে আপডেট করা হয়েছে');
         setEditingCommitteeMember(null);
-        setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
+        setNewMember({ name: '', role: '', image_url: '', sort_order: 0, userId: '', password: '' });
         fetchData();
       }
     } catch (err) {
       showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
+    }
+  };
+
+  const createAdminUser = async () => {
+    if (!newUserForm.name || !newUserForm.userId || !newUserForm.password) {
+      showFeedback('error', 'প্রয়োজনীয় তথ্য প্রদান করুন');
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUserForm)
+      });
+      if (res.ok) {
+        showFeedback('success', 'সদস্য সফলভাবে যোগ করা হয়েছে');
+        setShowAddUserModal(false);
+        setNewUserForm({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
+        fetchData();
+      } else {
+        const data = await res.json();
+        showFeedback('error', data.error || 'যোগ করা সম্ভব হয়নি');
+      }
+    } catch (err) {
+      showFeedback('error', 'সার্ভারে সমস্যা হয়েছে');
     }
   };
 
@@ -2761,7 +2788,9 @@ const AdminDashboard = () => {
       name: member.name,
       role: member.role,
       image_url: member.image_url || '',
-      sort_order: member.sort_order || 0
+      sort_order: member.sort_order || 0,
+      userId: member.user_id || '',
+      password: ''
     });
   };
   const formatLiveLink = (url: string) => {
@@ -3143,19 +3172,28 @@ const AdminDashboard = () => {
                             </h2>
                             <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Verified Community Database</p>
                          </div>
-                         <div className="relative w-full md:w-96">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input 
-                               type="text" 
-                               placeholder="Phone বা Name দিয়ে খুঁজুন..." 
-                               className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:border-bento-primary focus:ring-4 focus:ring-bento-primary/5 outline-none transition text-sm font-medium"
-                               value={searchTerm}
-                               onChange={e => setSearchTerm(e.target.value)}
-                            />
-                         </div>
-                      </div>
+                          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                             <button 
+                                onClick={() => setShowAddUserModal(true)}
+                                className="flex items-center gap-2 px-6 py-3.5 bg-bento-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:shadow-bento-primary/30 transition-all active:scale-95 w-full sm:w-auto"
+                             >
+                                <UserPlus size={16} />
+                                সদস্য যোগ করুন
+                             </button>
+                             <div className="relative w-full md:w-80">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input 
+                                   type="text" 
+                                   placeholder="Phone বা Name দিয়ে খুঁজুন..." 
+                                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:border-bento-primary focus:ring-4 focus:ring-bento-primary/5 outline-none transition text-sm font-medium"
+                                   value={searchTerm}
+                                   onChange={e => setSearchTerm(e.target.value)}
+                                />
+                             </div>
+                          </div>
+                       </div>
 
-                      <div className="flex-grow">
+                       <div className="flex-grow">
                          <div className="grid grid-cols-12 px-10 py-5 bg-white border-b border-gray-100 hidden md:grid">
                             <div className="col-span-5 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Member Identity</div>
                             <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
@@ -3472,6 +3510,23 @@ const AdminDashboard = () => {
                      <InputField label="পদবী" value={newMember.role} onChange={(e:any)=>setNewMember({...newMember, role: e.target.value})} placeholder="উদা: কোষাধ্যক্ষ" />
                      <InputField label="ক্রম (Sort Order)" type="number" value={newMember.sort_order} onChange={(e:any)=>setNewMember({...newMember, sort_order: parseInt(e.target.value) || 0})} placeholder="0, 1, 2..." />
                      
+                     <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light">লগইন ক্রেডেনশিয়াল (ঐচ্ছিক)</p>
+                        <InputField 
+                          label="ইউজার আইডি (UserId)" 
+                          value={newMember.userId} 
+                          onChange={(e:any)=>setNewMember({...newMember, userId: e.target.value})} 
+                          placeholder="উদা: member01" 
+                        />
+                        <InputField 
+                          label="পাসওয়ার্ড" 
+                          type="password" 
+                          value={newMember.password} 
+                          onChange={(e:any)=>setNewMember({...newMember, password: e.target.value})} 
+                          placeholder="পাসওয়ার্ড লিখুন" 
+                        />
+                     </div>
+
                      <div className="flex gap-4">
                         <button 
                            onClick={editingCommitteeMember ? updateCommitteeMember : addCommitteeMember} 
@@ -3545,6 +3600,64 @@ const AdminDashboard = () => {
               </div>
            </motion.div>
          )}
+         <AnimatePresence>
+            {showAddUserModal && (
+               <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 sm:p-12">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAddUserModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                  <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+                     <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 className="text-xl font-black italic text-gray-900 flex items-center gap-3"><UserPlus className="text-bento-primary" /> নতুন সদস্য যোগ করুন</h3>
+                        <button onClick={() => setShowAddUserModal(false)} className="p-3 hover:bg-white rounded-xl transition"><X size={20} /></button>
+                     </div>
+                     <div className="p-10 overflow-y-auto space-y-6">
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <InputField label="সদস্যের নাম" value={newUserForm.name} onChange={(e:any)=>setNewUserForm({...newUserForm, name: e.target.value})} placeholder="নাম লিখুন" />
+                           <InputField label="ইউজার আইডি (Login ID)" value={newUserForm.userId} onChange={(e:any)=>setNewUserForm({...newUserForm, userId: e.target.value})} placeholder="উদা: member01" />
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <InputField label="পাসওয়ার্ড" type="password" value={newUserForm.password} onChange={(e:any)=>setNewUserForm({...newUserForm, password: e.target.value})} placeholder="পাসওয়ার্ড লিখুন" />
+                           <InputField label="মোবাইল নম্বর" value={newUserForm.phone} onChange={(e:any)=>setNewUserForm({...newUserForm, phone: e.target.value})} placeholder="ফোন নম্বর" />
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <InputField label="ইমেইল (ঐচ্ছিক)" value={newUserForm.email} onChange={(e:any)=>setNewUserForm({...newUserForm, email: e.target.value})} placeholder="ইমেইল" />
+                           <div className="space-y-2">
+                             <label className="text-[10px] font-black uppercase tracking-widest text-bento-light ml-2">রক্তের গ্রুপ</label>
+                             <select 
+                               className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-bento-primary transition-all outline-none text-sm font-medium"
+                               value={newUserForm.blood_group}
+                               onChange={(e:any)=>setNewUserForm({...newUserForm, blood_group: e.target.value})}
+                             >
+                                <option value="">নির্বাচন করুন</option>
+                                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
+                             </select>
+                           </div>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                           <InputField label="পেশা" value={newUserForm.profession} onChange={(e:any)=>setNewUserForm({...newUserForm, profession: e.target.value})} placeholder="পেশা" />
+                           <div className="space-y-2">
+                             <label className="text-[10px] font-black uppercase tracking-widest text-bento-light ml-2">রোল (Role)</label>
+                             <select 
+                               className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-bento-primary transition-all outline-none text-sm font-medium"
+                               value={newUserForm.role}
+                               onChange={(e:any)=>setNewUserForm({...newUserForm, role: e.target.value})}
+                             >
+                                <option value="member">Member</option>
+                                <option value="admin">Admin</option>
+                             </select>
+                           </div>
+                        </div>
+                        <button 
+                           onClick={createAdminUser}
+                           className="w-full bg-bento-dark text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-bento-primary transition-all active:scale-95 mt-6"
+                        >
+                           সদস্য তৈরি করুন
+                        </button>
+                     </div>
+                  </motion.div>
+               </div>
+            )}
+         </AnimatePresence>
+
         {selectedUser && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="absolute inset-0 bg-[rgba(47,54,64,0.8)] backdrop-blur-xl" />

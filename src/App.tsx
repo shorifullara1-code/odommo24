@@ -12,7 +12,7 @@ import {
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
   AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
-  Eye, EyeOff
+  Eye, EyeOff, Plus, Minus
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -3868,6 +3868,7 @@ const CheckoutPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any>(location.state?.product || null);
+  const [quantity, setQuantity] = useState<number>(location.state?.quantity || 1);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -3912,8 +3913,8 @@ const CheckoutPage = () => {
           phone: formData.phone,
           address: formData.address,
           email: formData.email,
-          total_amount: Number(product.price),
-          items: [product],
+          total_amount: Number(product.price) * quantity,
+          items: [{ ...product, quantity }],
           payment_method: 'Cash on Delivery'
         })
       });
@@ -3932,6 +3933,8 @@ const CheckoutPage = () => {
   };
 
   if (!product) return null;
+
+  const subtotal = Number(product.price) * quantity;
 
   if (success) {
     return (
@@ -4005,16 +4008,32 @@ const CheckoutPage = () => {
                       <div className="w-20 h-20 bg-white/10 rounded-2xl overflow-hidden border border-white/10 shrink-0">
                          <img src={product.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-grow">
                          <p className="font-bold text-lg italic leading-tight">{product.name}</p>
                          <p className="text-xs text-white/40 italic">{product.category}</p>
+                         
+                         <div className="flex items-center gap-3 mt-4 bg-white/5 p-1 rounded-xl w-fit">
+                            <button 
+                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all"
+                            >
+                               <Minus size={14} />
+                            </button>
+                            <span className="w-6 text-center font-black text-sm">{quantity}</span>
+                            <button 
+                              onClick={() => setQuantity(quantity + 1)}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all"
+                            >
+                               <Plus size={14} />
+                            </button>
+                         </div>
                       </div>
-                      <p className="ml-auto font-black italic">৳{product.price}</p>
+                      <p className="font-black italic">৳{product.price}</p>
                    </div>
                    <div className="pt-6 border-t border-white/10 space-y-4">
                       <div className="flex justify-between items-center text-sm font-medium text-white/40 italic">
-                         <span>Subtotal</span>
-                         <span>৳{product.price}</span>
+                         <span>Subtotal ({quantity} {lang === 'bn' ? 'টি' : 'Items'})</span>
+                         <span>৳{subtotal}</span>
                       </div>
                       <div className="flex justify-between items-center text-sm font-medium text-white/40 italic">
                          <span>Delivery Charge</span>
@@ -4022,7 +4041,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="pt-6 flex justify-between items-center border-t border-white/20">
                          <span className="text-xl font-serif italic">Total</span>
-                         <span className="text-3xl font-black text-bento-primary">৳{product.price}</span>
+                         <span className="text-3xl font-black text-bento-primary">৳{subtotal}</span>
                       </div>
                    </div>
                 </div>
@@ -4189,6 +4208,88 @@ const ShopPage = () => {
       });
   }, []);
 
+  const ProductCard = ({ p, i, navigate, t }: any) => {
+    const [quantity, setQuantity] = useState(1);
+    
+    return (
+      <motion.div 
+        key={p.id}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: i * 0.1 }}
+        className="group relative flex flex-col bg-white rounded-[2.5rem] border border-bento-border overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+      >
+        <div className="aspect-square bg-gray-50 overflow-hidden relative">
+           <img 
+             src={p.image_url || "https://picsum.photos/seed/product/400/400"} 
+             alt={p.name} 
+             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+             referrerPolicy="no-referrer"
+           />
+           <div className="absolute top-6 left-6 flex flex-col gap-2">
+             <span className="bg-bento-dark/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                {p.category}
+             </span>
+             {p.stock_status === 'out_of_stock' ? (
+                <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                   {t('out_of_stock')}
+                </span>
+             ) : (
+                <span className="bg-bento-accent text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
+                   {t('available')}
+                </span>
+             )}
+           </div>
+        </div>
+        
+        <div className="p-8 flex-grow flex flex-col justify-between">
+           <div className="space-y-3">
+              <h3 className="text-xl font-bold italic text-bento-dark leading-tight group-hover:text-bento-primary transition-colors">
+                {p.name}
+              </h3>
+              <p className="text-xs text-bento-light italic line-clamp-2 leading-relaxed">
+                {p.description}
+              </p>
+           </div>
+           
+           <div className="pt-8 space-y-6">
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+                    <button 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition-all"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-8 text-center font-black text-xs">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition-all"
+                    >
+                      <Plus size={14} />
+                    </button>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-bento-light">{t('product_price')}</p>
+                    <p className="text-xl font-black text-bento-primary">৳{Number(p.price) * quantity}</p>
+                 </div>
+              </div>
+
+              <button 
+                onClick={() => navigate('/checkout', { state: { product: p, quantity } })}
+                disabled={p.stock_status === 'out_of_stock'}
+                className={`w-full py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest ${p.stock_status === 'out_of_stock' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-bento-dark text-white hover:bg-bento-primary hover:shadow-[0_15px_30px_rgba(192,57,43,0.3)]'}`}
+              >
+                 <CreditCard size={18} />
+                 {t('buy_now') || 'এখনই কিনুন'}
+              </button>
+           </div>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16 min-h-screen">
       <div className="text-center space-y-6">
@@ -4211,62 +4312,7 @@ const ShopPage = () => {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 pb-20">
            {products.map((p, i) => (
-              <motion.div 
-                key={p.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative flex flex-col bg-white rounded-[2.5rem] border border-bento-border overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-              >
-                <div className="aspect-square bg-gray-50 overflow-hidden relative">
-                   <img 
-                     src={p.image_url || "https://picsum.photos/seed/product/400/400"} 
-                     alt={p.name} 
-                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                     referrerPolicy="no-referrer"
-                   />
-                   <div className="absolute top-6 left-6 flex flex-col gap-2">
-                     <span className="bg-bento-dark/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
-                        {p.category}
-                     </span>
-                     {p.stock_status === 'out_of_stock' ? (
-                        <span className="bg-red-500 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
-                           {t('out_of_stock')}
-                        </span>
-                     ) : (
-                        <span className="bg-bento-accent text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl">
-                           {t('available')}
-                        </span>
-                     )}
-                   </div>
-                </div>
-                
-                <div className="p-8 flex-grow flex flex-col justify-between">
-                   <div className="space-y-3">
-                      <h3 className="text-xl font-bold italic text-bento-dark leading-tight group-hover:text-bento-primary transition-colors">
-                        {p.name}
-                      </h3>
-                      <p className="text-xs text-bento-light italic line-clamp-2 leading-relaxed">
-                        {p.description}
-                      </p>
-                   </div>
-                   
-                   <div className="pt-8 flex items-center justify-between">
-                      <div className="space-y-0.5">
-                         <p className="text-[8px] font-black uppercase tracking-widest text-bento-light">{t('product_price')}</p>
-                         <p className="text-2xl font-black text-bento-primary">৳{p.price}</p>
-                      </div>
-                      <button 
-                        onClick={() => navigate('/checkout', { state: { product: p } })}
-                        disabled={p.stock_status === 'out_of_stock'}
-                        className={`p-4 rounded-2xl shadow-lg transition-all active:scale-95 ${p.stock_status === 'out_of_stock' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-bento-dark text-white hover:bg-bento-primary hover:shadow-[0_15px_30px_rgba(192,57,43,0.3)]'}`}
-                      >
-                         <CreditCard size={20} />
-                      </button>
-                   </div>
-                </div>
-              </motion.div>
+             <ProductCard key={p.id} p={p} i={i} navigate={navigate} t={t} />
            ))}
            {products.length === 0 && (
               <div className="col-span-full py-32 text-center space-y-10 border-2 border-dashed border-bento-border rounded-[3rem] bg-gray-50/50">

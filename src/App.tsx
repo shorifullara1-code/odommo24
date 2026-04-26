@@ -12,7 +12,7 @@ import {
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
   AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
-  Eye, EyeOff, Plus, Minus
+  Eye, EyeOff, Plus, Minus, Image
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -2411,7 +2411,7 @@ const AdminDashboard = () => {
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('members');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('members');
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
@@ -2496,9 +2496,18 @@ const AdminDashboard = () => {
   };
 
   const toggleRole = async (uId: number, currentRole: string) => {
-    const newRole = currentRole === 'admin' ? 'member' : 'admin';
-    await fetch(`/api/admin/users/${uId}/role`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) });
-    fetchData();
+    try {
+      const newRole = currentRole === 'admin' ? 'member' : 'admin';
+      const res = await fetch(`/api/admin/users/${uId}/role`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) });
+      if (res.ok) {
+        showFeedback('success', 'User role updated');
+        fetchData();
+      } else {
+        showFeedback('error', 'Role update failed');
+      }
+    } catch (err) {
+      showFeedback('error', 'Role update error');
+    }
   };
 
   const createNotice = async () => {
@@ -2718,13 +2727,22 @@ const AdminDashboard = () => {
 
   const createEvent = async () => {
     if (!newEventTitle) return;
-    await fetch('/api/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newEventTitle, description: 'New event scheduled.', date: new Date().toISOString() })
-    });
-    setNewEventTitle('');
-    fetch('/api/events').then(r => r.json()).then(setEvents);
+    try {
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newEventTitle, description: 'New event scheduled.', date: new Date().toISOString() })
+      });
+      if (res.ok) {
+        showFeedback('success', 'Event created successfully');
+        setNewEventTitle('');
+        fetchData();
+      } else {
+        showFeedback('error', 'Event creation failed');
+      }
+    } catch (err) {
+      showFeedback('error', 'Server error');
+    }
   };
 
   const addCommitteeMember = async () => {
@@ -2831,23 +2849,35 @@ const AdminDashboard = () => {
   };
 
   const updateOrderStatus = async (id: number, status: string) => {
-    const res = await fetch(`/api/admin/orders/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    });
-    if (res.ok) {
-      fetchData();
-      showFeedback('success', 'অর্ডারের স্ট্যাটাস আপডেট হয়েছে');
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        fetchData();
+        showFeedback('success', 'অর্ডারের স্ট্যাটাস আপডেট হয়েছে');
+      } else {
+        showFeedback('error', 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
+      }
+    } catch (err) {
+      showFeedback('error', 'সার্ভারে সমস্যা হয়েছে');
     }
   };
 
   const deleteOrder = async (id: number) => {
     if (!confirm('আপনি কি নিশ্চিতভাবে এই অর্ডারটি ডিলিট করতে চান?')) return;
-    const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      fetchData();
-      showFeedback('success', 'অর্ডার ডিলিট হয়েছে');
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchData();
+        showFeedback('success', 'অর্ডার ডিলিট হয়েছে');
+      } else {
+        showFeedback('error', 'অর্ডার ডিলিট ব্যর্থ হয়েছে');
+      }
+    } catch (err) {
+      showFeedback('error', 'সার্ভারে সমস্যা হয়েছে');
     }
   };
 
@@ -3537,7 +3567,7 @@ const AdminDashboard = () => {
                            <button 
                               onClick={() => {
                                  setEditingCommitteeMember(null);
-                                 setNewMember({ name: '', role: '', image_url: '', sort_order: 0 });
+                                 setNewMember({ name: '', role: '', image_url: '', sort_order: 0, userId: '', password: '' });
                               }}
                               className="px-6 bg-gray-100 text-bento-light py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition"
                            >
@@ -3575,7 +3605,9 @@ const AdminDashboard = () => {
                                      name: m.name,
                                      role: m.role,
                                      image_url: m.image_url,
-                                     sort_order: m.sort_order
+                                     sort_order: m.sort_order,
+                                     userId: m.userId || '',
+                                     password: ''
                                    });
                                  }} 
                                  className="p-2 text-bento-primary hover:bg-bento-primary/10 rounded-lg transition"
@@ -3773,6 +3805,70 @@ const AdminDashboard = () => {
                      </div>
                    )}
                 </div>
+             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'settings' && (
+          <motion.div 
+            key="settings" 
+            initial={{ opacity:0, y:20 }} 
+            animate={{ opacity:1, y:0 }} 
+            exit={{ opacity:0, y:-20 }} 
+            transition={{ duration:0.3 }}
+            className="grid lg:grid-cols-2 gap-10"
+          >
+             <div className="bg-white p-10 rounded-[3rem] border border-bento-border shadow-2xl space-y-8">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Settings size={24} /></div>
+                   <h3 className="text-2xl font-black italic">Logo Settings</h3>
+                </div>
+                {siteSettings?.logo_url && (
+                   <div className="bg-gray-50 p-6 rounded-2xl flex justify-center items-center">
+                     <img src={siteSettings.logo_url} className="h-20 w-auto object-contain" />
+                   </div>
+                )}
+                <InputField 
+                   label="Logo URL" 
+                   value={logoInput} 
+                   onChange={(e:any) => setLogoInput(e.target.value)} 
+                   placeholder="Enter image URL" 
+                />
+                <button 
+                  onClick={handleLogoUpdate}
+                  className="w-full bg-bento-primary text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:scale-[1.02] transition-all"
+                >Update Logo</button>
+             </div>
+             
+             <div className="bg-white p-10 rounded-[3rem] border border-bento-border shadow-2xl space-y-8">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Image size={24} /></div>
+                   <h3 className="text-2xl font-black italic">Hero Images</h3>
+                </div>
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                   {(() => {
+                      let heroImgs = [];
+                      try {
+                        heroImgs = siteSettings?.hero_images ? JSON.parse(siteSettings.hero_images) : [];
+                      } catch(e) {}
+                      return heroImgs.map((img:string, idx:number) => (
+                         <div key={idx} className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <img src={img} className="h-12 w-20 object-cover rounded shadow" />
+                            <button onClick={() => removeHeroImg(idx)} className="text-red-500 hover:bg-red-50 p-3 rounded-xl transition"><Trash2 size={16} /></button>
+                         </div>
+                      ));
+                   })()}
+                </div>
+                <InputField 
+                   label="Add New Hero Image URL" 
+                   value={heroInput} 
+                   onChange={(e:any) => setHeroInput(e.target.value)} 
+                   placeholder="Enter image URL" 
+                />
+                <button 
+                  onClick={handleHeroAdd}
+                  className="w-full bg-bento-dark text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:scale-[1.02] transition-all"
+                >Add Banner Image</button>
              </div>
           </motion.div>
         )}
@@ -4684,7 +4780,7 @@ const DonationsPage = () => {
       fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
       setTimeout(() => {
         setStep(1);
-        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)' });
+        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান' });
         setSelectedMethod(null);
       }, 5000);
     }

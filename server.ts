@@ -22,7 +22,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-  console.log(`[Server] ${new Date().toISOString()} ${req.method} ${req.url}`);
+  if (req.url.startsWith('/api')) {
+    console.log(`[Server] ${new Date().toISOString()} ${req.method} ${req.url}`);
+  }
   next();
 });
 
@@ -455,9 +457,7 @@ app.post('/api/auth/login', async (req, res) => {
           name, 
           role, 
           image_url, 
-          sort_order: sort_order || 0,
-          user_id: userId || null,
-          password: hashedPassword || null
+          sort_order: sort_order || 0
         }]).select().single();
         
       if (error) throw error;
@@ -495,13 +495,8 @@ app.post('/api/auth/login', async (req, res) => {
         role, 
         image_url, 
         sort_order, 
-        is_active: is_active === undefined ? 1 : is_active,
-        user_id: userId || null
+        is_active: is_active === undefined ? 1 : is_active
       };
-
-      if (password) {
-        updateData.password = await bcrypt.hash(password, 10);
-      }
 
       const { error } = await supabase.from('committee_members')
         .update(updateData)
@@ -714,6 +709,12 @@ app.post('/api/auth/login', async (req, res) => {
   // --- API Catch-all ---
   app.all('/api/*', (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
+  });
+
+  // Global Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Unhandled Server Error:', err);
+    res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
   // --- Vite / Static Middleware ---

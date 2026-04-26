@@ -163,7 +163,7 @@ const CommitteePage = () => {
                         >
                            <div className="relative aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
                               {c.image_url ? (
-                                <img src={c.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt={c.name} referrerPolicy="no-referrer" />
+                                <img src={c.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" alt={c.name} referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                               ) : (
                                 <div className="flex flex-col items-center justify-center space-y-4">
                                    <div className={`p-8 rounded-full ${isFemale(c.name) ? 'bg-pink-50 text-pink-400' : 'bg-blue-50 text-blue-400'}`}>
@@ -202,7 +202,7 @@ const CommitteePage = () => {
                            >
                               <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-xl ring-1 ring-black/5 bg-gray-50 flex items-center justify-center">
                                  {c.image_url ? (
-                                   <img src={c.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" />
+                                   <img src={c.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-700" alt={c.name} referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                  ) : (
                                    <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
                                       {isFemale(c.name) ? <Venus size={40} /> : <Mars size={40} />}
@@ -466,7 +466,7 @@ const HomeOverview = () => {
                     scale: [1, 1.2, 0.8, 1]
                  }}
                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                 className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-bento-primary/30 rounded-full blur-[150px] will-change-transform"
+                 className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-bento-primary/30 rounded-full blur-[80px] will-change-transform"
               />
               <motion.div 
                  animate={{ 
@@ -475,7 +475,7 @@ const HomeOverview = () => {
                     scale: [1, 0.8, 1.2, 1]
                  }}
                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                 className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-bento-accent/20 rounded-full blur-[120px] will-change-transform"
+                 className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-bento-accent/20 rounded-full blur-[60px] will-change-transform"
               />
            </div>
          )}
@@ -498,13 +498,15 @@ const HomeOverview = () => {
                   <>
                     <img 
                       src={heroImages[currentImgIdx]} 
-                      className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-110" 
+                      className="absolute inset-0 w-full h-full object-cover blur-xl opacity-30 scale-110" 
                       referrerPolicy="no-referrer" 
+                      decoding="async"
                     />
                     <img 
                       src={heroImages[currentImgIdx]} 
                       className={`w-full h-full object-cover transition-opacity duration-1000 ${scrolled ? 'opacity-50' : 'opacity-70'}`}
                       referrerPolicy="no-referrer" 
+                      decoding="async"
                     />
                   </>
                )}
@@ -555,7 +557,7 @@ const HomeOverview = () => {
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="bg-white/80 backdrop-blur-xl border-2 border-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden group"
+                className="bg-white/80 backdrop-blur-lg border-2 border-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden group"
               >
                  {/* Premium Background Detail */}
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-bento-primary/10 to-transparent rounded-bl-[100px] opacity-50 group-hover:scale-110 transition-transform duration-700" />
@@ -707,7 +709,7 @@ const HomeOverview = () => {
           className="bento-card glass-morphism !p-6 sm:!p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_0_80px_rgba(192,57,43,0.15)] ring-1 ring-white/10"
         >
           {/* Internal Glow */}
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-bento-primary/5 rounded-full blur-[100px] group-hover:bg-bento-primary/10 transition-colors duration-700"></div>
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-bento-primary/5 rounded-full blur-[60px] group-hover:bg-bento-primary/10 transition-colors duration-700"></div>
           
           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
              <div className="space-y-8">
@@ -852,7 +854,7 @@ const HomeOverview = () => {
            viewport={{ once: true }}
            className="bento-card glass-morphism !p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_40px_100px_rgba(192,57,43,0.1)] ring-1 ring-white/10"
          >
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-600/10 rounded-full blur-[100px] group-hover:bg-red-600/20 transition-all duration-700"></div>
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-600/10 rounded-full blur-[60px] group-hover:bg-red-600/20 transition-all duration-700"></div>
             <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
                <div className="space-y-8">
                   <h2 className="text-3xl md:text-6xl font-serif text-bento-dark italic leading-tight">
@@ -897,7 +899,7 @@ const HomeOverview = () => {
            viewport={{ once: true }}
            className="bento-card bg-gradient-to-br from-[#1877F2]/10 to-[#1877F2]/5 !p-10 md:!p-20 relative overflow-hidden group border-none shadow-[0_40px_100px_rgba(24,119,242,0.1)] ring-1 ring-[#1877F2]/20"
          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1877F2]/5 rounded-full blur-[120px] pointer-events-none group-hover:bg-[#1877F2]/10 transition-all duration-700"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1877F2]/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-[#1877F2]/10 transition-all duration-700"></div>
             
             <div className="flex flex-col items-center text-center space-y-8 relative z-10">
                <div className="w-24 h-24 bg-[#1877F2] text-white rounded-3xl flex items-center justify-center shadow-2xl rotate-3 group-hover:rotate-0 transition-all duration-500">
@@ -964,10 +966,10 @@ const HomeOverview = () => {
            initial={{ opacity: 0, y: 50 }}
            whileInView={{ opacity: 1, y: 0 }}
            viewport={{ once: true }}
-           className="bg-[#0f172a] rounded-[3.5rem] md:rounded-[5rem] p-12 md:p-32 overflow-hidden relative group shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)]"
+           className="bg-[#0f172a] rounded-[3.5rem] md:rounded-[5rem] p-12 md:p-32 overflow-hidden relative group shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)] will-change-transform"
         >
-          {/* Intense Dramatic Red Glow */}
-          <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-red-600/20 rounded-full blur-[160px] -z-10 group-hover:bg-red-600/30 transition-all duration-1000"></div>
+          {/* Intense Dramatic Red Glow - Optimized blur */}
+          <div className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-red-600/20 rounded-full blur-[80px] -z-10 group-hover:bg-red-600/30 transition-all duration-1000"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.08),transparent)] pointer-events-none"></div>
           
           <div className="grid lg:grid-cols-2 gap-20 lg:gap-32 items-center relative z-10">
@@ -1000,15 +1002,17 @@ const HomeOverview = () => {
             <motion.div 
                whileHover={{ rotate: -2, scale: 1.02 }}
                transition={{ type: "spring", stiffness: 300 }}
-               className="relative"
+               className="relative will-change-transform"
             >
-              <div className="absolute -inset-10 bg-red-600/20 shadow-[0_0_100px_rgba(220,38,38,0.3)] blur-[120px] rounded-full"></div>
+              <div className="absolute -inset-10 bg-red-600/20 shadow-[0_0_100px_rgba(220,38,38,0.3)] blur-[60px] rounded-full"></div>
               <div className="relative z-10 w-full aspect-[4/5] rounded-[4rem] md:rounded-[5rem] overflow-hidden border-4 border-white/20 shadow-2xl group/portrait bg-black">
                 <img 
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmywWC7UItojCkfxrlLFU3sVKLN-Z2UVcMhA&s" 
                   alt="Justice For Hadi Vai" 
                   className="w-full h-full object-cover grayscale group-hover/portrait:grayscale-0 group-hover/portrait:scale-105 transition-all duration-1000 opacity-80 group-hover/portrait:opacity-100"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-90"></div>
                 <div className="absolute bottom-16 left-16 right-16">
@@ -1030,9 +1034,9 @@ const Guardian = ({ focusedField, usernameLength, mousePos }: { focusedField: st
   return (
     <div className="relative w-48 h-48 mx-auto mb-10">
       {/* Head/Mask with enhanced realism */}
-      <div className="absolute inset-0 bg-white/[0.04] rounded-[3rem] border border-white/10 backdrop-blur-3xl shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden">
-        {/* Internal Glow - More Colorful */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 bg-gradient-to-r from-bento-primary/20 via-indigo-500/20 to-purple-500/20 blur-[70px] rounded-full" />
+      <div className="absolute inset-0 bg-white/[0.04] rounded-[3rem] border border-white/10 backdrop-blur-lg shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden">
+        {/* Internal Glow - Optimized blur */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 bg-gradient-to-r from-bento-primary/20 via-indigo-500/20 to-purple-500/20 blur-[40px] rounded-full" />
         
         {/* Eyes Container - Larger & More Centered */}
         <div className="absolute top-[35%] left-0 w-full flex justify-center gap-12 px-8">
@@ -1093,7 +1097,7 @@ const Guardian = ({ focusedField, usernameLength, mousePos }: { focusedField: st
       </div>
       
       {/* Floor reflection shadow */}
-      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-6 bg-bento-primary/10 blur-[30px] rounded-full" />
+      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-6 bg-bento-primary/10 blur-[15px] rounded-full" />
     </div>
   );
 };
@@ -1184,7 +1188,7 @@ const Login = () => {
             scale: [1, 1.2, 1]
           }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[100%] h-[100%] bg-bento-primary/15 blur-[180px] rounded-full mix-blend-screen"
+          className="absolute -top-[20%] -left-[10%] w-[100%] h-[100%] bg-bento-primary/15 blur-[80px] rounded-full mix-blend-screen will-change-transform"
         />
         <motion.div 
           animate={{ 
@@ -1193,12 +1197,12 @@ const Login = () => {
             scale: [1, 1.1, 1]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 2 }}
-          className="absolute bottom-0 right-0 w-[80%] h-[80%] bg-indigo-500/10 blur-[150px] rounded-full mix-blend-screen"
+          className="absolute bottom-0 right-0 w-[80%] h-[80%] bg-indigo-500/10 blur-[80px] rounded-full mix-blend-screen will-change-transform"
         />
         <motion.div 
           animate={{ x: [-100, 100, -100], y: [100, -100, 100] }}
           transition={{ duration: 45, repeat: Infinity }}
-          className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/5 blur-[120px] rounded-full"
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/5 blur-[80px] rounded-full will-change-transform"
         />
         {/* Grain Overlay */}
         <div className="absolute inset-0 opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] blend-overlay"></div>
@@ -1208,7 +1212,7 @@ const Login = () => {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-[1150px] grid lg:grid-cols-2 bg-white/[0.012] backdrop-blur-[80px] rounded-[4rem] border border-white/[0.07] shadow-[0_50px_150px_-30px_rgba(0,0,0,0.8)] overflow-hidden z-10 relative"
+        className="w-full max-w-[1150px] grid lg:grid-cols-2 bg-white/[0.012] backdrop-blur-2xl rounded-[4rem] border border-white/[0.07] shadow-[0_50px_150px_-30px_rgba(0,0,0,0.8)] overflow-hidden z-10 relative"
       >
         {/* Floating Accent */}
         <div className="absolute top-0 right-0 w-80 h-[2px] bg-gradient-to-l from-bento-primary/30 via-indigo-500/20 to-transparent"></div>
@@ -1995,12 +1999,12 @@ const ProfilePage = () => {
           {/* Left Column: Actions & Card */}
           <div className="lg:col-span-4 space-y-10">
              {/* Membership Card Display */}
-             <div className="bg-white/70 backdrop-blur-2xl rounded-[3rem] p-10 shadow-2xl border border-white/50 ring-1 ring-black/5">
+             <div className="bg-white/70 backdrop-blur-lg rounded-[3rem] p-10 shadow-2xl border border-white/50 ring-1 ring-black/5">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-bento-light mb-8 text-center italic">ডিজিটাল মেম্বারশিপ কার্ড</h3>
                 <MembershipCard profile={profileData} siteSettings={siteSettings} />
              </div>
 
-             <div className="bg-white/70 backdrop-blur-2xl rounded-[3rem] p-8 shadow-xl border border-white/50 space-y-4">
+             <div className="bg-white/70 backdrop-blur-lg rounded-[3rem] p-8 shadow-xl border border-white/50 space-y-4">
                 <button onClick={() => setEditing(!editing)} className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all duration-300 shadow-lg ${editing ? 'bg-bento-dark text-white' : 'bg-bento-primary text-white hover:scale-[1.02] hover:shadow-bento-primary/30'}`}>
                   {editing ? 'এডিট বন্ধ করুন' : 'প্রোফাইল আপডেট করুন'}
                 </button>
@@ -2013,7 +2017,7 @@ const ProfilePage = () => {
           {/* Right Column: Information Grid */}
           <div className="lg:col-span-8 space-y-10 focus:outline-none">
              {editing ? (
-                <div className="bg-white/70 backdrop-blur-2xl rounded-[3rem] p-12 shadow-2xl border border-white/50 ring-1 ring-black/5">
+                <div className="bg-white/70 backdrop-blur-lg rounded-[3rem] p-12 shadow-2xl border border-white/50 ring-1 ring-black/5">
                     <form onSubmit={handleUpdate} className="grid md:grid-cols-2 gap-x-8 gap-y-10">
                        <div className="md:col-span-2 flex items-center gap-4 border-b border-gray-200 pb-4 mb-2">
                           <div className="w-10 h-10 bg-bento-primary/10 rounded-xl flex items-center justify-center text-bento-primary"><UserPlus size={20} /></div>
@@ -2200,7 +2204,7 @@ const Navbar = () => {
   const isHome = location.pathname === "/";
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-3xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || !isHome ? 'bg-bento-dark/95 backdrop-blur-xl border-b border-white/10 shadow-2xl py-4' : 'bg-transparent py-8'}`}>
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8">
         <div className="flex items-center justify-between">
            <div className="flex items-center gap-2 md:gap-4">
@@ -4474,7 +4478,7 @@ const DonationsPage = () => {
              <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
           </div>
 
-          <div className="bg-yellow-500/5 backdrop-blur-xl border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
+          <div className="bg-yellow-500/5 backdrop-blur-lg border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
             <h2 className="text-2xl font-serif text-center text-bento-dark italic">{t('donation_info_title')}</h2>
             
             <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
@@ -4754,8 +4758,8 @@ const RulesAndRegulationPage = () => {
            className="bento-card glass-morphism !p-10 md:!p-24 relative overflow-hidden group shadow-[0_40px_100px_rgba(192,57,43,0.1)] border-none"
         >
           {/* Internal Glow Effects for colorful appearance */}
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-bento-primary/5 rounded-full blur-[120px] group-hover:bg-bento-primary/10 transition-colors duration-1000"></div>
-          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-bento-accent/5 rounded-full blur-[120px] group-hover:bg-bento-accent/10 transition-colors duration-1000"></div>
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-bento-primary/5 rounded-full blur-[80px] group-hover:bg-bento-primary/10 transition-colors duration-1000"></div>
+          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-bento-accent/5 rounded-full blur-[80px] group-hover:bg-bento-accent/10 transition-colors duration-1000"></div>
 
           <div className="relative z-10 space-y-16">
             <div className="space-y-6">
@@ -4969,7 +4973,7 @@ export default function App() {
             scale: [1, 1.1, 1]
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-bento-primary/10 blur-[150px] rounded-full"
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-bento-primary/10 blur-[80px] rounded-full"
         />
         <motion.div 
           animate={{ 
@@ -4977,7 +4981,7 @@ export default function App() {
             scale: [1, 1.2, 1]
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear", delay: 2 }}
-          className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/5 blur-[180px] rounded-full"
+          className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/5 blur-[80px] rounded-full"
         />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
       </div>
@@ -4999,7 +5003,7 @@ export default function App() {
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="w-44 h-44 md:w-56 md:h-56 p-1 bg-white/[0.03] backdrop-blur-2xl rounded-[3rem] border border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] relative"
+            className="w-44 h-44 md:w-56 md:h-56 p-1 bg-white/[0.03] backdrop-blur-xl rounded-[3rem] border border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] relative"
           >
             <div className="w-full h-full rounded-[2.8rem] overflow-hidden bg-white/5 relative">
               <img 
@@ -5067,22 +5071,22 @@ export default function App() {
                   <motion.div 
                     animate={{ x: [0, 100, 0], y: [0, 150, 0], scale: [1, 1.2, 1] }}
                     transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute -top-20 -left-20 w-[800px] h-[800px] bg-bento-primary/20 rounded-full blur-[140px] will-change-transform" 
+                    className="absolute -top-20 -left-20 w-[800px] h-[800px] bg-bento-primary/20 rounded-full blur-[80px] will-change-transform" 
                   />
                   <motion.div 
                     animate={{ x: [0, -150, 0], y: [0, 100, 0], scale: [1, 0.8, 1] }}
                     transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                    className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-bento-accent/15 rounded-full blur-[120px] will-change-transform" 
+                    className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-bento-accent/15 rounded-full blur-[80px] will-change-transform" 
                   />
                   <motion.div 
                     animate={{ x: [0, 150, 0], y: [0, -250, 0], rotate: 360 }}
                     transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-                    className="absolute bottom-1/4 left-1/4 w-[900px] h-[900px] bg-vibrant-orange/10 rounded-full blur-[180px] will-change-transform" 
+                    className="absolute bottom-1/4 left-1/4 w-[900px] h-[900px] bg-vibrant-orange/10 rounded-full blur-[80px] will-change-transform" 
                   />
                   <motion.div 
                     animate={{ x: [-100, 100, -100], y: [0, 200, 0] }}
                     transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-                    className="absolute top-1/4 left-1/2 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-[100px] will-change-transform" 
+                    className="absolute top-1/4 left-1/2 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-[60px] will-change-transform" 
                   />
                 </>
               )}
@@ -5115,14 +5119,14 @@ export default function App() {
             </main>
             <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
               {/* Decorative Gradients */}
-              <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[120px]"></div>
-              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-bento-accent/10 rounded-full blur-[120px]"></div>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[80px]"></div>
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-bento-accent/10 rounded-full blur-[80px]"></div>
 
               <div className="container mx-auto px-6 relative z-10">
                 <div className="grid lg:grid-cols-4 gap-20 pb-20 border-b border-white/5">
                   <div className="lg:col-span-1 space-y-8">
                      <Link to="/" className="flex items-center gap-4 group">
-                        <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" />
+                        <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" decoding="async" />
                         <div>
                            <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Adomyo 24</h2>
                            <p className="text-[9px] font-black text-bento-primary uppercase tracking-[0.4em] mt-1">Fearless Humanity</p>

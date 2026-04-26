@@ -420,9 +420,16 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
+  // Cache for public endpoints to improve speed
+  const apiCache: Record<string, {data: any, time: number}> = {};
+  const CACHE_TTL = 30000; // 30 seconds
+
   // Committee CRUD
   app.get('/api/committee', async (req, res) => {
     try {
+      if (apiCache['committee'] && Date.now() - apiCache['committee'].time < CACHE_TTL) {
+        return res.json(apiCache['committee'].data);
+      }
       const { data: members, error } = await supabase.from('committee_members')
         .select('*')
         .eq('is_active', 1)
@@ -433,6 +440,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
         throw error;
       }
+      apiCache['committee'] = { data: members, time: Date.now() };
       res.json(members);
     } catch (err: any) {
       console.error('Error fetching committee:', err);
@@ -479,6 +487,7 @@ app.post('/api/auth/login', async (req, res) => {
         }]);
       }
 
+      delete apiCache['committee'];
       res.status(201).json({ message: 'Committee member added', member: data });
     } catch (err: any) {
       console.error('Error creating committee member:', err);
@@ -510,6 +519,7 @@ app.post('/api/auth/login', async (req, res) => {
         await supabase.from('users').update({ password: hashedPassword }).eq('userId', userId);
       }
 
+      delete apiCache['committee'];
       res.json({ message: 'Committee member updated' });
     } catch (err: any) {
       console.error('Error updating committee member:', err);
@@ -521,6 +531,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
       const { error } = await supabase.from('committee_members').delete().eq('id', req.params.id);
       if (error) throw error;
+      delete apiCache['committee'];
       res.json({ message: 'Committee member deleted' });
     } catch (err: any) {
       console.error('Error deleting committee member:', err);

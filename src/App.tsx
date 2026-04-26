@@ -120,11 +120,19 @@ const LoadingOverlay = () => (
   </div>
 );
 
+// Global cache for fast transitions
+const globalCache: Record<string, any> = {
+  committee: null,
+  notices: null,
+  events: null,
+  donations: null,
+};
+
 const CommitteePage = () => {
-  const [committee, setCommittee] = useState<any[]>([]);
+  const [committee, setCommittee] = useState<any[]>(globalCache.committee || []);
   const { t, lang } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!globalCache.committee);
   
   const translateRole = (role: string) => translateRoleHelper(role, t);
 
@@ -132,12 +140,16 @@ const CommitteePage = () => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
+    
+    // Always fetch latest in background, but show cache immediately
     fetch('/api/committee')
       .then(r => r.ok ? r.json() : [])
       .then(data => {
-        setCommittee(Array.isArray(data) ? data : []);
+        globalCache.committee = Array.isArray(data) ? data : [];
+        setCommittee(globalCache.committee);
         setLoading(false);
       });
+      
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -399,10 +411,10 @@ const NoticeBoardPage = () => {
 };
 
 const HomeOverview = () => {
-  const [events, setEvents] = useState<any[]>([]);
-  const [donations, setDonations] = useState<any[]>([]);
-  const [committee, setCommittee] = useState<any[]>([]);
-  const [notices, setNotices] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>(globalCache.events || []);
+  const [donations, setDonations] = useState<any[]>(globalCache.donations || []);
+  const [committee, setCommittee] = useState<any[]>(globalCache.committee || []);
+  const [notices, setNotices] = useState<any[]>(globalCache.notices || []);
   const shouldReduceMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -445,10 +457,22 @@ const HomeOverview = () => {
 
   useEffect(() => {
     fetch('/api/health').then(r => r.json()).then(d => console.log('API Status:', d)).catch(e => console.error('API Unreachable:', e));
-    fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => setEvents(Array.isArray(data) ? data : []));
-    fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
-    fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => setCommittee(Array.isArray(data) ? data : []));
-    fetch('/api/notices').then(r => r.ok ? r.json() : []).then(data => setNotices(Array.isArray(data) ? data : []));
+    fetch('/api/events').then(r => r.ok ? r.json() : []).then(data => {
+       globalCache.events = Array.isArray(data) ? data : [];
+       setEvents(globalCache.events);
+    });
+    fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => {
+       globalCache.donations = Array.isArray(data) ? data : [];
+       setDonations(globalCache.donations);
+    });
+    fetch('/api/committee').then(r => r.ok ? r.json() : []).then(data => {
+       globalCache.committee = Array.isArray(data) ? data : [];
+       setCommittee(globalCache.committee);
+    });
+    fetch('/api/notices').then(r => r.ok ? r.json() : []).then(data => {
+       globalCache.notices = Array.isArray(data) ? data : [];
+       setNotices(globalCache.notices);
+    });
   }, []);
 
   useEffect(() => {

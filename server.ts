@@ -363,6 +363,16 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(201).json({ message: 'Event created' });
   });
 
+  app.delete('/api/admin/events/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('events').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Event deleted' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Donations CRUD
   app.get('/api/donations', async (req, res) => {
     try {

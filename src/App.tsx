@@ -2450,7 +2450,7 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
-  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', date: new Date().toISOString().split('T')[0] });
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
@@ -2812,22 +2812,42 @@ const AdminDashboard = () => {
   };
 
   const createEvent = async () => {
-    if (!newEventTitle) return;
+    if (!newEvent.title || !newEvent.date) return;
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newEventTitle, description: 'New event scheduled.', date: new Date().toISOString() })
+        body: JSON.stringify({ 
+          title: newEvent.title, 
+          description: newEvent.description, 
+          location: newEvent.location, 
+          date: new Date(newEvent.date).toISOString() 
+        })
       });
       if (res.ok) {
         showFeedback('success', 'Event created successfully');
-        setNewEventTitle('');
+        setNewEvent({ title: '', description: '', location: '', date: new Date().toISOString().split('T')[0] });
         fetchData();
       } else {
         showFeedback('error', 'Event creation failed');
       }
     } catch (err) {
       showFeedback('error', 'Server error');
+    }
+  };
+
+  const deleteEvent = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      const res = await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'Event deleted');
+        setEvents(events.filter(e => e.id !== id));
+      } else {
+        showFeedback('error', 'Failed to delete event');
+      }
+    } catch (err) {
+      showFeedback('error', 'Deletion failed');
     }
   };
 
@@ -3566,19 +3586,32 @@ const AdminDashboard = () => {
                <div className="bento-card bg-white p-10 shadow-2xl space-y-8">
                   <h3 className="text-xl font-black italic border-b pb-4">নতুন ইভেন্ট যোগ করুন</h3>
                   <div className="space-y-6">
-                     <InputField label="ইভেন্ট টাইটেল" value={newEventTitle} onChange={(e:any) => setNewEventTitle(e.target.value)} placeholder="উদা: শীতবস্ত্র বিতরণ - ২০২৪" />
+                     <InputField label="ইভেন্ট টাইটেল" value={newEvent.title} onChange={(e:any) => setNewEvent({ ...newEvent, title: e.target.value })} placeholder="উদা: শীতবস্ত্র বিতরণ - ২০২৪" />
+                     <InputField label="তারিখ" type="date" value={newEvent.date} onChange={(e:any) => setNewEvent({ ...newEvent, date: e.target.value })} />
+                     <InputField label="লোকেশন" value={newEvent.location} onChange={(e:any) => setNewEvent({ ...newEvent, location: e.target.value })} placeholder="উদা: ঢাকা" />
+                     <div className="space-y-2">
+                       <label className="text-xs font-black uppercase tracking-widest text-bento-light ml-1 flex items-center gap-2">বিস্তারিত</label>
+                       <textarea className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border focus:ring-4 focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary transition text-sm font-medium h-32" value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} placeholder="ইভেন্টের বিস্তারিত তথ্য..."></textarea>
+                     </div>
                      <button onClick={createEvent} className="w-full bg-bento-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition">ইভেন্ট তৈরি করুন</button>
                   </div>
                </div>
             </div>
             <div className="lg:col-span-8 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-6 min-h-[500px]">
                <h3 className="text-xl font-black italic border-b pb-4">বর্তমান ইভেন্টসমূহ</h3>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 gap-6">
                   {events.map(e => (
-                    <div key={e.id} className="p-6 bg-gray-50 rounded-3xl border border-bento-border group relative overflow-hidden">
-                       <div className="absolute top-0 right-0 p-4 opacity-10"><Calendar size={40} /></div>
-                       <p className="text-[10px] font-black text-bento-primary uppercase tracking-widest mb-2 italic">{new Date(e.date).toLocaleDateString()}</p>
-                       <h4 className="font-bold text-lg italic text-bento-dark leading-tight">{e.title}</h4>
+                    <div key={e.id} className="p-6 bg-gray-50 rounded-3xl border border-bento-border flex justify-between items-start group relative overflow-hidden">
+                       <div className="absolute top-0 right-0 p-4 opacity-5"><Calendar size={100} /></div>
+                       <div className="relative z-10 space-y-2">
+                         <div className="flex items-center gap-3">
+                           <p className="text-[10px] font-black text-white bg-bento-primary uppercase tracking-widest px-3 py-1 rounded-full italic">{new Date(e.date).toLocaleDateString()}</p>
+                           <p className="text-[10px] font-black text-bento-light uppercase tracking-widest px-3 py-1 rounded-full bg-gray-200 border italic">{e.location || 'No Location'}</p>
+                         </div>
+                         <h4 className="font-bold text-xl italic text-bento-dark leading-tight">{e.title}</h4>
+                         <p className="text-sm text-bento-light leading-relaxed max-w-2xl whitespace-pre-wrap mt-2">{e.description}</p>
+                       </div>
+                       <button onClick={() => deleteEvent(e.id)} className="p-3 bg-white text-gray-400 hover:text-red-500 rounded-xl shadow-sm border hover:border-red-500 transition relative z-10 shrink-0"><Trash2 size={18} /></button>
                     </div>
                   ))}
                   {events.length === 0 && <p className="col-span-1 sm:col-span-2 text-center py-20 text-bento-light italic font-serif">কোনো ইভেন্ট পরিকল্পনা করা নেই...</p>}

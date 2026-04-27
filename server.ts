@@ -428,7 +428,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Cache for public endpoints to improve speed
   const apiCache: Record<string, {data: any, time: number}> = {};
-  const CACHE_TTL = 30000; // 30 seconds
+  const CACHE_TTL = 300000; // 5 minutes
 
   // Committee CRUD
   app.get('/api/committee', async (req, res) => {

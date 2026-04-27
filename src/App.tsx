@@ -123,6 +123,7 @@ const LoadingOverlay = () => (
 // Global cache for fast transitions
 const globalCache: Record<string, any> = {
   committee: null,
+  members: null,
   notices: null,
   events: null,
   donations: null,
@@ -1479,6 +1480,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
   const validateField = (name: string, value: string) => {
@@ -1511,7 +1513,12 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (error) return;
+    if (!agreedToTerms) {
+      setError('আপনাকে অবশ্যই আমাদের শর্তাবলী ও নিয়মাবলীতে সম্মত হতে হবে।');
+      return;
+    }
+    if (error && error !== 'আপনাকে অবশ্যই আমাদের শর্তাবলী ও নিয়মাবলীতে সম্মত হতে হবে।') return;
+    setError('');
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -1549,7 +1556,7 @@ const Register = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-32 px-4 sm:px-6 space-y-20">
+    <div className="w-full max-w-[1920px] mx-auto py-32 px-4 sm:px-6 lg:px-12 xl:px-20 space-y-20">
       <div className="text-center space-y-6 max-w-3xl mx-auto">
          <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">Become an Adomyo member</span>
          <h2 className="text-4xl md:text-7xl font-serif text-bento-dark italic leading-tight">সদস্য আবেদন ফর্ম</h2>
@@ -1671,16 +1678,28 @@ const Register = () => {
              </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 bg-white p-8 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-             <div className="absolute inset-0 bg-gradient-to-r from-bento-primary/5 via-blue-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-             <div className="flex items-center gap-6 text-gray-500 italic text-sm max-w-xl relative z-10">
-                <div className="w-16 h-16 bg-bento-primary/10 text-bento-primary rounded-[1.5rem] flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500"><Shield size={32} /></div>
-                <p className="leading-relaxed font-serif text-gray-600">আপনার সকল তথ্য সম্পূর্ণ নিরাপদ এবং শুধুমাত্র সংগঠনের অভ্যন্তরীণ প্রয়োজনে ব্যবহৃত হবে। আবেদনের পর এডমিন প্যানেল আপনার তথ্য যাচাই করবে।</p>
+          <div className="flex flex-col gap-6 pt-10">
+             <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-[2rem] border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => { setAgreedToTerms(!agreedToTerms); if(error === 'আপনাকে অবশ্যই আমাদের শর্তাবলী ও নিয়মাবলীতে সম্মত হতে হবে।') setError(''); }}>
+                <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center transition-all ${agreedToTerms ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-white border-2 border-gray-200 text-transparent'}`}>
+                   <CheckCircle size={16} className={agreedToTerms ? 'opacity-100' : 'opacity-0'} />
+                </div>
+                <div className="flex-1">
+                   <p className="text-sm font-bold text-gray-800">আমি অদম্য ২৪-এর সকল শর্তাবলী ও নিয়মাবলী পড়েছি এবং একমত পোষণ করছি।</p>
+                   <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mt-1">I agree to the Terms and Conditions</p>
+                </div>
              </div>
-             <button type="submit" className="w-full md:w-auto bg-gray-900 text-white px-20 py-6 rounded-[2rem] font-bold text-xs uppercase tracking-[0.4em] shadow-xl shadow-gray-900/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-bento-primary/30 transition-all duration-500 relative z-10 overflow-hidden group/btn">
-               <span className="relative z-10 flex items-center gap-4">আবেদন সম্পূর্ণ করুন <ArrowRight size={18} className="group-hover/btn:translate-x-3 transition-transform duration-500" /></span>
-               <div className="absolute inset-0 bg-gradient-to-r from-bento-primary to-bento-accent translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"></div>
-             </button>
+             
+             <div className="flex flex-col md:flex-row items-center justify-between gap-10 bg-white p-8 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-bento-primary/5 via-blue-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div className="flex items-center gap-6 text-gray-500 italic text-sm max-w-xl relative z-10">
+                   <div className="w-16 h-16 bg-bento-primary/10 text-bento-primary rounded-[1.5rem] flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500"><Shield size={32} /></div>
+                   <p className="leading-relaxed font-serif text-gray-600">আপনার সকল তথ্য সম্পূর্ণ নিরাপদ এবং শুধুমাত্র সংগঠনের অভ্যন্তরীণ প্রয়োজনে ব্যবহৃত হবে। আবেদনের পর এডমিন প্যানেল আপনার তথ্য যাচাই করবে।</p>
+                </div>
+                <button type="submit" disabled={!agreedToTerms} className={`w-full md:w-auto text-white px-20 py-6 rounded-[2rem] font-bold text-xs uppercase tracking-[0.4em] shadow-xl hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 relative z-10 overflow-hidden group/btn ${agreedToTerms ? 'bg-gray-900 shadow-gray-900/20 hover:shadow-bento-primary/30' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <span className="relative z-10 flex items-center gap-4">আবেদন সম্পূর্ণ করুন <ArrowRight size={18} className="group-hover/btn:translate-x-3 transition-transform duration-500" /></span>
+                  {agreedToTerms && <div className="absolute inset-0 bg-gradient-to-r from-bento-primary to-bento-accent translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"></div>}
+                </button>
+             </div>
           </div>
           {error && <p className="text-red-500 text-sm font-black bg-red-50/50 p-6 rounded-[2rem] border border-red-100 text-center uppercase tracking-widest backdrop-blur-sm shadow-sm">{error}</p>}
         </form>
@@ -4361,15 +4380,16 @@ const DetailGroup = ({ label, items }: { label: string, items: { label: string, 
 
 const PublicMembersPage = () => {
   const { t, lang } = useLanguage();
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>(globalCache.members || []);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!globalCache.members);
 
   useEffect(() => {
     fetch('/api/members')
       .then(r => r.ok ? r.json() : [])
       .then(data => {
-        setMembers(Array.isArray(data) ? data : []);
+        globalCache.members = Array.isArray(data) ? data : [];
+        setMembers(globalCache.members);
         setLoading(false);
       });
   }, []);
@@ -5404,8 +5424,16 @@ export default function App() {
       }
     };
 
+    const prefetchHeavyEndpoints = () => {
+      setTimeout(() => {
+        fetch('/api/members').then(r => r.ok ? r.json() : null).then(data => { if(Array.isArray(data)) globalCache.members = data; }).catch(() => {});
+        fetch('/api/committee').then(r => r.ok ? r.json() : null).then(data => { if(Array.isArray(data)) globalCache.committee = data; }).catch(() => {});
+      }, 1000); // Wait 1s so it doesn't block critical path
+    };
+
     checkAuth();
     fetchSettings();
+    prefetchHeavyEndpoints();
 
     // Safety timeout: stop loading after 6 seconds regardless of server response
     const timer = setTimeout(() => {

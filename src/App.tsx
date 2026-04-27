@@ -133,6 +133,7 @@ const CommitteePage = () => {
   const { t, lang } = useLanguage();
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(!globalCache.committee);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const translateRole = (role: string) => translateRoleHelper(role, t);
 
@@ -160,9 +161,11 @@ const CommitteePage = () => {
     return femaleKeywords.some(key => name.includes(key));
   };
   
-  const leaders = committee.filter(m => m.role.includes('আহ্বায়ক') || m.role.includes('সদস্য সচিব'));
-  const jointSecretaries = committee.filter(m => m.role.includes('যুগ্ম সদস্য সচিব'));
-  const generalMembers = committee.filter(m => !m.role.includes('আহ্বায়ক') && !m.role.includes('সদস্য সচিব'));
+  const filteredCommittee = committee.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.role.toLowerCase().includes(searchQuery.toLowerCase()));
+  
+  const leaders = filteredCommittee.filter(m => m.role.includes('আহ্বায়ক') || m.role.includes('সদস্য সচিব'));
+  const jointSecretaries = filteredCommittee.filter(m => m.role.includes('যুগ্ম সদস্য সচিব'));
+  const generalMembers = filteredCommittee.filter(m => !m.role.includes('আহ্বায়ক') && !m.role.includes('সদস্য সচিব'));
 
   return (
     <div className="pt-32 pb-20">
@@ -191,6 +194,23 @@ const CommitteePage = () => {
                >
                  {t('committee_desc')}
                </motion.p>
+               
+               <motion.div
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.4 }}
+                 className="pt-8 max-w-md mx-auto"
+               >
+                 <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="সদস্য খুঁজুন (নাম বা পদবী)..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-white border border-gray-200 rounded-2xl px-6 py-4 outline-none focus:border-bento-primary shadow-sm transition italic text-bento-dark"
+                    />
+                 </div>
+               </motion.div>
             </div>
 
             {committee.length > 0 ? (
@@ -2415,6 +2435,7 @@ const AdminDashboard = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
+  const [committeeSearchQuery, setCommitteeSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -3571,12 +3592,21 @@ const AdminDashboard = () => {
                   </div>
                </div>
                <div className="md:col-span-7 space-y-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                      <h4 className="text-xs font-black uppercase tracking-widest text-bento-light">কমিটি সদস্যবৃন্দ ({committee.length})</h4>
-                     <button onClick={() => fetch('/api/committee').then(r => r.json()).then(setCommittee)} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition">রিফ্রেশ</button>
+                     <div className="flex items-center gap-3">
+                       <input 
+                         type="text" 
+                         className="px-4 py-2 text-xs rounded-xl border border-gray-200 outline-none focus:border-bento-primary transition"
+                         placeholder="অনুসন্ধান করুন..."
+                         value={committeeSearchQuery}
+                         onChange={e => setCommitteeSearchQuery(e.target.value)}
+                       />
+                       <button onClick={() => fetch('/api/committee').then(r => r.json()).then(setCommittee)} className="text-[10px] font-black uppercase text-bento-primary hover:underline transition">রিফ্রেশ</button>
+                     </div>
                   </div>
                   <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                     {committee.map(m => (
+                     {committee.filter(m => m.name.toLowerCase().includes(committeeSearchQuery.toLowerCase()) || m.role.toLowerCase().includes(committeeSearchQuery.toLowerCase())).map(m => (
                         <div key={m.id} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
                            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4">
                               <div className="w-16 h-16 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-sm">

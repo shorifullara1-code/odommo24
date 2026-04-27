@@ -164,7 +164,6 @@ const CommitteePage = () => {
   const filteredCommittee = committee.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.role.toLowerCase().includes(searchQuery.toLowerCase()));
   
   const leaders = filteredCommittee.filter(m => m.role.includes('আহ্বায়ক') || m.role.includes('সদস্য সচিব'));
-  const jointSecretaries = filteredCommittee.filter(m => m.role.includes('যুগ্ম সদস্য সচিব'));
   const generalMembers = filteredCommittee.filter(m => !m.role.includes('আহ্বায়ক') && !m.role.includes('সদস্য সচিব'));
 
   return (
@@ -248,12 +247,12 @@ const CommitteePage = () => {
                      ))}
                   </div>
 
-                  <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-8 md:px-20 border border-gray-100">
+                  <div className="space-y-16 py-20 bg-gray-50/50 rounded-[5rem] px-6 sm:px-8 md:px-20 border border-gray-100">
                      <div className="text-center space-y-4">
                         <h3 className="text-xs font-black uppercase tracking-[0.5em] text-bento-light italic">{t('general_members')}</h3>
                         <p className="text-4xl font-serif italic text-bento-dark">{t('member_list_title').split(' ')[0]} <span className="text-bento-primary">{t('member_list_title').split(' ')[1]}</span></p>
                      </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
+                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 gap-y-16">
                         {generalMembers.map((c, i) => (
                            <motion.div 
                               key={c.id} 
@@ -261,20 +260,20 @@ const CommitteePage = () => {
                               whileInView={{ opacity: 1 }} 
                               viewport={{ once: true }}
                               transition={{ delay: isMobile ? 0 : i * 0.02 }}
-                              className="flex flex-col items-center text-center space-y-4 group"
+                              className="flex flex-col items-center text-center space-y-6 group"
                            >
-                              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm group-hover:border-bento-primary/30 group-hover:shadow-lg transition-all duration-500 overflow-hidden">
+                              <div className="w-full aspect-square max-w-[14rem] bg-white rounded-[3rem] flex items-center justify-center border border-gray-100 shadow-md group-hover:border-bento-primary/30 group-hover:shadow-2xl group-hover:-translate-y-2 transition-all duration-500 overflow-hidden relative">
                                  {c.image_url ? (
-                                    <img src={c.image_url} className="w-full h-full object-cover" alt={c.name} />
+                                    <img src={c.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={c.name} />
                                  ) : (
-                                    <div className={isFemale(c.name) ? 'text-pink-300' : 'text-blue-300'}>
-                                       {isFemale(c.name) ? <Venus size={18} /> : <Mars size={18} />}
+                                    <div className={isFemale(c.name) ? 'text-pink-300 bg-pink-50 w-full h-full flex items-center justify-center group-hover:bg-pink-100 transition-colors duration-500' : 'text-blue-300 bg-blue-50 w-full h-full flex items-center justify-center group-hover:bg-blue-100 transition-colors duration-500'}>
+                                       {isFemale(c.name) ? <Venus size={60} /> : <Mars size={60} />}
                                     </div>
                                  )}
                               </div>
-                              <div>
-                                 <p className="text-sm font-bold text-bento-dark leading-tight">{c.name}</p>
-                                 <p className="text-[8px] font-black uppercase tracking-widest text-bento-light mt-1">{translateRole(c.role)}</p>
+                              <div className="px-2">
+                                 <p className="text-lg md:text-xl font-serif italic font-bold text-bento-dark leading-tight group-hover:text-bento-primary transition-colors">{c.name}</p>
+                                 <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-bento-light mt-2">{translateRole(c.role)}</p>
                               </div>
                            </motion.div>
                         ))}
@@ -504,7 +503,6 @@ const HomeOverview = () => {
   }, [heroImages.length]);
 
   const leaders = useMemo(() => committee.filter(c => c.role === 'আহ্বায়ক' || c.role === 'সদস্য সচিব').sort((a,b) => a.sort_order - b.sort_order), [committee]);
-  const jointSecretaries = useMemo(() => committee.filter(c => c.role === 'যুগ্ম সদস্য সচিব').sort((a,b) => a.sort_order - b.sort_order), [committee]);
   const generalMembers = useMemo(() => committee.filter(c => c.role === 'সদস্য').sort((a,b) => a.sort_order - b.sort_order), [committee]);
 
   const currentDonation = Array.isArray(donations) ? donations.reduce((sum, d) => sum + d.amount, 0) : 0;

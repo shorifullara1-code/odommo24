@@ -12,7 +12,7 @@ import {
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
   AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
-  Eye, EyeOff, Plus, Minus, Image, Upload
+  Eye, EyeOff, Plus, Minus, Image, Upload, Code, Terminal, Cpu, Database, Binary, Braces, Layers, Box
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -5440,23 +5440,137 @@ const VisitorStats = () => {
 };
 
 const MaintenancePage = () => {
+  const codeSnippets = [
+    { code: 'def rebuild_system():', lang: 'Python', top: '15%', left: '10%', duration: 15 },
+    { code: 'import { future } from "next";', lang: 'JS', top: '25%', left: '70%', duration: 18 },
+    { code: '<section class="modern">', lang: 'HTML', top: '65%', left: '15%', duration: 12 },
+    { code: 'async function deploy() {}', lang: 'JS', top: '80%', left: '60%', duration: 20 },
+    { code: 'print("Upgrading...")', lang: 'Python', top: '45%', left: '85%', duration: 14 },
+    { code: 'const odommo = 24;', lang: 'JS', top: '10%', left: '40%', duration: 16 },
+    { code: '<div id="app"></div>', lang: 'HTML', top: '85%', left: '20%', duration: 22 },
+    { code: 'public static void main(String[] args)', lang: 'Java', top: '5%', left: '25%', duration: 19 },
+    { code: '#include <iostream>', lang: 'C++', top: '55%', left: '75%', duration: 17 },
+    { code: '<?php echo "Maintenance"; ?>', lang: 'PHP', top: '35%', left: '60%', duration: 21 },
+    { code: '@media (min-width: 1024px)', lang: 'CSS', top: '75%', left: '5%', duration: 13 },
+    { code: 'func updateUI() { ... }', lang: 'Swift', top: '92%', left: '35%', duration: 25 },
+  ];
+
+  const techSymbols = [
+    { icon: <Code size={24} />, top: '20%', left: '30%', duration: 10 },
+    { icon: <Terminal size={24} />, top: '70%', left: '80%', duration: 12 },
+    { icon: <Cpu size={24} />, top: '40%', left: '5%', duration: 15 },
+    { icon: <Database size={24} />, top: '10%', left: '75%', duration: 18 },
+    { icon: <Zap size={24} />, top: '90%', left: '45%', duration: 8 },
+    { icon: <Binary size={24} />, top: '50%', left: '90%', duration: 14 },
+    { icon: <Braces size={24} />, top: '30%', left: '15%', duration: 11 },
+    { icon: <Layers size={24} />, top: '80%', left: '10%', duration: 16 },
+    { icon: <Box size={24} />, top: '15%', left: '55%', duration: 20 },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-bento-primary/5 rounded-full blur-[80px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[80px]" />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0A0C10] selection:bg-bento-primary selection:text-white">
+      {/* Background Grid and Glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1a1f26_1px,transparent_1px)] [background-size:40px_40px] opacity-20" />
+      <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-bento-primary/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
+
+      {/* Floating Code Snippets */}
+      {codeSnippets.map((snippet, idx) => (
+        <motion.div
+          key={`code-${idx}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: [0.2, 0.5, 0.2], y: [-20, 20, -20], x: [-10, 10, -10] }}
+          transition={{ duration: snippet.duration, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', top: snippet.top, left: snippet.left }}
+          className="font-mono text-[10px] md:text-sm font-bold whitespace-nowrap pointer-events-none"
+        >
+          <span className="text-bento-primary/40 mr-2">[{snippet.lang}]</span>
+          <span className="text-white/20">{snippet.code}</span>
+        </motion.div>
+      ))}
+
+      {/* Floating Symbols */}
+      {techSymbols.map((symbol, idx) => (
+        <motion.div
+          key={`symbol-${idx}`}
+          animate={{ rotate: 360, y: [-30, 30, -30], opacity: [0.1, 0.3, 0.1] }}
+          transition={{ duration: symbol.duration, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', top: symbol.top, left: symbol.left }}
+          className="text-white/20 pointer-events-none"
+        >
+          {symbol.icon}
+        </motion.div>
+      ))}
       
-      <div className="relative z-10 text-center space-y-8 max-w-2xl mx-auto px-6">
-         <div className="w-32 h-32 bg-gray-50 text-bento-primary rounded-[3rem] flex items-center justify-center mx-auto mb-10 shadow-xl border border-gray-100">
-            <Settings size={64} className="animate-[spin_8s_linear_infinite]" />
+      <div className="relative z-10 text-center space-y-12 max-w-3xl mx-auto px-6 py-20">
+         <motion.div 
+           initial={{ scale: 0.8, opacity: 0 }}
+           animate={{ scale: 1, opacity: 1 }}
+           className="relative inline-block"
+         >
+           <div className="w-40 h-40 bg-white/5 backdrop-blur-xl text-bento-primary rounded-[3rem] flex items-center justify-center mx-auto shadow-[0_0_80px_rgba(192,57,43,0.1)] border border-white/10 relative z-10">
+              <div className="absolute inset-0 bg-bento-primary/20 rounded-[3rem] blur-2xl animate-pulse" />
+              <div className="relative">
+                <Settings size={80} className="animate-[spin_10s_linear_infinite]" />
+              </div>
+           </div>
+           {/* Decorative Rings */}
+           <div className="absolute -inset-4 border border-bento-primary/20 rounded-[3.5rem] animate-ping [animation-duration:3s]" />
+           <div className="absolute -inset-8 border border-white/5 rounded-[4rem] animate-ping [animation-duration:5s]" />
+         </motion.div>
+
+         <div className="space-y-6">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-6xl md:text-8xl font-serif font-black italic text-white leading-tight tracking-tighter"
+            >
+              System <span className="text-bento-primary">Update</span>
+            </motion.h1>
+            <motion.div 
+               initial={{ width: 0 }}
+               animate={{ width: 100 }}
+               className="h-1.5 bg-bento-primary mx-auto rounded-full shadow-[0_0_20px_rgba(192,57,43,0.5)]"
+               style={{ width: '100px' }}
+            />
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-xl md:text-2xl text-white/50 italic font-serif leading-relaxed max-w-xl mx-auto"
+            >
+              We are currently fine-tuning our organization's digital ecosystem. The human touch is undergoing a technical upgrade.
+            </motion.p>
          </div>
-         <h1 className="text-5xl md:text-7xl font-serif font-black italic text-gray-900 leading-tight">Under Maintenance</h1>
-         <p className="text-xl text-gray-500 italic leading-relaxed max-w-lg mx-auto">Website is currently undergoing maintenance. Please check back later.</p>
          
-         <div className="pt-10 flex justify-center">
-           <Link to="/login" className="inline-flex items-center gap-4 px-10 py-5 bg-gray-900 text-white rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-bento-primary transition-all duration-500 hover:scale-105 shadow-xl hover:shadow-2xl hover:shadow-bento-primary/30">
-             <Lock size={18} /> Admin Login
+         <motion.div 
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.5 }}
+           className="pt-10 flex flex-col items-center gap-8"
+         >
+           <Link to="/login" className="group relative px-12 py-6 bg-white text-gray-900 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.5em] transition-all duration-500 overflow-hidden">
+             <div className="absolute inset-0 bg-bento-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+             <span className="relative z-10 flex items-center gap-4 group-hover:text-white transition-colors duration-500">
+               <Lock size={18} /> Administrative Access
+             </span>
            </Link>
-         </div>
+
+           <div className="flex items-center gap-3">
+              <div className="h-[1px] w-12 bg-white/10" />
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.8em]">ODOMMO 24 SECURITY</span>
+              <div className="h-[1px] w-12 bg-white/10" />
+           </div>
+         </motion.div>
+      </div>
+
+      {/* Progress Bar Detail */}
+      <div className="fixed bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
+        <motion.div 
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="w-1/3 h-full bg-gradient-to-r from-transparent via-bento-primary to-transparent"
+        />
       </div>
     </div>
   );

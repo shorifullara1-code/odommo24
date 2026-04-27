@@ -12,7 +12,7 @@ import {
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
   AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
-  Eye, EyeOff, Plus, Minus, Image
+  Eye, EyeOff, Plus, Minus, Image, Upload
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -1556,40 +1556,49 @@ const Register = () => {
          <p className="text-lg text-bento-light font-serif italic leading-relaxed">অদম্য ২৪-এর অংশ হয়ে আর্তমানবতার সেবায় নিজেকে নিয়োজিত করুন। সকল তথ্য সঠিকভাবে পূরণ করুন।</p>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bento-card border-none shadow-2xl p-6 md:p-16 bg-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-bento-primary via-bento-accent to-bento-primary"></div>
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bg-[#fcfdfd] border border-gray-100 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] rounded-[3rem] p-6 md:p-16 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-bento-primary via-bento-accent to-blue-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-bento-primary/5 rounded-full blur-3xl"></div>
         
-        <form onSubmit={handleSubmit} className="space-y-16">
-          <div className="flex flex-col items-center space-y-4 mb-8">
-             <div className="w-32 h-32 bg-gray-50 rounded-3xl border-2 border-dashed border-bento-border flex items-center justify-center overflow-hidden relative group">
+        <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
+          <div className="flex flex-col items-center space-y-5 mb-12">
+             <div className="w-40 h-40 bg-white rounded-[2rem] border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden relative group hover:border-bento-primary transition-colors shadow-sm">
                 {formData.profile_image ? (
                   <img src={formData.profile_image} className="w-full h-full object-cover" />
                 ) : (
-                  <Camera size={40} className="text-gray-300" />
+                  <div className="flex flex-col items-center gap-2 text-gray-300 group-hover:text-bento-primary transition-colors">
+                     <Camera size={40} className="mb-2" />
+                  </div>
                 )}
-                <div className="absolute inset-0 bg-[rgba(47,54,64,0.4)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none z-0">
-                   <span className="text-[10px] font-black uppercase tracking-widest">ছবি যুক্ত করুন</span>
+                <div className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none z-0 backdrop-blur-sm">
+                   <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                     <Upload size={14} /> ছবি যুক্ত করুন
+                   </span>
                 </div>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" title="Upload Profile Picture" />
              </div>
-             <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">প্রোফাইল ছবি (সর্বোচ্চ ৫০০কেবি)</p>
+             <div className="text-center space-y-1">
+                <p className="text-sm font-bold text-gray-700">আপনার একটি সুন্দর ছবি দিন</p>
+                <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Max Size 500KB • Square Image Preferred</p>
              </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-16">
+          <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
              {/* Section 1: Basic Info */}
-             <div className="space-y-8">
-                <div className="flex items-center gap-4 border-b border-bento-border pb-4">
-                   <div className="w-10 h-10 bg-[rgba(192,57,43,0.1)] rounded-xl flex items-center justify-center text-bento-primary"><UserIcon size={20} /></div>
-                   <h3 className="text-xl font-black italic text-bento-dark">ব্যক্তিগত তথ্য</h3>
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 hover:shadow-lg hover:border-gray-200 transition-all">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center"><UserIcon size={24} /></div>
+                   <div>
+                      <h3 className="text-xl font-bold text-gray-900">ব্যক্তিগত তথ্য</h3>
+                      <p className="text-[10px] uppercase tracking-widest font-mono text-gray-400">Basic Identity</p>
+                   </div>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-5">
                    <InputField label="পূর্ণ নাম" value={formData.name} onChange={(e: any) => setFormData({ ...formData, name: e.target.value })} placeholder="উদা: মোহাম্মদ তামিম" required />
                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                         <label className="block text-[10px] font-black text-bento-light uppercase tracking-widest pl-1">রক্তের গ্রুপ</label>
-                         <select className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:outline-none focus:ring-4 focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary transition text-sm font-medium" value={formData.blood_group} onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}>
+                      <div className="space-y-1.5 flex flex-col justify-end">
+                         <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest pl-1 mb-1">রক্তের গ্রুপ</label>
+                         <select className="w-full px-5 py-[18px] rounded-2xl border-2 border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition text-sm font-medium text-gray-700 hover:bg-white" value={formData.blood_group} onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}>
                             <option value="">নির্বাচন করুন</option>
                             {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(g => <option key={g} value={g}>{g}</option>)}
                          </select>
@@ -1602,30 +1611,36 @@ const Register = () => {
              </div>
 
              {/* Section 2: Family & Identification */}
-             <div className="space-y-8">
-                <div className="flex items-center gap-4 border-b border-bento-border pb-4">
-                   <div className="w-10 h-10 bg-[rgba(39,174,96,0.1)] rounded-xl flex items-center justify-center text-bento-accent"><Shield size={20} /></div>
-                   <h3 className="text-xl font-black italic text-bento-dark">পরিবার ও পরিচয়</h3>
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 hover:shadow-lg hover:border-gray-200 transition-all">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center"><Shield size={24} /></div>
+                   <div>
+                      <h3 className="text-xl font-bold text-gray-900">পরিবার ও পরিচয়</h3>
+                      <p className="text-[10px] uppercase tracking-widest font-mono text-gray-400">Family & Gov ID</p>
+                   </div>
                 </div>
-                <div className="space-y-6">
-                   <InputField label="পিতার নাম" value={formData.father_name} onChange={(e: any) => setFormData({ ...formData, father_name: e.target.value })} required />
-                   <InputField label="মাতার নাম" value={formData.mother_name} onChange={(e: any) => setFormData({ ...formData, mother_name: e.target.value })} required />
-                   <InputField label="এনআইডি নম্বর" value={formData.nid_number} onChange={(e: any) => setFormData({ ...formData, nid_number: e.target.value })} required />
-                   <InputField label="জরুরি যোগাযোগ" value={formData.emergency_contact} onChange={(e: any) => setFormData({ ...formData, emergency_contact: e.target.value })} placeholder="মোবাইল নম্বর" required />
+                <div className="space-y-5">
+                   <InputField label="পিতার নাম" value={formData.father_name} onChange={(e: any) => setFormData({ ...formData, father_name: e.target.value })} placeholder="উদা: আব্দুল করিম" required />
+                   <InputField label="মাতার নাম" value={formData.mother_name} onChange={(e: any) => setFormData({ ...formData, mother_name: e.target.value })} placeholder="উদা: রহিমা বেগম" required />
+                   <InputField label="এনআইডি নম্বর" value={formData.nid_number} onChange={(e: any) => setFormData({ ...formData, nid_number: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নম্বর" required />
+                   <InputField label="জরুরি যোগাযোগ" value={formData.emergency_contact} onChange={(e: any) => setFormData({ ...formData, emergency_contact: e.target.value })} placeholder="পিতা/মাতার মোবাইল নম্বর" required />
                 </div>
              </div>
 
              {/* Section 3: Contact & Account */}
-             <div className="space-y-8">
-                <div className="flex items-center gap-4 border-b border-bento-border pb-4">
-                   <div className="w-10 h-10 bg-[rgba(59,130,246,0.1)] rounded-xl flex items-center justify-center text-blue-500"><Mail size={20} /></div>
-                   <h3 className="text-xl font-black italic text-bento-dark">যোগাযোগ ও অ্যাকাউন্ট</h3>
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8 hover:shadow-lg hover:border-gray-200 transition-all">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center"><Mail size={24} /></div>
+                   <div>
+                      <h3 className="text-xl font-bold text-gray-900">অ্যাকাউন্ট ও লগইন</h3>
+                      <p className="text-[10px] uppercase tracking-widest font-mono text-gray-400">System Credentials</p>
+                   </div>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-5">
                    <InputField label="মোবাইল নম্বর" value={formData.phone} onChange={(e: any) => setFormData({ ...formData, phone: e.target.value })} placeholder="017XXXXXXXX" required />
                    <InputField label="ইমেইল" value={formData.email} onChange={(e: any) => setFormData({ ...formData, email: e.target.value })} type="email" placeholder="example@mail.com" required />
                    <div className="grid grid-cols-2 gap-4">
-                      <InputField label="ইউজার আইডি (English)" value={formData.userId} onChange={(e: any) => setFormData({ ...formData, userId: e.target.value })} placeholder="@username" required />
+                      <InputField label="ইউজার আইডি" value={formData.userId} onChange={(e: any) => setFormData({ ...formData, userId: e.target.value })} placeholder="English only" required />
                       <InputField label="পাসওয়ার্ড" type="password" value={formData.password} onChange={(e: any) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required />
                    </div>
                 </div>
@@ -1633,39 +1648,41 @@ const Register = () => {
           </div>
 
           {/* Addresses - Wide Section */}
-          <div className="grid md:grid-cols-2 gap-10 pt-10 border-t border-bento-border">
-             <div className="space-y-4">
-                <label className="text-xs font-black uppercase tracking-widest text-bento-light flex items-center gap-2"> <MapPin size={14} /> বর্তমান ঠিকানা</label>
+          <div className="grid md:grid-cols-2 gap-8">
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all space-y-4">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-500 flex items-center gap-2"> <MapPin size={14} className="text-rose-500" /> বর্তমান ঠিকানা</label>
                 <textarea 
-                  className="w-full bg-gray-50 border-2 border-bento-border rounded-2xl p-5 text-sm font-medium focus:ring-4 focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary outline-none transition min-h-[120px]"
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-sm font-medium focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition hover:bg-white min-h-[140px] resize-none"
                   value={formData.present_address}
                   onChange={(e) => setFormData({ ...formData, present_address: e.target.value })}
-                  placeholder="গ্রাম, ডাকঘর, থানা, জেলা..."
+                  placeholder="গ্রাম, ডাকঘর, থানা, জেলা বিস্তারিত লিখুন..."
                   required
                 />
              </div>
-             <div className="space-y-4">
-                <label className="text-xs font-black uppercase tracking-widest text-bento-light flex items-center gap-2"> <MapPin size={14} /> স্থায়ী ঠিকানা</label>
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all space-y-4">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-500 flex items-center gap-2"> <MapPin size={14} className="text-blue-500" /> স্থায়ী ঠিকানা</label>
                 <textarea 
-                  className="w-full bg-gray-50 border-2 border-bento-border rounded-2xl p-5 text-sm font-medium focus:ring-4 focus:ring-[rgba(192,57,43,0.05)] focus:border-bento-primary outline-none transition min-h-[120px]"
+                  className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition hover:bg-white min-h-[140px] resize-none"
                   value={formData.permanent_address}
                   onChange={(e) => setFormData({ ...formData, permanent_address: e.target.value })}
-                  placeholder="গ্রাম, ডাকঘর, থানা, জেলা..."
+                  placeholder="গ্রাম, ডাকঘর, থানা, জেলা বিস্তারিত লিখুন..."
                   required
                 />
              </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 bg-gray-50 p-6 md:p-10 rounded-[2.5rem] border border-bento-border">
-             <div className="flex items-center gap-6 text-bento-light italic text-sm max-w-xl">
-                <div className="w-16 h-16 bg-bento-primary rounded-[1.5rem] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[rgba(192,57,43,0.2)]"><Shield size={32} /></div>
-                <p className="leading-relaxed font-serif">আপনার সকল তথ্য সম্পূর্ণ নিরাপদ এবং শুধুমাত্র সংগঠনের অভ্যন্তরীণ প্রয়োজনে ব্যবহৃত হবে। আবেদনের পর এডমিন প্যানেল আপনার তথ্য যাচাই করবে।</p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-10 bg-white p-8 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+             <div className="absolute inset-0 bg-gradient-to-r from-bento-primary/5 via-blue-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+             <div className="flex items-center gap-6 text-gray-500 italic text-sm max-w-xl relative z-10">
+                <div className="w-16 h-16 bg-bento-primary/10 text-bento-primary rounded-[1.5rem] flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-bento-primary group-hover:text-white transition-all duration-500"><Shield size={32} /></div>
+                <p className="leading-relaxed font-serif text-gray-600">আপনার সকল তথ্য সম্পূর্ণ নিরাপদ এবং শুধুমাত্র সংগঠনের অভ্যন্তরীণ প্রয়োজনে ব্যবহৃত হবে। আবেদনের পর এডমিন প্যানেল আপনার তথ্য যাচাই করবে।</p>
              </div>
-             <button type="submit" className="w-full md:w-auto bg-bento-primary text-white px-20 py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl shadow-[rgba(192,57,43,0.3)] hover:scale-105 active:scale-95 transition">
-               আবেদন সম্পূর্ণ করুন
+             <button type="submit" className="w-full md:w-auto bg-gray-900 text-white px-20 py-6 rounded-[2rem] font-bold text-xs uppercase tracking-[0.4em] shadow-xl shadow-gray-900/20 hover:-translate-y-2 hover:shadow-2xl hover:shadow-bento-primary/30 transition-all duration-500 relative z-10 overflow-hidden group/btn">
+               <span className="relative z-10 flex items-center gap-4">আবেদন সম্পূর্ণ করুন <ArrowRight size={18} className="group-hover/btn:translate-x-3 transition-transform duration-500" /></span>
+               <div className="absolute inset-0 bg-gradient-to-r from-bento-primary to-bento-accent translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"></div>
              </button>
           </div>
-          {error && <p className="text-red-500 text-sm font-black bg-red-50 p-6 rounded-[2rem] border border-red-100 text-center uppercase tracking-widest">{error}</p>}
+          {error && <p className="text-red-500 text-sm font-black bg-red-50/50 p-6 rounded-[2rem] border border-red-100 text-center uppercase tracking-widest backdrop-blur-sm shadow-sm">{error}</p>}
         </form>
       </motion.div>
     </div>
@@ -2519,6 +2536,47 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (uId: number) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      const res = await fetch(`/api/admin/users/${uId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'User deleted');
+        setUsers(users.filter(u => u.id !== uId));
+      } else {
+        showFeedback('error', 'Failed to delete user');
+      }
+    } catch (err) {
+      showFeedback('error', 'Deletion failed');
+    }
+  };
+
+  const handleUpdateUserImage = async (uId: number, file: File) => {
+    if (file.size > 500 * 1024) {
+      showFeedback('error', 'Image must be less than 500KB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        const res = await fetch(`/api/admin/users/${uId}/picture`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile_image: reader.result })
+        });
+        if (res.ok) {
+          showFeedback('success', 'User picture updated');
+          setUsers(users.map(u => u.id === uId ? { ...u, profile_image: reader.result } : u));
+        } else {
+          showFeedback('error', 'Failed to update picture');
+        }
+      } catch (err) {
+        showFeedback('error', 'Picture update failed');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const createNotice = async () => {
     if (!newNotice.title || !newNotice.content) return;
     try {
@@ -3246,13 +3304,19 @@ const AdminDashboard = () => {
                                   className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/80 transition-all group"
                                >
                                   <div className="col-span-12 md:col-span-5 flex items-center gap-5">
-                                     <div className="relative">
-                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover:border-bento-primary/30 transition-colors">
+                                     <div className="relative group/avatar cursor-pointer">
+                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover/avatar:border-bento-primary/30 transition-colors relative">
                                            {u.profile_image ? (
                                               <img src={u.profile_image} className="w-full h-full object-cover" />
                                            ) : (
                                               <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
                                            )}
+                                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                              <span className="text-[8px] font-black uppercase text-white tracking-widest text-center">Update</span>
+                                           </div>
+                                           <input type="file" accept="image/*" onChange={(e) => {
+                                              if (e.target.files?.[0]) handleUpdateUserImage(u.id, e.target.files[0]);
+                                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
                                         </div>
                                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
                                      </div>
@@ -3280,7 +3344,7 @@ const AdminDashboard = () => {
 
                                   <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
                                      <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-bento-primary hover:border-bento-primary hover:shadow-lg hover:shadow-bento-primary/5 transition-all"><Info size={16} /></button>
-                                     <button className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Trash2 size={16} /></button>
+                                     <button onClick={() => handleDeleteUser(u.id)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Trash2 size={16} /></button>
                                   </div>
                                </motion.div>
                             ))}

@@ -235,6 +235,7 @@ app.post('/api/auth/login', async (req, res) => {
       }]).select().single();
 
       if (error) throw error;
+      delete apiCache['members'];
       res.status(201).json({ message: 'User created successfully', user: data });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -246,6 +247,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
       const { error } = await supabase.from('users').update({ status: 'approved' }).eq('id', req.params.id);
       if (error) throw error;
+      delete apiCache['members'];
       res.json({ message: 'User approved' });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -255,6 +257,9 @@ app.post('/api/auth/login', async (req, res) => {
   // Public: Get approved members list
   app.get('/api/members', async (req, res) => {
     try {
+      if (apiCache['members'] && Date.now() - apiCache['members'].time < CACHE_TTL) {
+        return res.json(apiCache['members'].data);
+      }
       const { data: members, error } = await supabase.from('users')
         .select('id, name, profile_image, member_id_number')
         .eq('status', 'approved')
@@ -265,6 +270,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
         throw error;
       }
+      apiCache['members'] = { data: members, time: Date.now() };
       res.json(members);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -545,7 +551,33 @@ app.post('/api/auth/login', async (req, res) => {
     try {
       const { error } = await supabase.from('users').update({ role }).eq('id', req.params.id);
       if (error) throw error;
+      delete apiCache['members'];
       res.json({ message: 'Role updated' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: Delete user
+  app.delete('/api/admin/users/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('users').delete().eq('id', req.params.id);
+      if (error) throw error;
+      delete apiCache['members'];
+      res.json({ message: 'User deleted successfully' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Admin: Update user picture
+  app.patch('/api/admin/users/:id/picture', authenticateToken, isAdmin, async (req, res) => {
+    const { profile_image } = req.body;
+    try {
+      const { error } = await supabase.from('users').update({ profile_image }).eq('id', req.params.id);
+      if (error) throw error;
+      delete apiCache['members'];
+      res.json({ message: 'User picture updated successfully' });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

@@ -3952,6 +3952,25 @@ const AdminDashboard = () => {
             transition={{ duration:0.3 }}
             className="grid lg:grid-cols-2 gap-10"
           >
+             <div className="bg-white p-10 rounded-[3rem] border border-bento-border shadow-2xl space-y-8 lg:col-span-2">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-red-500 text-white rounded-2xl flex items-center justify-center"><Shield size={24} /></div>
+                   <h3 className="text-2xl font-black italic">System Configuration</h3>
+                </div>
+                <div className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                   <div>
+                      <h4 className="font-bold text-gray-900 italic text-xl">Under Maintenance</h4>
+                      <p className="text-sm text-gray-500 mt-1 font-serif">When active, normal users will see a maintenance page. Only admins can access the dashboard by logging in.</p>
+                   </div>
+                   <button 
+                     onClick={() => updateSettings('maintenance_mode', siteSettings?.maintenance_mode === 'true' ? 'false' : 'true')}
+                     className={`relative w-20 h-10 rounded-full transition-colors duration-300 ${siteSettings?.maintenance_mode === 'true' ? 'bg-red-500 shadow-lg shadow-red-500/30' : 'bg-gray-300'}`}
+                   >
+                      <div className={`absolute top-1 w-8 h-8 rounded-full bg-white transition-transform duration-300 ${siteSettings?.maintenance_mode === 'true' ? 'translate-x-11' : 'translate-x-1'}`} />
+                   </button>
+                </div>
+             </div>
+
              <div className="bg-white p-10 rounded-[3rem] border border-bento-border shadow-2xl space-y-8">
                 <div className="flex items-center gap-4">
                    <div className="w-12 h-12 bg-bento-primary text-white rounded-2xl flex items-center justify-center"><Settings size={24} /></div>
@@ -5420,6 +5439,29 @@ const VisitorStats = () => {
   );
 };
 
+const MaintenancePage = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-white">
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-bento-primary/5 rounded-full blur-[80px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[80px]" />
+      
+      <div className="relative z-10 text-center space-y-8 max-w-2xl mx-auto px-6">
+         <div className="w-32 h-32 bg-gray-50 text-bento-primary rounded-[3rem] flex items-center justify-center mx-auto mb-10 shadow-xl border border-gray-100">
+            <Settings size={64} className="animate-[spin_8s_linear_infinite]" />
+         </div>
+         <h1 className="text-5xl md:text-7xl font-serif font-black italic text-gray-900 leading-tight">Under Maintenance</h1>
+         <p className="text-xl text-gray-500 italic leading-relaxed max-w-lg mx-auto">Website is currently undergoing maintenance. Please check back later.</p>
+         
+         <div className="pt-10 flex justify-center">
+           <Link to="/login" className="inline-flex items-center gap-4 px-10 py-5 bg-gray-900 text-white rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-bento-primary transition-all duration-500 hover:scale-105 shadow-xl hover:shadow-2xl hover:shadow-bento-primary/30">
+             <Lock size={18} /> Admin Login
+           </Link>
+         </div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -5512,6 +5554,8 @@ export default function App() {
 
   if (loading) return <LoadingOverlay />;
 
+  const isMaintenance = siteSettings?.maintenance_mode === 'true' && user?.role !== 'admin';
+
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, siteSettings, updateSettings }}>
       <LanguageContext.Provider value={{ lang, setLang, t }}>
@@ -5554,28 +5598,39 @@ export default function App() {
               )}
             </div>
 
-            <Navbar />
+            {!isMaintenance && <Navbar />}
             <main className="flex-grow relative z-10">
               <Routes>
-                <Route path="/" element={<HomeOverview />} />
-                <Route path="/live" element={<LiveStreamPage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/committee" element={<CommitteePage />} />
-                <Route path="/members" element={<PublicMembersPage />} />
-                <Route path="/notices" element={<NoticeBoardPage />} />
-                <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
-                <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
-                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
-                <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/donations" element={<DonationsPage />} />
-                <Route path="/contact" element={<ContactUsPage />} />
-                <Route path="/rules" element={<RulesAndRegulationPage />} />
+                {isMaintenance ? (
+                  <>
+                    <Route path="/login" element={user && user.role === 'admin' ? <Navigate to="/admin" /> : <Login />} />
+                    <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />} />
+                    <Route path="*" element={<MaintenancePage />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<HomeOverview />} />
+                    <Route path="/live" element={<LiveStreamPage />} />
+                    <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/committee" element={<CommitteePage />} />
+                    <Route path="/members" element={<PublicMembersPage />} />
+                    <Route path="/notices" element={<NoticeBoardPage />} />
+                    <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
+                    <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />
+                    <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
+                    <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/donations" element={<DonationsPage />} />
+                    <Route path="/contact" element={<ContactUsPage />} />
+                    <Route path="/rules" element={<RulesAndRegulationPage />} />
+                  </>
+                )}
               </Routes>
             </main>
-            <VisitorStats />
-            <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
+            {!isMaintenance && <VisitorStats />}
+            {!isMaintenance && (
+              <footer className="bg-[#1a1f26] text-white pt-32 pb-16 relative overflow-hidden">
               {/* Decorative Gradients */}
               <div className="absolute top-0 left-1/4 w-96 h-96 bg-bento-primary/10 rounded-full blur-[80px]"></div>
               <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-bento-accent/10 rounded-full blur-[80px]"></div>
@@ -5715,6 +5770,7 @@ export default function App() {
                 </div>
               </div>
             </footer>
+            )}
           </div>
         </Router>
       </LanguageContext.Provider>

@@ -82,6 +82,7 @@ app.post('/api/auth/register', async (req, res) => {
       father_name, mother_name, present_address, permanent_address,
       blood_group, dob, profession, educational_qualification,
       nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber,
+      is_blood_donor: req.body.is_blood_donor || false,
       status: role === 'admin' ? 'approved' : 'pending'
     }]).select().single();
 
@@ -148,7 +149,7 @@ app.post('/api/auth/login', async (req, res) => {
         id, userId, name, email, phone, role, profile_image, bio,
         father_name, mother_name, present_address, permanent_address,
         blood_group, dob, profession, educational_qualification,
-        nid_number, emergency_contact, member_id_number, status
+        nid_number, emergency_contact, member_id_number, status, is_blood_donor
       `)
       .eq('id', req.user.id)
       .single();
@@ -168,7 +169,7 @@ app.post('/api/auth/login', async (req, res) => {
       name, email, phone, bio,
       father_name, mother_name, present_address, permanent_address,
       blood_group, dob, profession, educational_qualification,
-      nid_number, emergency_contact
+      nid_number, emergency_contact, is_blood_donor
     } = req.body;
     try {
       const { error } = await supabase.from('users')
@@ -176,7 +177,7 @@ app.post('/api/auth/login', async (req, res) => {
           name, email, phone, bio,
           father_name, mother_name, present_address, permanent_address,
           blood_group, dob, profession, educational_qualification,
-          nid_number, emergency_contact
+          nid_number, emergency_contact, is_blood_donor
         })
         .eq('id', req.user.id);
       
@@ -209,7 +210,7 @@ app.post('/api/auth/login', async (req, res) => {
         id, userId, name, email, phone, role, created_at, status,
         father_name, mother_name, present_address, permanent_address,
         blood_group, dob, profession, educational_qualification,
-        nid_number, emergency_contact, member_id_number
+        nid_number, emergency_contact, member_id_number, is_blood_donor
       `);
     if (error) return res.status(500).json({ error: error.message });
     res.json(users);
@@ -261,7 +262,7 @@ app.post('/api/auth/login', async (req, res) => {
         return res.json(apiCache['members'].data);
       }
       const { data: members, error } = await supabase.from('users')
-        .select('id, name, profile_image, member_id_number')
+        .select('id, name, phone, email, profile_image, member_id_number, is_blood_donor, blood_group')
         .eq('status', 'approved')
         .order('name', { ascending: true });
       if (error) {
@@ -801,7 +802,7 @@ app.post('/api/auth/login', async (req, res) => {
         key: 'visitor_stats', 
         value: JSON.stringify(activeStats), 
         updated_at: new Date().toISOString() 
-      }, { onConflict: 'key' }).then();
+      }, { onConflict: 'key' }).then(() => {}, (e) => console.error('Visitor stats upsert failed:', e));
       
       res.json({ today, weekly, monthly, yearly });
     } catch (err: any) {

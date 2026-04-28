@@ -164,6 +164,10 @@ export const translations = {
     buy_now: "এখনই কিনুন",
     out_of_stock: "স্টক আউট",
     available: "পর্যাপ্ত আছে",
+    blood_donate_interest: "আমি রক্ত দিতে আগ্রহী",
+    blood_donor_list: "রক্তদাতা তালিকা",
+    filter_blood_group: "রক্তের গ্রুপ দিয়ে খুঁজুন",
+    all_groups: "সব গ্রুপ",
   },
   en: {
     nav_home: "Home",
@@ -329,5 +333,9 @@ export const translations = {
     buy_now: "Buy Now",
     out_of_stock: "Out of Stock",
     available: "In Stock",
+    blood_donate_interest: "I am interested in donating blood",
+    blood_donor_list: "Blood Donor List",
+    filter_blood_group: "Filter by Blood Group",
+    all_groups: "All Groups",
   },
 };

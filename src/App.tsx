@@ -12,7 +12,8 @@ import {
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
   AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
-  Eye, EyeOff, Plus, Minus, Image, Upload, Code, Terminal, Cpu, Database, Binary, Braces, Layers, Box
+  Eye, EyeOff, Plus, Minus, Image, Upload, Code, Terminal, Cpu, Database, Binary, Braces, Layers, Box,
+  Workflow, Atom, Link2, Variable, Webhook, CircleEllipsis, Code2
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import jsPDF from 'jspdf';
@@ -299,6 +300,8 @@ const MemberListPage = () => {
   const [members, setMembers] = useState<any[]>([]);
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'all' | 'blood'>('all');
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState<string>('all');
 
   useEffect(() => {
     fetch('/api/members')
@@ -311,6 +314,13 @@ const MemberListPage = () => {
 
   if (loading) return <LoadingOverlay />;
 
+  const bloodDonors = members.filter(m => m.is_blood_donor);
+  const filteredDonors = selectedBloodGroup === 'all' 
+    ? bloodDonors 
+    : bloodDonors.filter(m => m.blood_group === selectedBloodGroup);
+
+  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-32 space-y-16">
       <motion.div 
@@ -319,42 +329,135 @@ const MemberListPage = () => {
         viewport={{ once: true }}
         className="text-center space-y-6"
       >
-        <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">{t('nav_member_list')}</span>
-        <h1 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight tracking-tighter">{t('member_list_title')}</h1>
-        <p className="text-sm md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto leading-relaxed">{t('member_list_public_desc')}</p>
+        <span className="text-bento-primary font-black uppercase tracking-[0.6em] text-[10px]">{activeTab === 'all' ? t('nav_member_list') : t('blood_donor_list')}</span>
+        <h1 className="text-4xl md:text-7xl font-serif italic text-bento-dark leading-tight tracking-tighter">
+          {activeTab === 'all' ? t('member_list_title') : t('blood_donor_list')}
+        </h1>
+        <p className="text-sm md:text-xl text-bento-light font-serif italic max-w-2xl mx-auto leading-relaxed">
+          {activeTab === 'all' ? t('member_list_public_desc') : t('mission_desc')}
+        </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {Array.isArray(members) && members.map((m, idx) => (
-          <motion.div 
-            key={m.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.05 }}
-            className="bg-white border-2 border-bento-border rounded-[2.5rem] p-8 text-center space-y-6 hover:border-bento-primary hover:shadow-2xl transition-all duration-500 group"
-          >
-            <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border group-hover:scale-105 transition-all duration-500">
-               {m.profile_image ? (
-                 <img src={m.profile_image} className="w-full h-full object-cover" alt={m.name} />
-               ) : (
-                 <div className="w-full h-full flex items-center justify-center text-bento-primary">
-                    <UserIcon size={48} />
-                 </div>
-               )}
-            </div>
-            <div>
-               <h3 className="text-xl font-black italic text-bento-dark">{m.name}</h3>
-               <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1">{m.member_id_number}</p>
-            </div>
-          </motion.div>
-        ))}
+      {/* Tab Switcher */}
+      <div className="flex justify-center p-2 bg-gray-100/50 backdrop-blur-md rounded-[2rem] max-w-md mx-auto border border-gray-100 shadow-inner">
+         <button 
+           onClick={() => setActiveTab('all')}
+           className={`flex-1 py-4 px-6 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'all' ? 'bg-white text-bento-primary shadow-lg ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
+         >
+           আবেদনকারী সবাই
+         </button>
+         <button 
+           onClick={() => setActiveTab('blood')}
+           className={`flex-1 py-4 px-6 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'blood' ? 'bg-white text-red-500 shadow-lg ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
+         >
+           রক্তদাতা সদস্য
+         </button>
       </div>
 
-      {members.length === 0 && (
-         <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-bento-border text-bento-light italic font-serif">
-            {t('no_members')}
-         </div>
+      {activeTab === 'blood' && (
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+           <div className="flex items-center gap-4">
+              <div className="p-3 bg-red-100 text-red-500 rounded-2xl"><Activity size={24} /></div>
+              <div>
+                 <h4 className="font-bold text-gray-900 leading-none">{t('filter_blood_group')}</h4>
+                 <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Select Group to Filter</p>
+              </div>
+           </div>
+           <div className="flex flex-wrap justify-center gap-2">
+              <button 
+                onClick={() => setSelectedBloodGroup('all')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedBloodGroup === 'all' ? 'bg-red-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-100 hover:border-red-200'}`}
+              >
+                {t('all_groups')}
+              </button>
+              {bloodGroups.map(group => (
+                <button 
+                  key={group}
+                  onClick={() => setSelectedBloodGroup(group)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedBloodGroup === group ? 'bg-red-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-100 hover:border-red-200'}`}
+                >
+                  {group}
+                </button>
+              ))}
+           </div>
+        </div>
+      )}
+
+      {activeTab === 'all' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {Array.isArray(members) && members.map((m, idx) => (
+            <motion.div 
+              key={m.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+              className="bg-white border-2 border-bento-border rounded-[2.5rem] p-8 text-center space-y-6 hover:border-bento-primary hover:shadow-2xl transition-all duration-500 group"
+            >
+              <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border group-hover:scale-105 transition-all duration-500">
+                 {m.profile_image ? (
+                   <img src={m.profile_image} className="w-full h-full object-cover" alt={m.name} />
+                 ) : (
+                   <div className="w-full h-full flex items-center justify-center text-bento-primary">
+                      <UserIcon size={48} />
+                   </div>
+                 )}
+              </div>
+              <div>
+                 <h3 className="text-xl font-black italic text-bento-dark">{m.name}</h3>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1">{m.member_id_number}</p>
+                 {m.is_blood_donor && (
+                   <div className="inline-flex items-center gap-1 mt-3 px-2 py-1 bg-red-50 text-red-500 rounded-lg text-[10px] font-bold">
+                     <Heart size={10} fill="currentColor" /> আগ্রহী
+                   </div>
+                 )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredDonors.map((m, idx) => (
+            <motion.div 
+              key={m.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="group bg-white p-8 rounded-[2.5rem] border border-gray-100 flex items-center gap-6 shadow-sm hover:shadow-xl hover:border-red-100 transition-all duration-500"
+            >
+               <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-50 group-hover:border-red-100 transition-colors">
+                     {m.profile_image ? <img src={m.profile_image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300"><UserIcon size={32} /></div>}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-red-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shadow-lg shadow-red-200">
+                     {m.blood_group}
+                  </div>
+               </div>
+               <div className="space-y-1 flex-1">
+                  <h4 className="text-xl font-black italic text-gray-900 group-hover:text-red-500 transition-colors">{m.name}</h4>
+                  <div className="flex flex-col gap-1">
+                     <a href={`tel:${m.phone}`} className="flex items-center gap-2 bg-blue-50/50 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest hover:bg-blue-100 transition-colors w-max">
+                        <Phone size={12} fill="currentColor" /> {m.phone}
+                     </a>
+                  </div>
+               </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'all' ? (
+        members.length === 0 && (
+          <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-bento-border text-bento-light italic font-serif">
+             {t('no_members')}
+          </div>
+        )
+      ) : (
+        filteredDonors.length === 0 && (
+          <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-red-200 text-red-300 italic font-serif">
+             এই রক্ত গ্রুপের কোনো দাতা পাওয়া যায়নি।
+          </div>
+        )
       )}
     </div>
   );
@@ -1471,11 +1574,12 @@ const Login = () => {
 };
 
 const Register = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({ 
     userId: '', password: '', name: '', email: '', phone: '',
     father_name: '', mother_name: '', present_address: '', permanent_address: '',
     blood_group: '', dob: '', profession: '', educational_qualification: '',
-    nid_number: '', emergency_contact: '', profile_image: ''
+    nid_number: '', emergency_contact: '', profile_image: '', is_blood_donor: false
   });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -1614,6 +1718,18 @@ const Register = () => {
                    </div>
                    <InputField label="পেশা" value={formData.profession} onChange={(e: any) => setFormData({ ...formData, profession: e.target.value })} placeholder="উদা: ছাত্র / চাকুরীজীবী" required />
                    <InputField label="শিক্ষাগত যোগ্যতা" value={formData.educational_qualification} onChange={(e: any) => setFormData({ ...formData, educational_qualification: e.target.value })} placeholder="উদা: স্নাতক" required />
+                   <div className="pt-4 flex items-start gap-4 p-4 bg-red-50/50 rounded-2xl border border-red-100 group transition-all hover:bg-red-50">
+                      <input 
+                        type="checkbox" 
+                        id="blood_donor"
+                        checked={formData.is_blood_donor}
+                        onChange={(e) => setFormData({ ...formData, is_blood_donor: e.target.checked })}
+                        className="w-5 h-5 mt-1 rounded border-gray-300 text-bento-primary focus:ring-bento-primary cursor-pointer shadow-sm"
+                      />
+                      <label htmlFor="blood_donor" className="text-sm font-bold text-gray-700 cursor-pointer select-none leading-relaxed">
+                         {t('blood_donate_interest')}
+                      </label>
+                   </div>
                 </div>
              </div>
 
@@ -1970,6 +2086,7 @@ const MembershipCard = ({ profile, siteSettings }: { profile: any, siteSettings:
 
 const ProfilePage = () => {
   const { user, siteSettings } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<any>(user);
   const [editing, setEditing] = useState(false);
   const [msg, setMsg] = useState('');
@@ -2121,6 +2238,18 @@ const ProfilePage = () => {
                              <InputField label="পেশা" value={profileData.profession || ''} onChange={(e:any)=>setProfile({...profileData, profession: e.target.value})} icon={Briefcase} />
                              <InputField label="শিক্ষাগত যোগ্যতা" value={profileData.educational_qualification || ''} onChange={(e:any)=>setProfile({...profileData, educational_qualification: e.target.value})} icon={Shield} />
                              <InputField label="জাতীয় পরিচয়পত্র" value={profileData.nid_number || ''} onChange={(e:any)=>setProfile({...profileData, nid_number: e.target.value})} icon={CreditCard} />
+                             <div className="flex items-center gap-4 p-4 bg-red-50/50 rounded-2xl border border-red-100 group transition-all hover:bg-red-50 mt-4">
+                                <input 
+                                  type="checkbox" 
+                                  id="profile_blood_donor"
+                                  checked={profileData.is_blood_donor}
+                                  onChange={(e) => setProfile({ ...profileData, is_blood_donor: e.target.checked })}
+                                  className="w-5 h-5 rounded border-gray-300 text-bento-primary focus:ring-bento-primary cursor-pointer shadow-sm"
+                                />
+                                <label htmlFor="profile_blood_donor" className="text-sm font-bold text-gray-700 cursor-pointer select-none leading-relaxed">
+                                   {t('blood_donate_interest')}
+                                </label>
+                             </div>
                           </div>
                           
                           <div className="space-y-6">
@@ -3361,7 +3490,10 @@ const AdminDashboard = () => {
                                      </div>
                                      <div>
                                         <p className="font-black text-lg italic text-gray-900 group-hover:text-bento-primary transition-colors">{u.name}</p>
-                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                        <div className="flex items-center gap-2">
+                                           <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                           {u.is_blood_donor && <span className="bg-red-50 text-red-500 text-[8px] font-black uppercase px-2 py-0.5 rounded border border-red-100 flex items-center gap-1"><Heart size={8} fill="currentColor" /> Donor</span>}
+                                        </div>
                                      </div>
                                   </div>
                                   
@@ -3846,6 +3978,11 @@ const AdminDashboard = () => {
                            <span className="bg-[rgba(192,57,43,0.1)] text-bento-primary text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full border border-[rgba(192,57,43,0.2)]">{selectedUser.role}</span>
                            <span className="bg-[rgba(39,174,96,0.1)] text-bento-accent text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full border border-[rgba(39,174,96,0.2)]">{selectedUser.blood_group}</span>
                            <span className="bg-[rgba(59,130,246,0.1)] text-blue-500 text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full border border-[rgba(59,130,246,0.1)]">ID: @{selectedUser.userId}</span>
+                           {selectedUser.is_blood_donor && (
+                             <span className="bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full border border-red-600 shadow-md flex items-center gap-2">
+                               <Heart size={12} fill="currentColor" /> রক্তদাতা
+                             </span>
+                           )}
                         </div>
                      </div>
                   </div>
@@ -5465,6 +5602,11 @@ const MaintenancePage = () => {
     { icon: <Braces size={24} />, top: '30%', left: '15%', duration: 11 },
     { icon: <Layers size={24} />, top: '80%', left: '10%', duration: 16 },
     { icon: <Box size={24} />, top: '15%', left: '55%', duration: 20 },
+    { icon: <Workflow size={24} />, top: '60%', left: '40%', duration: 22 },
+    { icon: <Atom size={24} />, top: '45%', left: '25%', duration: 19 },
+    { icon: <Globe size={24} />, top: '5%', left: '95%', duration: 17 },
+    { icon: <Variable size={24} />, top: '85%', left: '75%', duration: 21 },
+    { icon: <Code2 size={24} />, top: '35%', left: '35%', duration: 13 },
   ];
 
   return (
@@ -5589,12 +5731,11 @@ export default function App() {
   const fetchSettings = async () => {
     try {
       const res = await fetch('/api/site-settings');
-      if (res.ok) {
-        const data = await res.json();
-        setSiteSettings(data);
-      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setSiteSettings(data);
     } catch (err) {
-      console.error('Failed to fetch settings');
+      console.error('Failed to fetch settings:', err);
     }
   };
 
@@ -5607,11 +5748,19 @@ export default function App() {
           setUser(data);
         }
       } catch (err) {
-        console.error('Auth check failed');
+        console.error('Auth check failed:', err);
       } finally {
         setLoading(false);
       }
     };
+
+    // Global listener for unhandled fetch errors
+    const handleRejection = (event: any) => {
+      if (event.reason && event.reason.message === 'Failed to fetch') {
+        console.warn('Silent network error caught:', event.reason);
+      }
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
 
     const prefetchHeavyEndpoints = () => {
       setTimeout(() => {
@@ -5629,7 +5778,10 @@ export default function App() {
       setLoading(false);
     }, 6000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
   }, []);
 
   const shouldReduceMotion = useReducedMotion();

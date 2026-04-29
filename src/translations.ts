@@ -168,6 +168,7 @@ export const translations = {
     blood_donor_list: "রক্তদাতা তালিকা",
     filter_blood_group: "রক্তের গ্রুপ দিয়ে খুঁজুন",
     all_groups: "সব গ্রুপ",
+    admin_manage_blood_donors: "অদম্য ব্লাড ডোনার",
   },
   en: {
     nav_home: "Home",
@@ -337,5 +338,6 @@ export const translations = {
     blood_donor_list: "Blood Donor List",
     filter_blood_group: "Filter by Blood Group",
     all_groups: "All Groups",
+    admin_manage_blood_donors: "Adomyo Blood Donor",
   },
 };

@@ -344,7 +344,7 @@ const MemberListPage = () => {
            onClick={() => setActiveTab('all')}
            className={`flex-1 py-4 px-6 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'all' ? 'bg-white text-bento-primary shadow-lg ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
          >
-           আবেদনকারী সবাই
+           অনলাইন সদস্য
          </button>
          <button 
            onClick={() => setActiveTab('blood')}
@@ -2445,7 +2445,23 @@ const Navbar = () => {
               <NavLink to="/live" icon={Tv} location={location}>{t('nav_live')}</NavLink>
               <NavLink to="/shop" icon={ShoppingBag} location={location}>{t('nav_shop')}</NavLink>
               <NavLink to="/committee" icon={Users} location={location}>{t('nav_committee')}</NavLink>
-              <NavLink to="/members" icon={ClipboardList} location={location}>{t('nav_member_list')}</NavLink>
+
+              {/* Member List Dropdown Desktop */}
+              <div className="relative group">
+                <div className={`flex items-center gap-1 px-3 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 cursor-pointer ${['/members', '/blood-donors'].includes(location.pathname) ? 'bg-white/10 text-bento-primary' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+                  <ClipboardList size={14} className={`${['/members', '/blood-donors'].includes(location.pathname) ? 'scale-125' : 'group-hover:scale-125'} transition-transform`} />
+                  {t('nav_member_list')}
+                </div>
+                <div className="absolute top-full left-0 mt-2 w-48 bg-bento-dark rounded-2xl shadow-2xl border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
+                   <Link to="/members" className="block px-5 py-3.5 text-[10px] text-white/70 font-black uppercase tracking-wider hover:bg-white/10 hover:text-white border-b border-white/5 transition-colors">
+                      {lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Members'}
+                   </Link>
+                   <Link to="/blood-donors" className="block px-5 py-3.5 text-[10px] text-white/70 font-black uppercase tracking-wider hover:bg-white/10 hover:text-red-400 transition-colors">
+                      {lang === 'bn' ? 'রক্তদাতা সদস্য' : 'Blood Donors'}
+                   </Link>
+                </div>
+              </div>
+
               <NavLink to="/notices" icon={Bell} location={location}>{t('nav_notices')}</NavLink>
               <NavLink to="/events" icon={Calendar} location={location}>{t('nav_events')}</NavLink>
               <NavLink to="/donations" icon={Heart} location={location}>{t('nav_donations')}</NavLink>
@@ -2515,28 +2531,51 @@ const Navbar = () => {
                     <button onClick={() => setIsOpen(false)} className="p-2 text-white/50 hover:text-white"><X size={24} /></button>
                   </div>
                   
-                    <div className="p-8 space-y-4 overflow-y-auto flex-grow">
+                     <div className="p-8 space-y-4 overflow-y-auto flex-grow">
                      {[
                        { to: "/", label: t('nav_home'), icon: LayoutGrid },
                        { to: "/live", label: t('nav_live'), icon: Tv },
                        { to: "/shop", label: t('nav_shop'), icon: ShoppingBag },
                        { to: "/committee", label: t('nav_committee'), icon: Users },
-                       { to: "/members", label: t('nav_member_list'), icon: ClipboardList },
+                       { 
+                          to: "/members", 
+                          label: t('nav_member_list'), 
+                          icon: ClipboardList,
+                          sublinks: [
+                            { to: "/members", label: lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Members' },
+                            { to: "/blood-donors", label: lang === 'bn' ? 'রক্তদাতা সদস্য' : 'Blood Donors' }
+                          ]
+                       },
                        { to: "/notices", label: t('nav_notices'), icon: Bell },
                        { to: "/events", label: t('nav_events'), icon: Calendar },
                        { to: "/donations", label: t('nav_donations'), icon: Heart },
                        { to: "/rules", label: t('nav_rules'), icon: Info },
                        { to: "/contact", label: t('nav_contact'), icon: Phone }
                      ].map((item) => (
-                       <NavLink 
-                         key={item.label}
-                         to={item.to} 
-                         location={location}
-                         icon={item.icon}
-                         onClick={()=>setIsOpen(false)}
-                       >
-                         <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
-                       </NavLink>
+                       <div key={item.label}>
+                         <NavLink 
+                           to={item.to} 
+                           location={location}
+                           icon={item.icon}
+                           onClick={()=>setIsOpen(false)}
+                         >
+                           <span className="font-black uppercase text-xs tracking-widest">{item.label}</span>
+                         </NavLink>
+                         {item.sublinks && (
+                           <div className="pl-6 mt-2 space-y-1 mb-2 border-l-2 border-white/5 ml-3">
+                             {item.sublinks.map(sub => (
+                               <Link
+                                 key={sub.label}
+                                 to={sub.to}
+                                 onClick={() => setIsOpen(false)}
+                                 className="block py-2 text-[10px] text-white/50 hover:text-white font-black uppercase tracking-widest"
+                               >
+                                 {sub.label}
+                               </Link>
+                             ))}
+                           </div>
+                         )}
+                       </div>
                      ))}
                    </div>
 
@@ -2584,7 +2623,7 @@ const AdminDashboard = () => {
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('members');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'blood_donors' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('dashboard');
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
@@ -3196,6 +3235,7 @@ const AdminDashboard = () => {
             {[
               { id: 'dashboard', label: 'এডমিন ড্যাশবোর্ড', icon: Activity },
               { id: 'members', label: t('nav_member_list'), icon: Users },
+              { id: 'blood_donors', label: t('admin_manage_blood_donors'), icon: Heart },
               { id: 'pending', label: t('admin_pending_members'), icon: ShieldAlert },
               { id: 'orders', label: 'অর্ডার ম্যানেজমেন্ট', icon: ShoppingCart },
               { id: 'shop', label: t('admin_manage_shop'), icon: ShoppingBag },
@@ -3241,7 +3281,9 @@ const AdminDashboard = () => {
                      <span className="text-gray-900">{activeTab}</span>
                   </div>
                   <h2 className="text-3xl font-black italic text-gray-900 tracking-tight flex items-center gap-4">
+                    {activeTab === 'dashboard' && 'এডমিন ড্যাশবোর্ড'}
                     {activeTab === 'members' && t('nav_member_list')}
+                    {activeTab === 'blood_donors' && t('admin_manage_blood_donors')}
                     {activeTab === 'pending' && t('admin_pending_members')}
                     {activeTab === 'orders' && 'অর্ডার ম্যানেজমেন্ট'}
                     {activeTab === 'shop' && t('admin_manage_shop')}
@@ -3523,6 +3565,101 @@ const AdminDashboard = () => {
                                <div className="flex flex-col items-center justify-center py-32 text-center">
                                   <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-6 border border-dashed border-gray-300"><Users size={32} /></div>
                                   <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching records found in database</p>
+                               </div>
+                            )}
+                         </div>
+                      </div>
+                   </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'blood_donors' && (
+                <motion.div 
+                   key="blood_donors" 
+                   initial={{ opacity: 0, y: 20 }} 
+                   animate={{ opacity: 1, y: 0 }} 
+                   exit={{ opacity: 0, y: -20 }}
+                   transition={{ duration: 0.3 }}
+                   className="space-y-8"
+                >
+                   <div className="bg-white rounded-[2.5rem] border border-red-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
+                      <div className="p-8 border-b border-red-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-red-50/30">
+                         <div>
+                            <h2 className="text-xl font-black italic text-gray-900 flex items-center gap-3">
+                               <Heart className="text-red-500" size={24} /> 
+                               অদম্য ব্লাড ডোনার
+                            </h2>
+                            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Verified Blood Donors Database</p>
+                         </div>
+                          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                             <div className="relative w-full md:w-80">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <input 
+                                   type="text" 
+                                   placeholder="Phone বা Name বা Blood Group দিয়ে খুঁজুন..." 
+                                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-red-100 rounded-2xl focus:border-red-500 focus:ring-4 focus:ring-red-500/5 outline-none transition text-sm font-medium"
+                                   value={searchTerm}
+                                   onChange={e => setSearchTerm(e.target.value)}
+                                />
+                             </div>
+                          </div>
+                       </div>
+
+                       <div className="flex-grow">
+                         <div className="grid grid-cols-12 px-10 py-5 bg-white border-b border-red-50 hidden md:grid">
+                            <div className="col-span-5 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Donor Identity</div>
+                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
+                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Blood Group</div>
+                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
+                         </div>
+                         <div className="divide-y divide-red-50">
+                            {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).map(u => (
+                               <motion.div 
+                                  layout
+                                  key={u.id} 
+                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-red-50/50 transition-all group"
+                               >
+                                  <div className="col-span-12 md:col-span-5 flex items-center gap-5">
+                                     <div className="relative group/avatar cursor-pointer">
+                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover/avatar:border-red-500/30 transition-colors relative">
+                                           {u.profile_image ? (
+                                              <img src={u.profile_image} className="w-full h-full object-cover" />
+                                           ) : (
+                                              <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
+                                           )}
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full shadow-sm flex items-center justify-center text-[8px] text-white">
+                                           <Heart size={10} fill="currentColor" />
+                                        </div>
+                                     </div>
+                                     <div>
+                                        <p className="font-black text-lg italic text-gray-900 group-hover:text-red-500 transition-colors">{u.name}</p>
+                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                     </div>
+                                  </div>
+                                  
+                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+                                     <div className="inline-flex flex-col items-center">
+                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+                                        <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
+                                     </div>
+                                  </div>
+
+                                  <div className="col-span-6 md:col-span-2 flex justify-center">
+                                     <span className="px-4 py-1.5 rounded-lg text-sm font-black text-red-500 bg-red-50 border border-red-100 shadow-sm">
+                                        {u.blood_group || 'N/A'}
+                                     </span>
+                                  </div>
+
+                                  <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
+                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Info size={16} /></button>
+                                  </div>
+                               </motion.div>
+                            ))}
+                            {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).length === 0 && (
+                               <div className="flex flex-col items-center justify-center py-32 text-center">
+                                  <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-200 mb-6 border border-dashed border-red-200"><Heart size={32} /></div>
+                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching donors found</p>
                                </div>
                             )}
                          </div>
@@ -4572,6 +4709,8 @@ const PublicMembersPage = () => {
   const [members, setMembers] = useState<any[]>(globalCache.members || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(!globalCache.members);
+  const location = useLocation();
+  const isBloodDonors = location.pathname === '/blood-donors';
 
   useEffect(() => {
     fetch('/api/members')
@@ -4584,18 +4723,26 @@ const PublicMembersPage = () => {
   }, []);
 
   const filteredMembers = useMemo(() => {
-    if (!searchTerm) return members;
-    return members.filter(m => m.name?.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [members, searchTerm]);
+    let result = members;
+    if (isBloodDonors) {
+      result = result.filter(m => m.is_blood_donor === 1 || m.is_blood_donor === true || String(m.is_blood_donor) === 'true');
+    }
+    if (!searchTerm) return result;
+    return result.filter(m => m.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [members, searchTerm, isBloodDonors]);
 
   if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-24 min-h-screen">
       <div className="text-center space-y-4 mb-20">
-         <h1 className="text-5xl md:text-8xl font-serif text-bento-dark italic">{t('members_page_title')}</h1>
+         <h1 className="text-5xl md:text-8xl font-serif text-bento-dark italic">
+           {isBloodDonors ? (lang === 'bn' ? 'অদম্য ব্লাড ডোনার' : 'Blood Donors') : (lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Members')}
+         </h1>
          <div className="w-48 h-2 bg-bento-primary mx-auto rounded-full"></div>
-         <p className="text-sm font-black uppercase tracking-[0.5em] text-bento-light">Our Growing Community</p>
+         <p className="text-sm font-black uppercase tracking-[0.5em] text-bento-light">
+           {isBloodDonors ? (lang === 'bn' ? 'আমাদের রক্তদাতা সদস্যবৃন্দ' : 'Our Bold Blood Donors') : 'Our Growing Community'}
+         </p>
       </div>
 
       <div className="max-w-xl mx-auto mb-16 relative">
@@ -4619,15 +4766,14 @@ const PublicMembersPage = () => {
              transition={{ delay: index * 0.05 }}
              className="bento-card border border-bento-border hover:border-bento-primary hover:shadow-2xl transition duration-500 group text-center"
            >
-              <div className="w-24 h-24 bg-gray-50 rounded-[2rem] mx-auto mb-6 flex items-center justify-center overflow-hidden border-2 border-bento-border group-hover:border-bento-primary transition shadow-inner">
-                 {member.profile_image ? (
-                   <img src={member.profile_image} className="w-full h-full object-cover" />
-                 ) : (
-                   <UserIcon className="text-bento-light group-hover:text-bento-primary transition" size={32} />
-                 )}
-              </div>
               <h3 className="text-xl font-serif italic text-bento-dark mb-2">{member.name}</h3>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-light">Member ID: @{member.userId || 'N/A'}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-bento-primary">
+                {isBloodDonors ? (lang === 'bn' ? 'অদম্য ব্লাড ডোনার' : 'Blood Donor') : (member.role === 'admin' ? 'এডমিন' : (lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Member'))}
+              </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-light">Member ID: @{member.member_id_number || member.userId || 'N/A'}</p>
+              {isBloodDonors && member.blood_group && (
+                 <p className="mt-4 text-[12px] font-bold text-red-500 bg-red-50 py-1.5 px-3 rounded-xl inline-block">Group: {member.blood_group}</p>
+              )}
            </motion.div>
          ))}
       </div>
@@ -5880,6 +6026,7 @@ export default function App() {
                     <Route path="/shop" element={<ShopPage />} />
                     <Route path="/committee" element={<CommitteePage />} />
                     <Route path="/members" element={<PublicMembersPage />} />
+                    <Route path="/blood-donors" element={<PublicMembersPage />} />
                     <Route path="/notices" element={<NoticeBoardPage />} />
                     <Route path="/login" element={user ? <Navigate to="/profile" /> : <Login />} />
                     <Route path="/register" element={user ? <Navigate to="/profile" /> : <Register />} />

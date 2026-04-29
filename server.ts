@@ -455,13 +455,20 @@ app.post('/api/auth/login', async (req, res) => {
         if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
           return res.json([]);
         }
+        if (apiCache['committee'] && apiCache['committee'].data) {
+          console.warn('Committee fetch error, using stale cache:', error.message || error);
+          return res.json(apiCache['committee'].data);
+        }
         throw error;
       }
       apiCache['committee'] = { data: members, time: Date.now() };
       res.json(members);
     } catch (err: any) {
-      console.error('Error fetching committee:', err);
-      res.status(500).json({ error: err.message });
+      console.error('Error fetching committee:', err.message || JSON.stringify(err));
+      if (apiCache['committee'] && apiCache['committee'].data) {
+         return res.json(apiCache['committee'].data);
+      }
+      res.status(500).json({ error: err.message || 'Error fetching committee' });
     }
   });
 

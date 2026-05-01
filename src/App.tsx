@@ -5174,7 +5174,8 @@ const DonationsPage = () => {
     message: '', 
     phone_email: '',
     fund_type: 'তহবিল - ১ (সাধারণ)',
-    donor_type: 'সাধারণ অনুদান'
+    donor_type: 'সাধারণ অনুদান',
+    is_anonymous: false
   });
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
@@ -5184,7 +5185,7 @@ const DonationsPage = () => {
 
   const handleNextToCheckout = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.amount && formData.phone_email && formData.donor_name) {
+    if (formData.amount && (formData.is_anonymous || (formData.phone_email && formData.donor_name))) {
       setStep(2);
     }
   };
@@ -5197,9 +5198,9 @@ const DonationsPage = () => {
       method: 'POST', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify({
-        donor_name: formData.donor_name,
+        donor_name: formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name,
         amount: Number(formData.amount),
-        phone_email: formData.phone_email,
+        phone_email: formData.is_anonymous ? 'Hidden' : formData.phone_email,
         fund_type: formData.fund_type,
         donor_type: formData.donor_type,
         payment_method: selectedMethod,
@@ -5212,7 +5213,7 @@ const DonationsPage = () => {
       fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
       setTimeout(() => {
         setStep(1);
-        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান' });
+        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান', is_anonymous: false });
         setSelectedMethod(null);
       }, 5000);
     }
@@ -5270,19 +5271,21 @@ const DonationsPage = () => {
               </div>
 
               <InputField 
-                label={t('form_name') + " *"} 
-                value={formData.donor_name} 
+                label={t('form_name') + (formData.is_anonymous ? "" : " *")} 
+                value={formData.is_anonymous ? 'গোপন দাতা' : formData.donor_name} 
                 onChange={(e:any)=>setFormData({...formData, donor_name: e.target.value})} 
                 placeholder="পরিচয় দিন" 
-                required 
+                required={!formData.is_anonymous}
+                disabled={formData.is_anonymous}
               />
               
               <InputField 
-                label={t('mobile_email') + " *"} 
-                value={formData.phone_email} 
+                label={t('mobile_email') + (formData.is_anonymous ? "" : " *")} 
+                value={formData.is_anonymous ? 'Hidden' : formData.phone_email} 
                 onChange={(e:any)=>setFormData({...formData, phone_email: e.target.value})} 
                 placeholder="017... / email@..." 
-                required 
+                required={!formData.is_anonymous}
+                disabled={formData.is_anonymous}
               />
 
               <div className="space-y-2">
@@ -5298,6 +5301,24 @@ const DonationsPage = () => {
                   />
                   <button type="submit" className="bg-bento-accent hover:bg-green-700 text-white px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-green-500/20">{t('donate_now')}</button>
                 </div>
+              </div>
+
+              <div className="col-span-1 md:col-span-5 flex items-center justify-center mt-4">
+                 <label className="flex items-center gap-3 cursor-pointer group bg-white/50 px-6 py-3 rounded-full hover:bg-white transition shadow-sm border border-bento-border">
+                    <div className="relative flex items-center">
+                       <input 
+                         type="checkbox" 
+                         className="peer sr-only"
+                         checked={formData.is_anonymous}
+                         onChange={(e) => setFormData({...formData, is_anonymous: e.target.checked})}
+                       />
+                       <div className="w-5 h-5 bg-white border-2 border-gray-300 rounded peer-checked:bg-bento-primary peer-checked:border-bento-primary transition-colors"></div>
+                       <svg className="absolute w-5 h-5 text-white scale-0 peer-checked:scale-100 transition-transform pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                         <polyline points="20 6 9 17 4 12"></polyline>
+                       </svg>
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-bento-light group-hover:text-bento-dark transition-colors">{lang === 'bn' ? 'গোপন দাতা হিসেবে অনুদান দিন (তথ্য গোপন থাকবে)' : 'Donate Anonymously (Hide Identity)'}</span>
+                 </label>
               </div>
             </form>
             
@@ -5375,8 +5396,8 @@ const DonationsPage = () => {
                 <div className="space-y-4 pt-8">
                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">Donor Identity</h4>
                   <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100">
-                    <p className="text-sm font-bold text-bento-dark italic">{formData.donor_name}</p>
-                    <p className="text-xs text-bento-light leading-relaxed flex items-center gap-2">{formData.phone_email} <span className="text-[9px] bg-green-100/50 text-green-600 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase border border-green-200">গোপন থাকবে</span></p>
+                    <p className="text-sm font-bold text-bento-dark italic">{formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name}</p>
+                    <p className="text-xs text-bento-light leading-relaxed flex items-center gap-2">{formData.is_anonymous ? 'তথ্য গোপন করা হয়েছে' : formData.phone_email} <span className="text-[9px] bg-green-100/50 text-green-600 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase border border-green-200">গোপন থাকবে</span></p>
                   </div>
                 </div>
               </div>

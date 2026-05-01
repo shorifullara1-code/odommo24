@@ -2430,7 +2430,7 @@ const Navbar = () => {
                   whileHover={{ rotate: 12, scale: 1.1 }}
                   className="w-12 h-12 bg-white rounded-2xl p-2 shadow-2xl relative overflow-hidden"
                 >
-                   <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                   <img src={logoUrl} alt="Adomyo 24 | অদম্য ২৪ Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                    <div className="absolute inset-0 bg-gradient-to-tr from-bento-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.div>
                 <div className="hidden sm:block">
@@ -6052,7 +6052,7 @@ export default function App() {
                 <div className="grid lg:grid-cols-4 gap-20 pb-20 border-b border-white/5">
                   <div className="lg:col-span-1 space-y-8">
                      <Link to="/" className="flex items-center gap-4 group">
-                        <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Logo" referrerPolicy="no-referrer" decoding="async" />
+                        <img src={siteSettings?.logo_url || "https://picsum.photos/seed/logo/100/100"} className="w-16 h-16 bg-white rounded-[1.5rem] p-3 shadow-2xl transition group-hover:rotate-12" alt="Adomyo 24 | অদম্য ২৪ Logo" referrerPolicy="no-referrer" decoding="async" />
                         <div>
                            <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Adomyo 24</h2>
                            <p className="text-[9px] font-black text-bento-primary uppercase tracking-[0.4em] mt-1">Fearless Humanity</p>

@@ -1,0 +1,104 @@
+389-            <motion.div 
+390-              key={m.id}
+391-              initial={{ opacity: 0, scale: 0.9 }}
+392-              whileInView={{ opacity: 1, scale: 1 }}
+393-              viewport={{ once: true }}
+394-              transition={{ delay: idx * 0.05 }}
+395-              className="bg-white border-2 border-bento-border rounded-[2.5rem] p-8 text-center space-y-6 hover:border-bento-primary hover:shadow-2xl transition-all duration-500 group"
+396-            >
+397-              <div className="w-32 h-32 bg-gray-50 rounded-[2rem] mx-auto overflow-hidden border border-bento-border group-hover:scale-105 transition-all duration-500">
+398-                 {m.profile_image ? (
+399-                   <img src={m.profile_image} className="w-full h-full object-cover" alt={m.name} />
+400-                 ) : (
+401-                   <div className="w-full h-full flex items-center justify-center text-bento-primary">
+402-                      <UserIcon size={48} />
+403-                   </div>
+404-                 )}
+405-              </div>
+406-              <div>
+407-                 <h3 className="text-xl font-black italic text-bento-dark">{m.name}</h3>
+408-                 <p className="text-[10px] font-black uppercase tracking-widest text-bento-light mt-1">{m.member_id_number}</p>
+409-                 {m.is_blood_donor && (
+410-                   <div className="inline-flex items-center gap-1 mt-3 px-2 py-1 bg-red-50 text-red-500 rounded-lg text-[10px] font-bold">
+411-                     <Heart size={10} fill="currentColor" /> আগ্রহী
+412-                   </div>
+413-                 )}
+414-              </div>
+415-            </motion.div>
+416-          ))}
+417-        </div>
+418-      ) : (
+419-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+420-          {filteredDonors.map((m, idx) => (
+421-            <motion.div 
+422-              key={m.id}
+423-              initial={{ opacity: 0, x: -20 }}
+424-              animate={{ opacity: 1, x: 0 }}
+425-              transition={{ delay: idx * 0.05 }}
+426-              className="group bg-white p-8 rounded-[2.5rem] border border-gray-100 flex items-center gap-6 shadow-sm hover:shadow-xl hover:border-red-100 transition-all duration-500"
+427-            >
+428-               <div className="relative">
+429-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-50 group-hover:border-red-100 transition-colors">
+430-                     {m.profile_image ? <img src={m.profile_image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300"><UserIcon size={32} /></div>}
+431-                  </div>
+432-                  <div className="absolute -bottom-2 -right-2 bg-red-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shadow-lg shadow-red-200">
+433-                     {m.blood_group}
+434-                  </div>
+435-               </div>
+436-               <div className="space-y-1 flex-1">
+437-                  <h4 className="text-xl font-black italic text-gray-900 group-hover:text-red-500 transition-colors">{m.name}</h4>
+438-                  <div className="flex flex-col gap-1">
+439:                     <a href={`tel:${m.phone}`} className="flex items-center gap-2 bg-blue-50/50 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest hover:bg-blue-100 transition-colors w-max">
+440:                        <Phone size={12} fill="currentColor" /> {m.phone}
+--
+4003-                            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
+4004-                               <button 
+4005-                                 onClick={() => {
+4006-                                   setEditingCommitteeMember(m);
+4007-                                   setNewMember({
+4008-                                     name: m.name,
+4009-                                     role: m.role,
+4010-                                     image_url: m.image_url,
+4011-                                     sort_order: m.sort_order,
+4012-                                     userId: m.userId || '',
+4013-                                     password: ''
+4014-                                   });
+4015-                                 }} 
+4016-                                 className="p-2 text-bento-primary hover:bg-bento-primary/10 rounded-lg transition"
+4017-                               >
+4018-                                  <Settings size={14} />
+4019-                               </button>
+4020-                               <button onClick={() => deleteCommitteeMember(m.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+4021-                                  <Trash2 size={14} />
+4022-                               </button>
+4023-                            </div>
+4024-                         </div>
+4025-                      ))}
+4026-                      {committee.length === 0 && (
+4027-                         <div className="py-20 text-center space-y-4 opacity-30">
+4028-                            <Users size={32} className="mx-auto" />
+4029-                            <p className="text-sm font-serif italic">কোনো সদস্য তালিকাভুক্ত নেই</p>
+4030-                         </div>
+4031-                      )}
+4032-                   </div>
+4033-                </div>
+4034-              </div>
+4035-           </motion.div>
+4036-         )}
+4037-         <AnimatePresence>
+4038-            {showAddUserModal && (
+4039-               <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 sm:p-12">
+4040-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAddUserModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+4041-                  <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+4042-                     <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+4043-                        <h3 className="text-xl font-black italic text-gray-900 flex items-center gap-3"><UserPlus className="text-bento-primary" /> নতুন সদস্য যোগ করুন</h3>
+4044-                        <button onClick={() => setShowAddUserModal(false)} className="p-3 hover:bg-white rounded-xl transition"><X size={20} /></button>
+4045-                     </div>
+4046-                     <div className="p-10 overflow-y-auto space-y-6">
+4047-                        <div className="grid sm:grid-cols-2 gap-6">
+4048-                           <InputField label="সদস্যের নাম" value={newUserForm.name} onChange={(e:any)=>setNewUserForm({...newUserForm, name: e.target.value})} placeholder="নাম লিখুন" />
+4049-                           <InputField label="ইউজার আইডি (Login ID)" value={newUserForm.userId} onChange={(e:any)=>setNewUserForm({...newUserForm, userId: e.target.value})} placeholder="উদা: member01" />
+4050-                        </div>
+4051-                        <div className="grid sm:grid-cols-2 gap-6">
+4052-                           <InputField label="পাসওয়ার্ড" type="password" value={newUserForm.password} onChange={(e:any)=>setNewUserForm({...newUserForm, password: e.target.value})} placeholder="পাসওয়ার্ড লিখুন" />
+4053:                           <InputField label="মোবাইল নম্বর" value={newUserForm.phone} onChange={(e:any)=>setNewUserForm({...newUserForm, phone: e.target.value})} placeholder="ফোন নম্বর" />

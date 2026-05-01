@@ -436,9 +436,7 @@ const MemberListPage = () => {
                <div className="space-y-1 flex-1">
                   <h4 className="text-xl font-black italic text-gray-900 group-hover:text-red-500 transition-colors">{m.name}</h4>
                   <div className="flex flex-col gap-1">
-                     <a href={`tel:${m.phone}`} className="flex items-center gap-2 bg-blue-50/50 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest hover:bg-blue-100 transition-colors w-max">
-                        <Phone size={12} fill="currentColor" /> {m.phone}
-                     </a>
+                     {/* Phone number hidden for privacy */}
                   </div>
                </div>
             </motion.div>
@@ -2893,15 +2891,14 @@ const AdminDashboard = () => {
     const tableData = donations.map(d => [
       new Date(d.date).toLocaleDateString(),
       d.donor_name,
-      d.phone_email,
-      `BDT ${d.amount}`,
+      `৳ ${d.amount}`,
       d.payment_method || 'N/A',
       d.fund_type || 'General'
     ]);
 
     autoTable(doc, {
       startY: 40,
-      head: [['Date', 'Donor', 'Contact', 'Amount', 'Method', 'Fund']],
+      head: [['Date', 'Donor', 'Amount', 'Method', 'Fund']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [192, 57, 43] }
@@ -3819,7 +3816,6 @@ const AdminDashboard = () => {
                         <th className="px-8 py-5">দাতার নাম</th>
                         <th className="px-8 py-5">ধরন</th>
                         <th className="px-8 py-5">মবলগ</th>
-                        <th className="px-8 py-5">যোগাযোগ</th>
                         <th className="px-8 py-5">পদ্ধতি</th>
                       </tr>
                     </thead>
@@ -3830,7 +3826,6 @@ const AdminDashboard = () => {
                           <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
                           <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
                           <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
-                          <td className="px-8 py-5 text-xs italic">{d.phone_email}</td>
                           <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
                         </tr>
                       ))}
@@ -5381,7 +5376,7 @@ const DonationsPage = () => {
                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">Donor Identity</h4>
                   <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100">
                     <p className="text-sm font-bold text-bento-dark italic">{formData.donor_name}</p>
-                    <p className="text-xs text-bento-light leading-relaxed">{formData.phone_email}</p>
+                    <p className="text-xs text-bento-light leading-relaxed flex items-center gap-2">{formData.phone_email} <span className="text-[9px] bg-green-100/50 text-green-600 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase border border-green-200">গোপন থাকবে</span></p>
                   </div>
                 </div>
               </div>

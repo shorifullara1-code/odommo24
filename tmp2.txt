@@ -1,0 +1,385 @@
+434-                  </div>
+435-               </div>
+436-               <div className="space-y-1 flex-1">
+437-                  <h4 className="text-xl font-black italic text-gray-900 group-hover:text-red-500 transition-colors">{m.name}</h4>
+438-                  <div className="flex flex-col gap-1">
+439:                     <a href={`tel:${m.phone}`} className="flex items-center gap-2 bg-blue-50/50 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest hover:bg-blue-100 transition-colors w-max">
+440:                        <Phone size={12} fill="currentColor" /> {m.phone}
+441-                     </a>
+442-                  </div>
+443-               </div>
+444-            </motion.div>
+445-          ))}
+--
+1574-};
+1575-
+1576-const Register = () => {
+1577-  const { t } = useLanguage();
+1578-  const [formData, setFormData] = useState({ 
+1579:    userId: '', password: '', name: '', email: '', phone: '',
+1580-    father_name: '', mother_name: '', present_address: '', permanent_address: '',
+1581-    blood_group: '', dob: '', profession: '', educational_qualification: '',
+1582-    nid_number: '', emergency_contact: '', profile_image: '', is_blood_donor: false
+1583-  });
+1584-  const [error, setError] = useState('');
+--
+1589-
+1590-  const validateField = (name: string, value: string) => {
+1591-    let err = '';
+1592-    if (!value) err = 'This field is required';
+1593-    else if (name === 'email' && !/\S+@\S+\.\S+/.test(value)) err = 'Invalid email address';
+1594:    else if (name === 'phone' && !/^\d{11}$/.test(value)) err = 'Must be 11 digits';
+1595-    else if (name === 'nid_number' && value.length < 10) err = 'Invalid NID length';
+1596-    else if (name === 'password' && value.length < 6) err = 'Min 6 characters';
+1597-    
+1598-    setFieldErrors(prev => ({ ...prev, [name]: err }));
+1599-    return !err;
+--
+1758-                      <h3 className="text-xl font-bold text-gray-900">অ্যাকাউন্ট ও লগইন</h3>
+1759-                      <p className="text-[10px] uppercase tracking-widest font-mono text-gray-400">System Credentials</p>
+1760-                   </div>
+1761-                </div>
+1762-                <div className="space-y-5">
+1763:                   <InputField label="মোবাইল নম্বর" value={formData.phone} onChange={(e: any) => setFormData({ ...formData, phone: e.target.value })} placeholder="017XXXXXXXX" required />
+1764-                   <InputField label="ইমেইল" value={formData.email} onChange={(e: any) => setFormData({ ...formData, email: e.target.value })} type="email" placeholder="example@mail.com" required />
+1765-                   <div className="grid grid-cols-2 gap-4">
+1766-                      <InputField label="ইউজার আইডি" value={formData.userId} onChange={(e: any) => setFormData({ ...formData, userId: e.target.value })} placeholder="English only" required />
+1767-                      <InputField label="পাসওয়ার্ড" type="password" value={formData.password} onChange={(e: any) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" required />
+1768-                   </div>
+--
+1994-                  <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#718096', textTransform: 'uppercase' }}>BLOOD GROUP</span>
+1995-                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#c0392b' }}>{profile.blood_group || 'N/A'}</span>
+1996-               </div>
+1997-               <div style={{ display: 'grid', gridTemplateColumns: '95px 1fr', padding: '0.4rem 0', borderBottom: '1px dashed #e2e8f0' }}>
+1998-                  <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#718096', textTransform: 'uppercase' }}>PHONE</span>
+1999:                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1a1f26' }}>{profile.phone || 'N/A'}</span>
+2000-               </div>
+2001-               <div style={{ display: 'grid', gridTemplateColumns: '95px 1fr', padding: '0.4rem 0' }}>
+2002-                  <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#718096', textTransform: 'uppercase' }}>VALIDITY</span>
+2003-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38a169', fontStyle: 'italic' }}>LIFE TIME MEMBER</span>
+2004-               </div>
+--
+2254-                          
+2255-                          <div className="space-y-6">
+2256-                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-accent ml-1">পারিবারিক ও যোগাযোগ</h4>
+2257-                             <InputField label="পিতার নাম" value={profileData.father_name || ''} onChange={(e:any)=>setProfile({...profileData, father_name: e.target.value})} icon={UserIcon} />
+2258-                             <InputField label="মাতার নাম" value={profileData.mother_name || ''} onChange={(e:any)=>setProfile({...profileData, mother_name: e.target.value})} icon={UserIcon} />
+2259:                             <InputField label="মোবাইল" value={profileData.phone || ''} onChange={(e:any)=>setProfile({...profileData, phone: e.target.value})} icon={Phone} />
+2260-                             <InputField label="জরুরি যোগাযোগ" value={profileData.emergency_contact || ''} onChange={(e:any)=>setProfile({...profileData, emergency_contact: e.target.value})} icon={Shield} />
+2261-                             <InputField label="ইমেইল" value={profileData.email || ''} onChange={(e:any)=>setProfile({...profileData, email: e.target.value})} icon={Mail} />
+2262-                          </div>
+2263-                       </div>
+2264-
+--
+2306-                  <div className="grid md:grid-cols-2 gap-6">
+2307-                    {[
+2308-                      { label: 'রক্তের গ্রুপ', value: profileData.blood_group, icon: Heart, color: 'text-red-500', bg: 'bg-red-50' },
+2309-                      { label: 'জাতীয় পরিচয়পত্র', value: profileData.nid_number, icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-50' },
+2310-                      { label: 'জন্ম তারিখ', value: profileData.dob, icon: Calendar, color: 'text-green-500', bg: 'bg-green-50' },
+2311:                      { label: 'মোবাইল নং', value: profileData.phone, icon: Phone, color: 'text-bento-primary', bg: 'bg-red-50' },
+2312-                    ].map((field, idx) => (
+2313-                      <motion.div key={idx} initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay: idx*0.05}} className="p-8 bg-white/60 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-lg hover:shadow-2xl hover:bg-white transition-all duration-500 flex items-center gap-6 group">
+2314-                         <div className={`w-16 h-16 ${field.bg} rounded-[1.5rem] flex items-center justify-center ${field.color} shrink-0 shadow-inner group-hover:scale-110 group-hover:rotate-6 transition-all`}>
+2315-                            <field.icon size={28} />
+2316-                         </div>
+--
+2633-  const [adminStats, setAdminStats] = useState({ success: '', error: '' });
+2634-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+2635-  const [liveLinkInput, setLiveLinkInput] = useState('');
+2636-  const [uploadTarget, setUploadTarget] = useState<'logo' | 'hero' | null>(null);
+2637-  const [showAddUserModal, setShowAddUserModal] = useState(false);
+2638:  const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
+2639-  const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
+2640-  const [committeeSearchQuery, setCommitteeSearchQuery] = useState('');
+2641-  const fileInputRef = useRef<HTMLInputElement>(null);
+2642-  const committeeFileInputRef = useRef<HTMLInputElement>(null);
+2643-
+--
+2678-
+2679-  const filteredUsers = useMemo(() => {
+2680-    if (!searchTerm) return users;
+2681-    return users.filter(u => 
+2682-      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+2683:      u.phone?.includes(searchTerm)
+2684-    );
+2685-  }, [users, searchTerm]);
+2686-
+2687-  useEffect(() => {
+2688-    if (siteSettings?.logo_url) setLogoInput(siteSettings.logo_url);
+--
+2891-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+2892-
+2893-    const tableData = donations.map(d => [
+2894-      new Date(d.date).toLocaleDateString(),
+2895-      d.donor_name,
+2896:      d.phone_email,
+2897-      `BDT ${d.amount}`,
+2898-      d.payment_method || 'N/A',
+2899-      d.fund_type || 'General'
+2900-    ]);
+2901-
+--
+3068-        body: JSON.stringify(newUserForm)
+3069-      });
+3070-      if (res.ok) {
+3071-        showFeedback('success', 'সদস্য সফলভাবে যোগ করা হয়েছে');
+3072-        setShowAddUserModal(false);
+3073:        setNewUserForm({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
+3074-        fetchData();
+3075-      } else {
+3076-        const data = await res.json();
+3077-        showFeedback('error', data.error || 'যোগ করা সম্ভব হয়নি');
+3078-      }
+--
+3162-
+3163-    orders.forEach(order => {
+3164-      const orderData = [
+3165-        order.id,
+3166-        order.customer_name,
+3167:        order.phone,
+3168-        `৳${order.total_amount}`,
+3169-        order.status,
+3170-        new Date(order.created_at).toLocaleDateString()
+3171-      ];
+3172-      tableRows.push(orderData);
+--
+3540-                                  </div>
+3541-                                  
+3542-                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+3543-                                     <div className="inline-flex flex-col items-center">
+3544-                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+3545:                                        <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
+3546-                                     </div>
+3547-                                  </div>
+3548-
+3549-                                  <div className="col-span-6 md:col-span-2 flex justify-center">
+3550-                                     <button 
+--
+3611-                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
+3612-                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Blood Group</div>
+3613-                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
+3614-                         </div>
+3615-                         <div className="divide-y divide-red-50">
+3616:                            {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).map(u => (
+3617-                               <motion.div 
+3618-                                  layout
+3619-                                  key={u.id} 
+3620-                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-red-50/50 transition-all group"
+3621-                               >
+--
+3639-                                  </div>
+3640-                                  
+3641-                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+3642-                                     <div className="inline-flex flex-col items-center">
+3643-                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+3644:                                        <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
+3645-                                     </div>
+3646-                                  </div>
+3647-
+3648-                                  <div className="col-span-6 md:col-span-2 flex justify-center">
+3649-                                     <span className="px-4 py-1.5 rounded-lg text-sm font-black text-red-500 bg-red-50 border border-red-100 shadow-sm">
+--
+3654-                                  <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
+3655-                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Info size={16} /></button>
+3656-                                  </div>
+3657-                               </motion.div>
+3658-                            ))}
+3659:                            {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).length === 0 && (
+3660-                               <div className="flex flex-col items-center justify-center py-32 text-center">
+3661-                                  <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-200 mb-6 border border-dashed border-red-200"><Heart size={32} /></div>
+3662-                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching donors found</p>
+3663-                               </div>
+3664-                            )}
+--
+3707-                            )}
+3708-                         </div>
+3709-                         <div>
+3710-                            <p className="font-black text-xl italic text-gray-900 mb-1">{u.name}</p>
+3711-                            <div className="flex flex-wrap gap-2">
+3712:                               <span className="text-[9px] font-mono text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded bg-gray-50">Phone: {u.phone}</span>
+3713-                               <span className="text-[9px] font-mono text-gray-400 uppercase border border-gray-200 px-2 py-0.5 rounded bg-gray-50">NID: {u.nid_number || 'PENDING'}</span>
+3714-                            </div>
+3715-                         </div>
+3716-                      </div>
+3717-                      
+--
+3828-                        <tr key={d.id} className="hover:bg-gray-50 transition">
+3829-                          <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
+3830-                          <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
+3831-                          <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
+3832-                          <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
+3833:                          <td className="px-8 py-5 text-xs italic">{d.phone_email}</td>
+3834-                          <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
+3835-                        </tr>
+3836-                      ))}
+3837-                    </tbody>
+3838-                 </table>
+--
+4048-                           <InputField label="সদস্যের নাম" value={newUserForm.name} onChange={(e:any)=>setNewUserForm({...newUserForm, name: e.target.value})} placeholder="নাম লিখুন" />
+4049-                           <InputField label="ইউজার আইডি (Login ID)" value={newUserForm.userId} onChange={(e:any)=>setNewUserForm({...newUserForm, userId: e.target.value})} placeholder="উদা: member01" />
+4050-                        </div>
+4051-                        <div className="grid sm:grid-cols-2 gap-6">
+4052-                           <InputField label="পাসওয়ার্ড" type="password" value={newUserForm.password} onChange={(e:any)=>setNewUserForm({...newUserForm, password: e.target.value})} placeholder="পাসওয়ার্ড লিখুন" />
+4053:                           <InputField label="মোবাইল নম্বর" value={newUserForm.phone} onChange={(e:any)=>setNewUserForm({...newUserForm, phone: e.target.value})} placeholder="ফোন নম্বর" />
+4054-                        </div>
+4055-                        <div className="grid sm:grid-cols-2 gap-6">
+4056-                           <InputField label="ইমেইল (ঐচ্ছিক)" value={newUserForm.email} onChange={(e:any)=>setNewUserForm({...newUserForm, email: e.target.value})} placeholder="ইমেইল" />
+4057-                           <div className="space-y-2">
+4058-                             <label className="text-[10px] font-black uppercase tracking-widest text-bento-light ml-2">রক্তের গ্রুপ</label>
+--
+4135-                        { label: 'পিতার নাম', value: selectedUser.father_name },
+4136-                        { label: 'মাতার নাম', value: selectedUser.mother_name },
+4137-                        { label: 'জরুরি যোগাযোগ', value: selectedUser.emergency_contact }
+4138-                     ]} />
+4139-                     <DetailGroup label="যোগাযোগ" items={[
+4140:                        { label: 'মোবাইল', value: selectedUser.phone },
+4141-                        { label: 'ইমেইল', value: selectedUser.email }
+4142-                     ]} />
+4143-                  </div>
+4144-
+4145-                  <div className="grid md:grid-cols-2 gap-10">
+--
+4456-                      {orders.map((o) => (
+4457-                        <tr key={o.id} className="border-b border-bento-border hover:bg-gray-50/50 transition">
+4458-                          <td className="px-8 py-5 text-xs font-black text-bento-primary">#{o.id}</td>
+4459-                          <td className="px-8 py-5">
+4460-                             <p className="font-bold italic text-bento-dark">{o.customer_name}</p>
+4461:                             <p className="text-[10px] text-bento-light">{o.phone}</p>
+4462-                          </td>
+4463-                          <td className="px-8 py-5 text-xs italic max-w-xs truncate">{o.address}</td>
+4464-                          <td className="px-8 py-5 font-black text-bento-dark">৳{o.total_amount}</td>
+4465-                          <td className="px-8 py-5 font-black text-bento-dark italic uppercase text-[9px]">{o.payment_method}</td>
+4466-                          <td className="px-8 py-5">
+--
+4504-  const navigate = useNavigate();
+4505-  const [product, setProduct] = useState<any>(location.state?.product || null);
+4506-  const [quantity, setQuantity] = useState<number>(location.state?.quantity || 1);
+4507-  const [formData, setFormData] = useState({
+4508-    name: '',
+4509:    phone: '',
+4510-    address: '',
+4511-    email: ''
+4512-  });
+4513-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+4514-  const [loading, setLoading] = useState(false);
+--
+4516-
+4517-  const validateField = (name: string, value: string) => {
+4518-    let err = '';
+4519-    if (!value) err = 'This field is required';
+4520-    else if (name === 'email' && !/\S+@\S+\.\S+/.test(value)) err = 'Invalid email';
+4521:    else if (name === 'phone' && !/^\d{11}$/.test(value)) err = 'Must be 11 digits';
+4522-    setFieldErrors(prev => ({ ...prev, [name]: err }));
+4523-    return !err;
+4524-  };
+4525-
+4526-  useEffect(() => {
+--
+4543-      const res = await fetch('/api/orders', {
+4544-        method: 'POST',
+4545-        headers: { 'Content-Type': 'application/json' },
+4546-        body: JSON.stringify({
+4547-          customer_name: formData.name,
+4548:          phone: formData.phone,
+4549-          address: formData.address,
+4550-          email: formData.email,
+4551-          total_amount: Number(product.price) * quantity,
+4552-          items: [{ ...product, quantity }],
+4553-          payment_method: 'Cash on Delivery'
+--
+4597-          <div className="lg:col-span-12 xl:col-span-7 bg-white p-6 sm:p-10 md:p-14 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-gray-100 space-y-10">
+4598-             <h3 className="text-xl sm:text-2xl font-black italic flex items-center gap-3"><MapPin className="text-bento-primary" /> শিপিং তথ্য দিন</h3>
+4599-             <form onSubmit={handleSubmit} className="space-y-8">
+4600-                <InputField label="পূর্ণ নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} placeholder="আপনার নাম এখানে লিখুন..." required />
+4601-                <div className="grid md:grid-cols-2 gap-8">
+4602:                   <InputField label="মোবাইল নাম্বার" value={formData.phone} onChange={(e:any)=>setFormData({...formData, phone: e.target.value})} placeholder="০১৭..." required />
+4603-                   <InputField label="ইমেইল (ঐচ্ছিক)" value={formData.email} onChange={(e:any)=>setFormData({...formData, email: e.target.value})} placeholder="example@gmail.com" />
+4604-                </div>
+4605-                <div className="space-y-2">
+4606-                   <label className="text-[10px] font-black uppercase tracking-widest text-bento-light">বিস্তারিত ঠিকানা</label>
+4607-                   <textarea 
+--
+5075-                  <div className="flex gap-6 group">
+5076-                     <div className="w-16 h-16 rounded-[2rem] bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
+5077-                        <Phone size={28} />
+5078-                     </div>
+5079-                     <div className="space-y-1">
+5080:                        <p className="text-[10px] font-black uppercase tracking-widest text-bento-light opacity-60">{t('office_phone_label')}</p>
+5081-                        <p className="text-2xl font-black italic text-bento-dark">01722000231</p>
+5082-                     </div>
+5083-                  </div>
+5084-
+5085-                  <div className="flex gap-6 group">
+--
+5175-  const [step, setStep] = useState(1); // 1: Info, 2: Checkout, 3: Success
+5176-  const [formData, setFormData] = useState({ 
+5177-    donor_name: '', 
+5178-    amount: '', 
+5179-    message: '', 
+5180:    phone_email: '',
+5181-    fund_type: 'তহবিল - ১ (সাধারণ)',
+5182-    donor_type: 'সাধারণ অনুদান'
+5183-  });
+5184-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+5185-
+--
+5187-    fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
+5188-  }, []);
+5189-
+5190-  const handleNextToCheckout = (e: React.FormEvent) => {
+5191-    e.preventDefault();
+5192:    if (formData.amount && formData.phone_email && formData.donor_name) {
+5193-      setStep(2);
+5194-    }
+5195-  };
+5196-
+5197-  const handleConfirmDonation = async () => {
+--
+5202-      method: 'POST', 
+5203-      headers: { 'Content-Type': 'application/json' }, 
+5204-      body: JSON.stringify({
+5205-        donor_name: formData.donor_name,
+5206-        amount: Number(formData.amount),
+5207:        phone_email: formData.phone_email,
+5208-        fund_type: formData.fund_type,
+5209-        donor_type: formData.donor_type,
+5210-        payment_method: selectedMethod,
+5211-        message: formData.message
+5212-      }) 
+--
+5215-    if (res.ok) {
+5216-      setStep(3);
+5217-      fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
+5218-      setTimeout(() => {
+5219-        setStep(1);
+5220:        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান' });
+5221-        setSelectedMethod(null);
+5222-      }, 5000);
+5223-    }
+5224-  };
+5225-
+--
+5282-                required 
+5283-              />
+5284-              
+5285-              <InputField 
+5286-                label={t('mobile_email') + " *"} 
+5287:                value={formData.phone_email} 
+5288:                onChange={(e:any)=>setFormData({...formData, phone_email: e.target.value})} 
+5289-                placeholder="017... / email@..." 
+5290-                required 
+5291-              />
+5292-
+5293-              <div className="space-y-2">
+--
+5379-
+5380-                <div className="space-y-4 pt-8">
+5381-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">Donor Identity</h4>
+5382-                  <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100">
+5383-                    <p className="text-sm font-bold text-bento-dark italic">{formData.donor_name}</p>
+5384:                    <p className="text-xs text-bento-light leading-relaxed">{formData.phone_email}</p>
+5385-                  </div>
+5386-                </div>
+5387-              </div>
+5388-
+5389-              <div className="bg-blue-50/50 p-8 rounded-3xl border border-blue-100/50 flex items-center gap-4 italic text-xs text-blue-800">

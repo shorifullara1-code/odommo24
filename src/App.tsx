@@ -2635,7 +2635,8 @@ const AdminDashboard = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
-  const [committeeSearchQuery, setCommitteeSearchQuery] = useState('');
+  const [donationSubTab, setDonationSubTab] = useState<'general' | 'member_fee'>('general');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -2882,29 +2883,34 @@ const AdminDashboard = () => {
 
   const downloadDonationsPDF = () => {
     const doc = new jsPDF();
+    const isMemberFee = donationSubTab === 'member_fee';
+    const reportTitle = isMemberFee ? 'Member Fee Report - Adomyo 24' : 'Donations Report - Adomyo 24';
+
     doc.setFontSize(20);
-    doc.text('Donations Report - Adomyo 24', 14, 22);
+    doc.text(reportTitle, 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
 
-    const tableData = donations.map(d => [
+    const filteredDonations = donations.filter(d => isMemberFee ? d.fund_type === 'সাধারণ সদস্য ফি' : d.fund_type !== 'সাধারণ সদস্য ফি');
+
+    const tableData = filteredDonations.map(d => [
       new Date(d.date).toLocaleDateString(),
       d.donor_name,
       `৳ ${d.amount}`,
       d.payment_method || 'N/A',
-      d.fund_type || 'General'
+      isMemberFee ? (d.message || d.phone_email || 'N/A') : (d.fund_type || 'General')
     ]);
 
     autoTable(doc, {
       startY: 40,
-      head: [['Date', 'Donor', 'Amount', 'Method', 'Fund']],
+      head: [['Date', isMemberFee ? 'Member Name' : 'Donor', 'Amount', 'Method', isMemberFee ? 'Form & Contact' : 'Fund']],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [192, 57, 43] }
     });
 
-    doc.save(`Adomyo24_Donations_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`Adomyo24_${isMemberFee ? 'MemberFee' : 'Donations'}_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const showFeedback = (type: 'success' | 'error', msg: string) => {
@@ -3797,10 +3803,18 @@ const AdminDashboard = () => {
             transition={{ duration: 0.3 }}
             className="space-y-10"
           >
+             <div className="flex flex-wrap gap-4 mb-6">
+                <button onClick={() => setDonationSubTab('general')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'general' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-white text-bento-light border border-bento-border hover:bg-gray-50'}`}>সাধারণ অনুদান</button>
+                <button onClick={() => setDonationSubTab('member_fee')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'member_fee' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-white text-bento-light border border-bento-border hover:bg-gray-50'}`}>সাধারণ সদস্য ফি</button>
+             </div>
+
             <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
                <div className="space-y-1">
-                  <h3 className="text-2xl font-black italic">অনুদান রিপোর্ট</h3>
-                  <p className="text-xs text-bento-light uppercase tracking-widest">মোট অনুদান সংখ্যা: {donations.length}</p>
+                  <h3 className="text-2xl font-black italic">{donationSubTab === 'general' ? 'সাধারণ অনুদান রিপোর্ট' : 'সাধারণ সদস্য ফি রিপোর্ট'}</h3>
+                  <p className="text-xs text-bento-light uppercase tracking-widest">
+                     মোট সংখ্যা: {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').length} |  
+                     সর্বমোট: ৳{donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').reduce((acc, d) => acc + Number(d.amount), 0).toLocaleString()}
+                  </p>
                </div>
                <button onClick={downloadDonationsPDF} className="flex items-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
                   <Download size={16} /> এক্সেল/পিডিএফ ডাউনলোড
@@ -3814,17 +3828,30 @@ const AdminDashboard = () => {
                       <tr>
                         <th className="px-8 py-5">তারিখ</th>
                         <th className="px-8 py-5">দাতার নাম</th>
-                        <th className="px-8 py-5">ধরন</th>
+                        {donationSubTab === 'member_fee' ? (
+                          <th className="px-8 py-5">ফরম নাম্বার ও ফোন</th>
+                        ) : (
+                          <th className="px-8 py-5">ধরন</th>
+                        )}
                         <th className="px-8 py-5">মবলগ</th>
                         <th className="px-8 py-5">পদ্ধতি</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-bento-border">
-                      {donations.map(d => (
+                      {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').map(d => (
                         <tr key={d.id} className="hover:bg-gray-50 transition">
                           <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
                           <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
-                          <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
+                          {donationSubTab === 'member_fee' ? (
+                            <td className="px-8 py-5">
+                               <div className="flex flex-col gap-1">
+                                 <span className="text-[10px] font-black uppercase text-bento-dark bg-yellow-50 px-2 py-1 rounded w-max">{d.message || 'N/A'}</span>
+                                 <span className="text-[10px] text-bento-light font-mono">{d.phone_email || 'N/A'}</span>
+                               </div>
+                            </td>
+                          ) : (
+                            <td className="px-8 py-5"><span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-md">{d.donor_type || 'N/A'}</span></td>
+                          )}
                           <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
                           <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
                         </tr>
@@ -3832,7 +3859,7 @@ const AdminDashboard = () => {
                     </tbody>
                  </table>
                </div>
-               {donations.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো অনুদান পাওয়া যায়নি...</p>}
+               {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো ডাটা পাওয়া যায়নি...</p>}
             </div>
           </motion.div>
         )}
@@ -5168,6 +5195,7 @@ const DonationsPage = () => {
   const { t, lang } = useLanguage();
   const [donations, setDonations] = useState<any[]>([]);
   const [step, setStep] = useState(1); // 1: Info, 2: Checkout, 3: Success
+  const [donationType, setDonationType] = useState<'general' | 'member_fee'>('general');
   const [formData, setFormData] = useState({ 
     donor_name: '', 
     amount: '', 
@@ -5175,8 +5203,10 @@ const DonationsPage = () => {
     phone_email: '',
     fund_type: 'তহবিল - ১ (সাধারণ)',
     donor_type: 'সাধারণ অনুদান',
-    is_anonymous: false
+    is_anonymous: false,
+    form_number: '' // Added for member fee
   });
+
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
   useEffect(() => {
@@ -5185,8 +5215,14 @@ const DonationsPage = () => {
 
   const handleNextToCheckout = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.amount && (formData.is_anonymous || (formData.phone_email && formData.donor_name))) {
-      setStep(2);
+    if (donationType === 'member_fee') {
+      if (formData.amount && formData.phone_email && formData.donor_name && formData.form_number) {
+        setStep(2);
+      }
+    } else {
+      if (formData.amount && (formData.is_anonymous || (formData.phone_email && formData.donor_name))) {
+        setStep(2);
+      }
     }
   };
 
@@ -5198,13 +5234,13 @@ const DonationsPage = () => {
       method: 'POST', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify({
-        donor_name: formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name,
+        donor_name: donationType === 'member_fee' ? formData.donor_name : (formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name),
         amount: Number(formData.amount),
-        phone_email: formData.is_anonymous ? 'Hidden' : formData.phone_email,
-        fund_type: formData.fund_type,
-        donor_type: formData.donor_type,
+        phone_email: donationType === 'member_fee' ? formData.phone_email : (formData.is_anonymous ? 'Hidden' : formData.phone_email),
+        fund_type: donationType === 'member_fee' ? 'সাধারণ সদস্য ফি' : formData.fund_type,
+        donor_type: donationType === 'member_fee' ? 'সদস্য ফি' : formData.donor_type,
         payment_method: selectedMethod,
-        message: formData.message
+        message: donationType === 'member_fee' ? `ফরম নাম্বার: ${formData.form_number}` : formData.message
       }) 
     });
     
@@ -5213,7 +5249,7 @@ const DonationsPage = () => {
       fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
       setTimeout(() => {
         setStep(1);
-        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান', is_anonymous: false });
+        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান', is_anonymous: false, form_number: '' });
         setSelectedMethod(null);
       }, 5000);
     }
@@ -5240,9 +5276,25 @@ const DonationsPage = () => {
              <div className="w-40 h-1 bg-bento-primary mx-auto rounded-full"></div>
           </div>
 
+          <div className="flex flex-wrap justify-center gap-4">
+             <button
+                onClick={() => setDonationType('general')}
+                className={`px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all ${donationType === 'general' ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/20' : 'bg-gray-100 text-bento-light hover:bg-gray-200'}`}
+             >
+                সাধারণ অনুদান (Donation)
+             </button>
+             <button
+                onClick={() => setDonationType('member_fee')}
+                className={`px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all ${donationType === 'member_fee' ? 'bg-bento-primary text-white shadow-xl shadow-bento-primary/20' : 'bg-gray-100 text-bento-light hover:bg-gray-200'}`}
+             >
+                সাধারণ সদস্য ফি (Member Fee)
+             </button>
+          </div>
+
           <div className="bg-yellow-500/5 backdrop-blur-lg border-2 border-yellow-500/20 rounded-[3rem] p-10 md:p-14 space-y-12">
-            <h2 className="text-2xl font-serif text-center text-bento-dark italic">{t('donation_info_title')}</h2>
+            <h2 className="text-2xl font-serif text-center text-bento-dark italic">{donationType === 'general' ? t('donation_info_title') : 'সদস্য ফি প্রদান ফর্ম'}</h2>
             
+            {donationType === 'general' ? (
             <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">{t('donation_fund_label')}</label>
@@ -5321,6 +5373,45 @@ const DonationsPage = () => {
                  </label>
               </div>
             </form>
+            ) : (
+            <form onSubmit={handleNextToCheckout} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+              <InputField 
+                label="সদস্য নাম *" 
+                value={formData.donor_name} 
+                onChange={(e:any)=>setFormData({...formData, donor_name: e.target.value})} 
+                placeholder="আপনার নাম লিখুন" 
+                required 
+              />
+              <InputField 
+                label="সদস্য ফরম নাম্বার *" 
+                value={formData.form_number} 
+                onChange={(e:any)=>setFormData({...formData, form_number: e.target.value})} 
+                placeholder="ফরম নাম্বার (উদা: ১০১)" 
+                required 
+              />
+              <InputField 
+                label="ফোন নাম্বার *" 
+                value={formData.phone_email} 
+                onChange={(e:any)=>setFormData({...formData, phone_email: e.target.value})} 
+                placeholder="০১৭XXXXXXXX" 
+                required 
+              />
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-bento-light pl-2">সদস্য fee (৳) *</label>
+                <div className="flex gap-4">
+                  <input 
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    className="flex-grow bg-white border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-yellow-500 transition font-bold text-sm"
+                    placeholder="পরিমাণ"
+                    required
+                  />
+                  <button type="submit" className="bg-bento-primary hover:bg-red-700 text-white px-8 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-red-500/20">পরবর্তী ধাপ</button>
+                </div>
+              </div>
+            </form>
+            )}
             
             <p className="text-center text-xs text-bento-light italic">
               {t('donation_blessing')} <span className="text-bento-primary font-bold cursor-pointer hover:underline">{t('click_details')}</span>
@@ -5419,6 +5510,16 @@ const DonationsPage = () => {
               </div>
 
               <div className="space-y-10">
+                {/* Notice */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 flex gap-4 text-yellow-800 text-sm leading-relaxed">
+                  <div className="mt-1"><Phone size={24} className="text-yellow-600" /></div>
+                  <p>
+                    <strong>অনুগ্রহ করে 'Send Money' করুন:</strong> 
+                    <br />bKash Personal Number: <span className="font-bold text-xl select-all bg-yellow-200/50 px-2 py-0.5 rounded ml-2">01722000231</span>
+                    <br /><span className="text-xs opacity-80 mt-1 block">টাকা পাঠানোর পর নিচের পেমেন্ট মাধ্যম সিলেক্ট করে 'নিশ্চিত করুন' বাটনে ক্লিক করুন।</span>
+                  </p>
+                </div>
+
                 {/* Categories */}
                 <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                   {['Mobile Banking', 'Card', 'Net Banking'].map((cat) => (

@@ -2636,6 +2636,7 @@ const AdminDashboard = () => {
   const [newUserForm, setNewUserForm] = useState({ userId: '', password: '', name: '', email: '', phone: '', role: 'member', blood_group: '', profession: '' });
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [donationSubTab, setDonationSubTab] = useState<'general' | 'member_fee'>('general');
+  const [donationDateFilter, setDonationDateFilter] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
@@ -2892,7 +2893,14 @@ const AdminDashboard = () => {
     doc.setTextColor(100);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
 
-    const filteredDonations = donations.filter(d => isMemberFee ? d.fund_type === 'সাধারণ সদস্য ফি' : d.fund_type !== 'সাধারণ সদস্য ফি');
+    const filteredDonations = donations.filter(d => {
+      const typeMatch = isMemberFee ? d.fund_type === 'সাধারণ সদস্য ফি' : d.fund_type !== 'সাধারণ সদস্য ফি';
+      if (!typeMatch) return false;
+      if (donationDateFilter) {
+        return d.date && d.date.startsWith(donationDateFilter);
+      }
+      return true;
+    });
 
     const tableData = filteredDonations.map(d => [
       new Date(d.date).toLocaleDateString(),
@@ -3794,7 +3802,19 @@ const AdminDashboard = () => {
         </motion.div>
         )}
 
-        {activeTab === 'donations' && (
+        {activeTab === 'donations' && (() => {
+          const isMemberFee = donationSubTab === 'member_fee';
+          const relevantDonations = donations.filter(d => isMemberFee ? d.fund_type === 'সাধারণ সদস্য ফি' : d.fund_type !== 'সাধারণ সদস্য ফি');
+          
+          const todayStr = new Date().toISOString().split('T')[0];
+          const todaysDonations = relevantDonations.filter(d => d.date && d.date.startsWith(todayStr));
+          const todaysTotal = todaysDonations.reduce((acc, d) => acc + Number(d.amount), 0);
+
+          const dateFilteredDonations = relevantDonations.filter(d => donationDateFilter ? (d.date && d.date.startsWith(donationDateFilter)) : true);
+          const filteredTotal = dateFilteredDonations.reduce((acc, d) => acc + Number(d.amount), 0);
+          const allTotal = relevantDonations.reduce((acc, d) => acc + Number(d.amount), 0);
+
+          return (
           <motion.div 
             key="donations" 
             initial={{ opacity: 0, y: 20 }} 
@@ -3803,17 +3823,38 @@ const AdminDashboard = () => {
             transition={{ duration: 0.3 }}
             className="space-y-10"
           >
-             <div className="flex flex-wrap gap-4 mb-6">
-                <button onClick={() => setDonationSubTab('general')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'general' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-white text-bento-light border border-bento-border hover:bg-gray-50'}`}>সাধারণ অনুদান</button>
-                <button onClick={() => setDonationSubTab('member_fee')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'member_fee' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-white text-bento-light border border-bento-border hover:bg-gray-50'}`}>সাধারণ সদস্য ফি</button>
+             <div className="flex flex-wrap gap-4 mb-6 justify-between items-center bg-white p-4 rounded-2xl border border-bento-border shadow-sm">
+                <div className="flex gap-4">
+                  <button onClick={() => setDonationSubTab('general')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'general' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-gray-50 text-bento-light hover:bg-gray-100'}`}>সাধারণ অনুদান</button>
+                  <button onClick={() => setDonationSubTab('member_fee')} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${donationSubTab === 'member_fee' ? 'bg-bento-primary text-white shadow-lg shadow-bento-primary/30' : 'bg-gray-50 text-bento-light hover:bg-gray-100'}`}>সাধারণ সদস্য ফি</button>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end">
+                     <span className="text-[10px] font-black tracking-widest uppercase text-bento-light">আজকের কালেকশন</span>
+                     <span className="text-lg font-black text-bento-primary">৳{todaysTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
+                  <div className="flex items-center gap-2">
+                     <input 
+                       type="date" 
+                       value={donationDateFilter} 
+                       onChange={e => setDonationDateFilter(e.target.value)}
+                       className="px-4 py-2 border rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:border-bento-primary"
+                     />
+                     {donationDateFilter && (
+                       <button onClick={() => setDonationDateFilter('')} className="text-xs text-red-500 font-bold ml-2 hover:underline">Clear</button>
+                     )}
+                  </div>
+                </div>
              </div>
 
             <div className="flex justify-between items-center bg-gray-50 p-8 rounded-[2.5rem] border border-bento-border">
                <div className="space-y-1">
                   <h3 className="text-2xl font-black italic">{donationSubTab === 'general' ? 'সাধারণ অনুদান রিপোর্ট' : 'সাধারণ সদস্য ফি রিপোর্ট'}</h3>
                   <p className="text-xs text-bento-light uppercase tracking-widest">
-                     মোট সংখ্যা: {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').length} |  
-                     সর্বমোট: ৳{donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').reduce((acc, d) => acc + Number(d.amount), 0).toLocaleString()}
+                     মোট সংখ্যা (সর্ট করা): {dateFilteredDonations.length} | 
+                     তারিখ-অনুযায়ী মোট: ৳{filteredTotal.toLocaleString()} | 
+                     সর্বমোট (সকল): ৳{allTotal.toLocaleString()}
                   </p>
                </div>
                <button onClick={downloadDonationsPDF} className="flex items-center gap-3 bg-bento-primary text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-bento-primary/20 hover:scale-105 transition active:scale-95">
@@ -3838,7 +3879,7 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-bento-border">
-                      {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').map(d => (
+                      {dateFilteredDonations.map(d => (
                         <tr key={d.id} className="hover:bg-gray-50 transition">
                           <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
                           <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
@@ -3859,10 +3900,11 @@ const AdminDashboard = () => {
                     </tbody>
                  </table>
                </div>
-               {donations.filter(d => donationSubTab === 'general' ? d.fund_type !== 'সাধারণ সদস্য ফি' : d.fund_type === 'সাধারণ সদস্য ফি').length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো ডাটা পাওয়া যায়নি...</p>}
+               {dateFilteredDonations.length === 0 && <p className="text-center py-20 text-bento-light italic font-serif">কোনো ডাটা পাওয়া যায়নি...</p>}
             </div>
           </motion.div>
-        )}
+          )
+        })()}
 
         {activeTab === 'events' && (
           <motion.div 
@@ -5468,7 +5510,7 @@ const DonationsPage = () => {
           <div className="grid lg:grid-cols-5 gap-12 items-start">
             {/* Left: Summary */}
             <div className="lg:col-span-2 space-y-8 sticky top-24">
-              <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-100 space-y-8">
+              <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl border border-gray-100 space-y-8">
                 <div className="flex items-center gap-4 pb-8 border-b border-gray-100">
                   <div className="w-12 h-12 bg-bento-primary rounded-2xl flex items-center justify-center text-white font-black italic">A24</div>
                   <div>
@@ -5508,8 +5550,8 @@ const DonationsPage = () => {
             </div>
 
             {/* Right: Payment Methods */}
-            <div className="lg:col-span-3 bg-white rounded-[3rem] p-10 md:p-14 shadow-2xl border border-gray-100 space-y-12">
-              <div className="flex justify-between items-center">
+            <div className="lg:col-span-3 bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-14 shadow-2xl border border-gray-100 space-y-10 md:space-y-12">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <h2 className="text-2xl font-serif italic text-bento-dark">Payment Methods</h2>
                 <div className="flex items-center gap-2 text-xs font-bold text-bento-light">
                    <Lock size={12} />
@@ -5519,13 +5561,19 @@ const DonationsPage = () => {
 
               <div className="space-y-10">
                 {/* Notice */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 flex gap-4 text-yellow-800 text-sm leading-relaxed">
-                  <div className="mt-1"><Phone size={24} className="text-yellow-600" /></div>
-                  <p>
-                    <strong>অনুগ্রহ করে 'Send Money' করুন:</strong> 
-                    <br />bKash Personal Number: <span className="font-bold text-xl select-all bg-yellow-200/50 px-2 py-0.5 rounded ml-2">01722000231</span>
-                    <br /><span className="text-xs opacity-80 mt-1 block">টাকা পাঠানোর পর নিচের পেমেন্ট মাধ্যম সিলেক্ট করে 'নিশ্চিত করুন' বাটনে ক্লিক করুন।</span>
-                  </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 text-yellow-800 text-sm leading-relaxed">
+                  <div className="hidden sm:block mt-1"><Phone size={24} className="text-yellow-600 shrink-0" /></div>
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-2">
+                       <Phone size={20} className="text-yellow-600 sm:hidden shrink-0" />
+                       <strong>অনুগ্রহ করে 'Send Money' করুন:</strong> 
+                    </div>
+                    <div className="bg-yellow-200/50 p-3 rounded-lg border border-yellow-200 inline-block w-full sm:w-auto text-center sm:text-left">
+                       <span className="opacity-80 text-xs uppercase tracking-widest block mb-1">bKash Personal Number</span>
+                       <span className="font-bold text-2xl tracking-widest select-all">01722000231</span>
+                    </div>
+                    <p className="text-xs opacity-80 mt-2">উপরের নাম্বারে টাকা পাঠানোর পর নিচের পেমেন্ট মাধ্যম সিলেক্ট করে 'Pay' বাটনে ক্লিক করুন।</p>
+                  </div>
                 </div>
 
                 {/* Categories */}

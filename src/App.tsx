@@ -5229,29 +5229,37 @@ const DonationsPage = () => {
   const handleConfirmDonation = async () => {
     if (!selectedMethod) return;
     
-    // Simulate API call
-    const res = await fetch('/api/donations', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({
-        donor_name: donationType === 'member_fee' ? formData.donor_name : (formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name),
-        amount: Number(formData.amount),
-        phone_email: donationType === 'member_fee' ? formData.phone_email : (formData.is_anonymous ? 'Hidden' : formData.phone_email),
-        fund_type: donationType === 'member_fee' ? 'সাধারণ সদস্য ফি' : formData.fund_type,
-        donor_type: donationType === 'member_fee' ? 'সদস্য ফি' : formData.donor_type,
-        payment_method: selectedMethod,
-        message: donationType === 'member_fee' ? `ফরম নাম্বার: ${formData.form_number}` : formData.message
-      }) 
-    });
-    
-    if (res.ok) {
-      setStep(3);
-      fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
-      setTimeout(() => {
-        setStep(1);
-        setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান', is_anonymous: false, form_number: '' });
-        setSelectedMethod(null);
-      }, 5000);
+    try {
+      const res = await fetch('/api/donations', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({
+          donor_name: donationType === 'member_fee' ? formData.donor_name : (formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name),
+          amount: Number(formData.amount),
+          phone_email: donationType === 'member_fee' ? formData.phone_email : (formData.is_anonymous ? 'Hidden' : formData.phone_email),
+          fund_type: donationType === 'member_fee' ? 'সাধারণ সদস্য ফি' : formData.fund_type,
+          donor_type: donationType === 'member_fee' ? 'সদস্য ফি' : formData.donor_type,
+          payment_method: selectedMethod,
+          message: donationType === 'member_fee' ? `ফরম নাম্বার: ${formData.form_number}` : formData.message
+        }) 
+      });
+      
+      if (res.ok) {
+        setStep(3);
+        fetch('/api/donations').then(r => r.ok ? r.json() : []).then(data => setDonations(Array.isArray(data) ? data : []));
+        setTimeout(() => {
+          setStep(1);
+          setFormData({ donor_name: '', amount: '', message: '', phone_email: '', fund_type: 'তহবিল - ১ (সাধারণ)', donor_type: 'সাধারণ অনুদান', is_anonymous: false, form_number: '' });
+          setSelectedMethod(null);
+        }, 5000);
+      } else {
+        const err = await res.json();
+        console.error("Donation failed:", err);
+        alert(`Failed to save donation: ${err.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error submitting donation:", error);
+      alert("Failed to submit donation due to network error.");
     }
   };
 

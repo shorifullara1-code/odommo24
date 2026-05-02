@@ -392,7 +392,9 @@ app.post('/api/auth/login', async (req, res) => {
 
   app.post('/api/donations', async (req, res) => {
     const { donor_name, amount, message, phone_email, fund_type, payment_method, donor_type } = req.body;
-    const { error } = await supabase.from('donations').insert([{ 
+    
+    // First try with all columns
+    let { error } = await supabase.from('donations').insert([{ 
       donor_name, 
       amount, 
       message,
@@ -402,6 +404,20 @@ app.post('/api/auth/login', async (req, res) => {
       donor_type,
       date: new Date().toISOString()
     }]);
+
+    if (error && error.code === 'PGRST204') {
+       // Fallback for missing columns
+       const combinedMessage = `${message || ''} | Phone: ${phone_email || 'N/A'} | Payment: ${payment_method || 'N/A'} | Fund: ${fund_type || 'N/A'}`;
+       const fallbackRes = await supabase.from('donations').insert([{
+         donor_name,
+         amount,
+         message: combinedMessage,
+         donor_type,
+         date: new Date().toISOString()
+       }]);
+       error = fallbackRes.error;
+    }
+
     if (error) return res.status(500).json({ error: error.message });
     res.status(201).json({ message: 'Donation recorded' });
   });

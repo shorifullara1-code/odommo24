@@ -3031,6 +3031,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteDonation = async (id: number) => {
+    if (!window.confirm('আপনি কি নিশ্চিত যে আপনি এই অনুদানটি মুছতে চান?')) return;
+    try {
+      const res = await fetch(`/api/admin/donations/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'অনুদানটি সফলভাবে মুছে ফেলা হয়েছে');
+        setDonations(donations.filter(d => d.id !== id));
+      } else {
+        showFeedback('error', 'অনুদান মুছতে ব্যর্থ হয়েছে');
+      }
+    } catch (err) {
+      showFeedback('error', 'নেটওয়ার্ক ত্রুটি');
+    }
+  };
+
   const addCommitteeMember = async () => {
     if (!newMember.name || !newMember.role) return;
     try {
@@ -3877,6 +3892,7 @@ const AdminDashboard = () => {
                         )}
                         <th className="px-8 py-5">মবলগ</th>
                         <th className="px-8 py-5">পদ্ধতি</th>
+                        <th className="px-8 py-5">অ্যাকশন</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-bento-border">
@@ -3896,6 +3912,11 @@ const AdminDashboard = () => {
                           )}
                           <td className="px-8 py-5 font-black text-bento-primary">৳{d.amount}</td>
                           <td className="px-8 py-5 overflow-hidden"><span className="bg-white px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase text-bento-light">{d.payment_method || 'N/A'}</span></td>
+                          <td className="px-8 py-5">
+                             <button onClick={() => deleteDonation(d.id)} className="text-red-500 hover:text-red-700 transition-all p-2 bg-red-50 hover:bg-red-100 rounded-lg shadow-sm border border-red-100" title="মুছে ফেলুন">
+                               <Trash2 size={16} />
+                             </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

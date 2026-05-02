@@ -422,6 +422,18 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(201).json({ message: 'Donation recorded' });
   });
 
+  app.delete('/api/admin/donations/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { error } = await supabase.from('donations').delete().eq('id', id);
+      if (error) throw error;
+      res.json({ message: 'Donation deleted successfully' });
+    } catch (err: any) {
+      console.error('Error deleting donation:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Site Settings
   app.get('/api/site-settings', async (req, res) => {
     try {

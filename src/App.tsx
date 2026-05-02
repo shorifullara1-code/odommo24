@@ -2637,6 +2637,7 @@ const AdminDashboard = () => {
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [donationSubTab, setDonationSubTab] = useState<'general' | 'member_fee'>('general');
   const [donationDateFilter, setDonationDateFilter] = useState<string>('');
+  const [committeeSearchQuery, setCommitteeSearchQuery] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const committeeFileInputRef = useRef<HTMLInputElement>(null);
@@ -4600,9 +4601,13 @@ const CheckoutPage = () => {
     Object.keys(formData).forEach(key => {
       if (!validateField(key, (formData as any)[key])) isValid = false;
     });
-    if (!isValid) return;
+    if (!isValid) {
+      alert("অনুগ্রহ করে ফর্মটি সঠিকভাবে পূরণ করুন। (মোবাইল নম্বর ১১ ডিজিট হতে হবে)");
+      return;
+    }
 
     setLoading(true);
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -4651,14 +4656,14 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-32 max-w-6xl space-y-16">
+    <div className="container mx-auto px-4 py-32 max-w-6xl space-y-16 overflow-hidden">
        <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-6xl font-serif italic text-bento-dark">চেকআউট</h1>
           <div className="w-24 h-1 bg-bento-primary mx-auto rounded-full"></div>
        </div>
 
-       <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          <div className="lg:col-span-12 xl:col-span-7 bg-white p-6 sm:p-10 md:p-14 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-gray-100 space-y-10">
+       <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start w-full">
+          <div className="lg:col-span-12 xl:col-span-7 bg-white p-6 sm:p-10 md:p-14 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-gray-100 space-y-10 w-full overflow-hidden break-words">
              <h3 className="text-xl sm:text-2xl font-black italic flex items-center gap-3"><MapPin className="text-bento-primary" /> শিপিং তথ্য দিন</h3>
              <form onSubmit={handleSubmit} className="space-y-8">
                 <InputField label="পূর্ণ নাম" value={formData.name} onChange={(e:any)=>setFormData({...formData, name: e.target.value})} placeholder="আপনার নাম এখানে লিখুন..." required />
@@ -4698,20 +4703,20 @@ const CheckoutPage = () => {
              </form>
           </div>
 
-          <div className="lg:col-span-12 xl:col-span-5 space-y-8 xl:sticky xl:top-24">
-             <div className="bg-bento-dark text-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group">
-                <ShoppingBag size={200} className="absolute -bottom-10 -right-10 opacity-5 group-hover:scale-110 transition duration-1000" />
+          <div className="lg:col-span-12 xl:col-span-5 space-y-8 xl:sticky xl:top-24 w-full">
+             <div className="bg-bento-dark text-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden group w-full break-words">
+                <ShoppingBag size={200} className="absolute -bottom-10 -right-10 opacity-5 group-hover:scale-110 transition duration-1000 shrink-0" />
                 <h3 className="text-xl font-black italic border-b border-white/10 pb-4 mb-8">অর্ডার সামারি</h3>
                 <div className="space-y-6">
-                   <div className="flex items-center gap-6">
+                   <div className="flex flex-col sm:flex-row sm:items-center gap-6">
                       <div className="w-20 h-20 bg-white/10 rounded-2xl overflow-hidden border border-white/10 shrink-0">
                          <img src={product.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
-                      <div className="space-y-1 flex-grow">
-                         <p className="font-bold text-lg italic leading-tight">{product.name}</p>
-                         <p className="text-xs text-white/40 italic">{product.category}</p>
+                      <div className="space-y-1 flex-grow min-w-0">
+                         <p className="font-bold text-lg italic leading-tight truncate" title={product.name}>{product.name}</p>
+                         <p className="text-xs text-white/40 italic truncate">{product.category}</p>
                          
-                         <div className="flex items-center gap-3 mt-4 bg-white/5 p-1 rounded-xl w-fit">
+                         <div className="flex items-center gap-3 mt-4 bg-white/5 p-1 rounded-xl w-fit shrink-0">
                             <button 
                               onClick={() => setQuantity(Math.max(1, quantity - 1))}
                               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all"
@@ -5260,16 +5265,24 @@ const DonationsPage = () => {
     if (donationType === 'member_fee') {
       if (formData.amount && formData.phone_email && formData.donor_name && formData.form_number) {
         setStep(2);
+      } else {
+        alert('অনুগ্রহ করে সব তথ্য দিন।');
       }
     } else {
       if (formData.amount && (formData.is_anonymous || (formData.phone_email && formData.donor_name))) {
         setStep(2);
+      } else {
+        alert('অনুগ্রহ করে পরিমাণ এবং অন্যান্য তথ্য দিন।');
       }
     }
   };
 
-  const handleConfirmDonation = async () => {
-    if (!selectedMethod) return;
+  const handleConfirmDonation = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedMethod) {
+      alert('অনুগ্রহ করে একটি পেমেন্ট মাধ্যম সিলেক্ট করুন (যেমন: bKash, Nagad)');
+      return;
+    }
     
     try {
       const res = await fetch('/api/donations', { 
@@ -5301,7 +5314,7 @@ const DonationsPage = () => {
       }
     } catch (error) {
       console.error("Error submitting donation:", error);
-      alert("Failed to submit donation due to network error.");
+      alert("Network error. Please try again.");
     }
   };
 
@@ -5501,7 +5514,7 @@ const DonationsPage = () => {
       )}
 
       {step === 2 && (
-        <div className="max-w-5xl mx-auto space-y-12">
+        <div className="max-w-5xl mx-auto space-y-12 px-4 sm:px-0 w-full overflow-hidden">
           <div className="flex items-center gap-4 text-bento-light hover:text-bento-dark transition cursor-pointer" onClick={() => setStep(1)}>
             <ArrowRight className="rotate-180" size={20} />
             <span className="font-bold text-sm">তহবিল পাতায় ফিরে যান</span>
@@ -5536,24 +5549,27 @@ const DonationsPage = () => {
 
                 <div className="space-y-4 pt-8">
                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-bento-light">Donor Identity</h4>
-                  <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100">
+                  <div className="bg-gray-50 p-6 rounded-3xl space-y-2 border border-gray-100 overflow-hidden break-words">
                     <p className="text-sm font-bold text-bento-dark italic">{formData.is_anonymous ? 'গোপন দাতা (Anonymous)' : formData.donor_name}</p>
-                    <p className="text-xs text-bento-light leading-relaxed flex items-center gap-2">{formData.is_anonymous ? 'তথ্য গোপন করা হয়েছে' : formData.phone_email} <span className="text-[9px] bg-green-100/50 text-green-600 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase border border-green-200">গোপন থাকবে</span></p>
+                    <p className="text-xs text-bento-light leading-relaxed flex flex-wrap items-center gap-2 max-w-full">
+                       <span className="truncate flex-1 min-w-0">{formData.is_anonymous ? 'তথ্য গোপন করা হয়েছে' : formData.phone_email}</span> 
+                       <span className="text-[9px] bg-green-100/50 text-green-600 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase border border-green-200 whitespace-nowrap">গোপন থাকবে</span>
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-blue-50/50 p-8 rounded-3xl border border-blue-100/50 flex items-center gap-4 italic text-xs text-blue-800">
+              <div className="bg-blue-50/50 p-8 rounded-3xl border border-blue-100/50 flex items-start sm:items-center gap-4 italic text-xs text-blue-800">
                 <Shield size={24} className="shrink-0" />
                 <p>আপনার পেমেন্ট তথ্য এনক্রিপ্টেড এবং সম্পূর্ণ নিরাপদ। অদম্য ২৪ কোনো কার্ড তথ্য সংরক্ষণ করে না।</p>
               </div>
             </div>
 
             {/* Right: Payment Methods */}
-            <div className="lg:col-span-3 bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-14 shadow-2xl border border-gray-100 space-y-10 md:space-y-12">
+            <div className="lg:col-span-3 bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-14 shadow-2xl border border-gray-100 space-y-10 md:space-y-12 overflow-hidden">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <h2 className="text-2xl font-serif italic text-bento-dark">Payment Methods</h2>
-                <div className="flex items-center gap-2 text-xs font-bold text-bento-light">
+                <div className="flex items-center gap-2 text-xs font-bold text-bento-light whitespace-nowrap">
                    <Lock size={12} />
                    Secure Checkout
                 </div>
@@ -5561,16 +5577,16 @@ const DonationsPage = () => {
 
               <div className="space-y-10">
                 {/* Notice */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 text-yellow-800 text-sm leading-relaxed">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 text-yellow-800 text-sm leading-relaxed overflow-hidden break-words">
                   <div className="hidden sm:block mt-1"><Phone size={24} className="text-yellow-600 shrink-0" /></div>
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-3 min-w-0">
                     <div className="flex items-center gap-2">
                        <Phone size={20} className="text-yellow-600 sm:hidden shrink-0" />
                        <strong>অনুগ্রহ করে 'Send Money' করুন:</strong> 
                     </div>
-                    <div className="bg-yellow-200/50 p-3 rounded-lg border border-yellow-200 inline-block w-full sm:w-auto text-center sm:text-left">
+                    <div className="bg-yellow-200/50 p-3 rounded-lg border border-yellow-200 inline-block w-full sm:w-auto text-center sm:text-left overflow-hidden break-all sm:break-normal">
                        <span className="opacity-80 text-xs uppercase tracking-widest block mb-1">bKash Personal Number</span>
-                       <span className="font-bold text-2xl tracking-widest select-all">01722000231</span>
+                       <span className="font-bold text-xl sm:text-2xl tracking-widest select-all">01722000231</span>
                     </div>
                     <p className="text-xs opacity-80 mt-2">উপরের নাম্বারে টাকা পাঠানোর পর নিচের পেমেন্ট মাধ্যম সিলেক্ট করে 'Pay' বাটনে ক্লিক করুন।</p>
                   </div>
@@ -5611,8 +5627,7 @@ const DonationsPage = () => {
                 <div className="pt-8 border-t border-gray-100 space-y-6">
                    <button 
                      onClick={handleConfirmDonation}
-                     disabled={!selectedMethod}
-                     className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.5em] text-sm transition-all ${selectedMethod ? 'bg-bento-accent text-white shadow-2xl shadow-green-500/30 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                     className={`w-full py-6 rounded-3xl font-black uppercase tracking-[0.5em] text-sm transition-all ${selectedMethod ? 'bg-bento-accent text-white shadow-2xl shadow-green-500/30 active:scale-95' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                    >
                      Pay ৳{Number(formData.amount).toLocaleString()}
                    </button>

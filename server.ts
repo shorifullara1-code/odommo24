@@ -463,19 +463,37 @@ app.post('/api/auth/login', async (req, res) => {
       if (apiCache['committee'] && Date.now() - apiCache['committee'].time < CACHE_TTL) {
         return res.json(apiCache['committee'].data);
       }
-      const { data: members, error } = await supabase.from('committee_members')
-        .select('*')
-        .eq('is_active', 1)
-        .order('sort_order', { ascending: true });
-      if (error) {
-        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
-          return res.json([]);
+      // Use chunked fetching to avoid Supabase statement timeouts due to large Base64 images
+      let members: any[] = [];
+      let hasMore = true;
+      let start = 0;
+      const CHUNK_SIZE = 30; // Small chunk size safely avoids the 8s query limit
+      
+      while (hasMore) {
+        const { data: chunk, error } = await supabase.from('committee_members')
+          .select('*')
+          .eq('is_active', 1)
+          .order('sort_order', { ascending: true })
+          .range(start, start + CHUNK_SIZE - 1);
+          
+        if (error) {
+          if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+            return res.json([]);
+          }
+          if (apiCache['committee'] && apiCache['committee'].data) {
+            console.warn('Committee fetch error, using stale cache:', error.message || error);
+            return res.json(apiCache['committee'].data);
+          }
+          throw error;
         }
-        if (apiCache['committee'] && apiCache['committee'].data) {
-          console.warn('Committee fetch error, using stale cache:', error.message || error);
-          return res.json(apiCache['committee'].data);
+        
+        if (chunk && chunk.length > 0) {
+          members = members.concat(chunk);
+          if (chunk.length < CHUNK_SIZE) hasMore = false;
+          else start += CHUNK_SIZE;
+        } else {
+          hasMore = false;
         }
-        throw error;
       }
       apiCache['committee'] = { data: members, time: Date.now() };
       res.json(members);

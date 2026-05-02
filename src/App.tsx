@@ -1614,12 +1614,14 @@ const Register = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
     if (!agreedToTerms) {
       setError('আপনাকে অবশ্যই আমাদের শর্তাবলী ও নিয়মাবলীতে সম্মত হতে হবে।');
       return;
     }
-    if (error && error !== 'আপনাকে অবশ্যই আমাদের শর্তাবলী ও নিয়মাবলীতে সম্মত হতে হবে।') return;
+
+    if (error && error.includes('ছবির সাইজ')) return;
     setError('');
     try {
       const res = await fetch('/api/auth/register', {

@@ -73,7 +73,7 @@ app.post('/api/auth/register', async (req, res) => {
     const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
     const role = userCount === 0 ? 'admin' : 'member';
     
-    const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).single();
+    const { data: lastUser } = await supabase.from('users').select('id').order('id', { ascending: false }).limit(1).maybeSingle();
     const nextIdNumber = lastUser ? (1001 + lastUser.id) : 1001;
     const memberIdNumber = `OD24-${String(nextIdNumber).padStart(4, '0')}`;
 
@@ -84,9 +84,12 @@ app.post('/api/auth/register', async (req, res) => {
       nid_number, emergency_contact, profile_image, member_id_number: memberIdNumber,
       is_blood_donor: req.body.is_blood_donor || false,
       status: role === 'admin' ? 'approved' : 'pending'
-    }]).select().single();
+    }]).select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Registration Error:', error);
+      throw error;
+    }
     
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err: any) {

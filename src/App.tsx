@@ -219,7 +219,7 @@ const CommitteePage = () => {
                   <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                      {leaders.map((c, i) => (
                         <motion.div 
-                           key={c.id} 
+                           key={`leader-${c.id || i}`} 
                            initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 40 }} 
                            whileInView={{ opacity: 1, y: 0 }} 
                            viewport={{ once: true }} 
@@ -257,7 +257,7 @@ const CommitteePage = () => {
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 gap-y-16">
                         {generalMembers.map((c, i) => (
                            <motion.div 
-                              key={c.id} 
+                              key={`member-${c.id || i}`} 
                               initial={{ opacity: 0 }} 
                               whileInView={{ opacity: 1 }} 
                               viewport={{ once: true }}
@@ -387,7 +387,7 @@ const MemberListPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {Array.isArray(members) && members.map((m, idx) => (
             <motion.div 
-              key={m.id}
+              key={`member-all-${m.id || idx}`}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -419,7 +419,7 @@ const MemberListPage = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredDonors.map((m, idx) => (
             <motion.div 
-              key={m.id}
+              key={`donor-list-${m.id || idx}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.05 }}
@@ -493,7 +493,7 @@ const NoticeBoardPage = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {Array.isArray(notices) && notices.map((n, idx) => (
           <motion.div 
-            key={n.id}
+            key={`notice-page-${n.id || idx}`}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -742,7 +742,7 @@ const HomeOverview = () => {
                  <div className="space-y-4 relative z-10">
                     {notices.slice(0, 3).map((n, i) => (
                       <Link 
-                        key={n.id} 
+                        key={`notice-home-${n.id || i}`} 
                         to="/notices" 
                         className="block p-5 bg-white/40 hover:bg-white rounded-3xl border border-bento-border/40 hover:border-bento-primary/20 hover:shadow-xl transition-all duration-300 group/item"
                       >
@@ -957,8 +957,8 @@ const HomeOverview = () => {
                <Link to="/events" className="text-[10px] font-black text-bento-primary uppercase tracking-widest">{t('view_all_events')} &rarr;</Link>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-               {events.slice(0, 2).map((e: any) => (
-                 <div key={e.id} className="flex gap-4 items-center bg-gray-50 p-4 rounded-xl border border-bento-border">
+               {events.slice(0, 2).map((e: any, i: number) => (
+                 <div key={`event-home-${e.id || i}`} className="flex gap-4 items-center bg-gray-50 p-4 rounded-xl border border-bento-border">
                     <div className="w-10 h-10 bg-white rounded-lg flex flex-col items-center justify-center border border-bento-border shrink-0">
                        <span className="text-[10px] font-black text-bento-primary">{new Date(e.date).getDate()}</span>
                        <span className="text-[8px] font-bold uppercase">{new Date(e.date).toLocaleString('default', { month: 'short' })}</span>
@@ -2452,7 +2452,7 @@ const JusticeForHadiPage = () => {
         <div className="grid gap-20">
           {posts.map((post, i) => (
             <motion.div 
-              key={post.id}
+              key={`justice-post-${post.id || i}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -3995,8 +3995,8 @@ const AdminDashboard = () => {
           <div className="lg:col-span-7 bento-card bg-white p-6 sm:p-10 shadow-2xl space-y-6">
               <h3 className="text-xl font-black italic border-b pb-4">বর্তমান নোটিশসমূহ</h3>
               <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                 {notices.map(n => (
-                    <div key={n.id} className="p-6 bg-gray-50 rounded-[2rem] border border-bento-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
+                 {notices.map((n, i) => (
+                    <div key={`admin-notice-${n.id || i}`} className="p-6 bg-gray-50 rounded-[2rem] border border-bento-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
                        <div className="space-y-2">
                           <p className="font-bold text-base italic leading-tight">{n.title}</p>
                           <p className="text-[9px] font-black uppercase tracking-widest opacity-40">{new Date(n.created_at).toLocaleDateString()}</p>
@@ -4269,8 +4269,8 @@ const AdminDashboard = () => {
                      </div>
                   </div>
                   <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                     {committee.filter(m => m.name.toLowerCase().includes(committeeSearchQuery.toLowerCase()) || m.role.toLowerCase().includes(committeeSearchQuery.toLowerCase())).map(m => (
-                        <div key={m.id} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
+                     {committee.filter(m => m.name.toLowerCase().includes(committeeSearchQuery.toLowerCase()) || m.role.toLowerCase().includes(committeeSearchQuery.toLowerCase())).map((m, i) => (
+                        <div key={`admin-committee-${m.id || i}`} className="p-4 bg-gray-50 rounded-3xl border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-500">
                            <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4">
                               <div className="w-16 h-16 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-sm">
                                  <img src={m.image_url || `https://picsum.photos/seed/mem${m.id}/100/100`} className="w-full h-full object-cover" />
@@ -4480,8 +4480,8 @@ const AdminDashboard = () => {
             <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-bento-border overflow-hidden">
                <h3 className="text-2xl font-black italic mb-8">বিদ্যমান পোস্টসমূহ ({justicePosts.length})</h3>
                <div className="grid gap-6">
-                {justicePosts.map((post) => (
-                  <div key={post.id} className="flex flex-col md:flex-row gap-8 bg-gray-50 p-8 rounded-[2rem] border border-bento-border group hover:border-red-200 transition-all">
+                {justicePosts.map((post, i) => (
+                  <div key={`admin-justice-${post.id || i}`} className="flex flex-col md:flex-row gap-8 bg-gray-50 p-8 rounded-[2rem] border border-bento-border group hover:border-red-200 transition-all">
                     {post.image_url && (
                       <div className="w-full md:w-48 h-32 rounded-xl overflow-hidden shadow-md">
                         <img src={post.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
@@ -5109,7 +5109,7 @@ const PublicMembersPage = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
          {filteredMembers.map((member, index) => (
            <motion.div 
-             key={member.id}
+             key={`public-member-${member.id || index}`}
              initial={{ opacity: 0, scale: 0.9 }}
              whileInView={{ opacity: 1, scale: 1 }}
              viewport={{ once: true }}

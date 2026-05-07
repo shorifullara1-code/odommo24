@@ -257,7 +257,7 @@ const CommitteePage = () => {
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 gap-y-16">
                         {generalMembers.map((c, i) => (
                            <motion.div 
-                              key={`member-${c.id || i}`} 
+                              key={`committee-member-${c.id || 'no-id'}-${i}`} 
                               initial={{ opacity: 0 }} 
                               whileInView={{ opacity: 1 }} 
                               viewport={{ once: true }}
@@ -435,8 +435,13 @@ const MemberListPage = () => {
                </div>
                <div className="space-y-1 flex-1">
                   <h4 className="text-xl font-black italic text-gray-900 group-hover:text-red-500 transition-colors">{m.name}</h4>
-                  <div className="flex flex-col gap-1">
-                     {/* Phone number hidden for privacy */}
+                  <div className="flex flex-col gap-1 mt-2">
+                     {m.phone && (
+                        <a href={`tel:${m.phone}`} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-red-500 transition w-fit border border-gray-100 hover:border-red-100 bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-lg">
+                           <Phone size={14} />
+                           {m.phone}
+                        </a>
+                     )}
                   </div>
                </div>
             </motion.div>
@@ -3744,10 +3749,10 @@ const AdminDashboard = () => {
                             <div className="col-span-12 md:col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
                          </div>
                          <div className="divide-y divide-gray-100">
-                            {filteredUsers.filter(u => u.status === 'approved').map(u => (
+                            {filteredUsers.filter(u => u.status === 'approved').map((u, i) => (
                                <motion.div 
                                   layout
-                                  key={`member-${u.id}`} 
+                                  key={`admin-member-${u.id || 'no-id'}-${i}`} 
                                   className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/50 transition-all group"
                                >
                                   <div className="col-span-12 md:col-span-5 flex items-center gap-5">
@@ -3945,7 +3950,7 @@ const AdminDashboard = () => {
                 {users.filter(u => u.status === 'pending').map(u => (
                    <motion.div 
                       layout
-                      key={u.id} 
+                      key={`pending-user-${u.id}`} 
                       className="px-10 py-8 flex flex-col md:flex-row justify-between items-center bg-white hover:bg-orange-50/10 transition-all border-l-4 border-transparent hover:border-orange-500"
                    >
                       <div className="flex items-center gap-6">
@@ -4120,7 +4125,7 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-bento-border">
                       {dateFilteredDonations.map(d => (
-                        <tr key={d.id} className="hover:bg-gray-50 transition">
+                        <tr key={`donation-${d.id}`} className="hover:bg-gray-50 transition">
                           <td className="px-8 py-5 text-xs text-bento-light italic">{new Date(d.date).toLocaleDateString()}</td>
                           <td className="px-8 py-5 font-bold italic text-bento-dark">{d.donor_name}</td>
                           {donationSubTab === 'member_fee' ? (
@@ -4179,7 +4184,7 @@ const AdminDashboard = () => {
                <h3 className="text-xl font-black italic border-b pb-4">বর্তমান ইভেন্টসমূহ</h3>
                <div className="grid grid-cols-1 gap-6">
                   {events.map(e => (
-                    <div key={e.id} className="p-6 bg-gray-50 rounded-3xl border border-bento-border flex justify-between items-start group relative overflow-hidden">
+                    <div key={`admin-event-${e.id}`} className="p-6 bg-gray-50 rounded-3xl border border-bento-border flex justify-between items-start group relative overflow-hidden">
                        <div className="absolute top-0 right-0 p-4 opacity-5"><Calendar size={100} /></div>
                        <div className="relative z-10 space-y-2">
                          <div className="flex items-center gap-3">
@@ -4745,7 +4750,7 @@ const AdminDashboard = () => {
                <h3 className="text-xl font-black italic border-b pb-4">পণ্য তালিকা ({products.length})</h3>
                <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                   {products.map(p => (
-                     <div key={p.id} className="p-6 bg-gray-50 rounded-[2.5rem] border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-500">
+                     <div key={`admin-product-${p.id}`} className="p-6 bg-gray-50 rounded-[2.5rem] border border-bento-border flex flex-col sm:flex-row justify-between items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-500">
                         <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-6">
                            <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden border border-bento-border shadow-inner shrink-0 group-hover:scale-105 transition-transform">
                               <img src={p.image_url || "https://picsum.photos/seed/p/100/100"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -4829,7 +4834,7 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody>
                       {orders.map((o) => (
-                        <tr key={o.id} className="border-b border-bento-border hover:bg-gray-50/50 transition">
+                        <tr key={`admin-order-${o.id}`} className="border-b border-bento-border hover:bg-gray-50/50 transition">
                           <td className="px-8 py-5 text-xs font-black text-bento-primary">#{o.id}</td>
                           <td className="px-8 py-5">
                              <p className="font-bold italic text-bento-dark">{o.customer_name}</p>
@@ -5088,6 +5093,7 @@ const PublicMembersPage = () => {
   const [members, setMembers] = useState<any[]>(globalCache.members || []);
   const [publicDonors, setPublicDonors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState<string>('all');
   const [loading, setLoading] = useState(!globalCache.members);
   const location = useLocation();
   const isBloodDonors = location.pathname === '/blood-donors';
@@ -5096,6 +5102,8 @@ const PublicMembersPage = () => {
   const [regData, setRegData] = useState({ name: '', phone: '', blood_group: '', age: '', address: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [regSuccess, setRegSuccess] = useState(false);
+  
+  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   useEffect(() => {
     // Cache check for members
@@ -5129,6 +5137,11 @@ const PublicMembersPage = () => {
         member_id_number: 'Public Donor'
       }));
       result = [...memberDonors, ...mappedPublicDonors];
+      
+      // Filter by blood group if selected
+      if (selectedBloodGroup !== 'all') {
+        result = result.filter(m => m.blood_group === selectedBloodGroup);
+      }
     }
     
     if (!searchTerm) return result;
@@ -5136,7 +5149,7 @@ const PublicMembersPage = () => {
       m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
       m.blood_group?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [members, publicDonors, searchTerm, isBloodDonors]);
+  }, [members, publicDonors, searchTerm, isBloodDonors, selectedBloodGroup]);
 
   const handleRegisterDonor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -5201,15 +5214,37 @@ const PublicMembersPage = () => {
          )}
       </div>
 
-      <div className="max-w-xl mx-auto mb-16 relative">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-bento-light" size={20} />
-         <input 
-           type="text" 
-           placeholder={isBloodDonors ? (lang === 'bn' ? 'রক্তের গ্রুপ বা নাম দিয়ে খুঁজুন...' : 'Search by blood group or name...') : (lang === 'bn' ? 'সদস্যের নাম দিয়ে খুঁজুন...' : 'Search members by name...')}
-           className="w-full pl-16 pr-8 py-5 bg-white border-2 border-bento-border rounded-[2rem] shadow-xl focus:border-bento-primary outline-none transition text-base italic"
-           value={searchTerm}
-           onChange={e => setSearchTerm(e.target.value)}
-         />
+      <div className="max-w-xl mx-auto mb-16 relative space-y-6">
+         <div className="relative">
+           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-bento-light" size={20} />
+           <input 
+             type="text" 
+             placeholder={isBloodDonors ? (lang === 'bn' ? 'রক্তের গ্রুপ বা নাম দিয়ে খুঁজুন...' : 'Search by blood group or name...') : (lang === 'bn' ? 'সদস্যের নাম দিয়ে খুঁজুন...' : 'Search members by name...')}
+             className="w-full pl-16 pr-8 py-5 bg-white border-2 border-bento-border rounded-[2rem] shadow-xl focus:border-bento-primary outline-none transition text-base italic"
+             value={searchTerm}
+             onChange={e => setSearchTerm(e.target.value)}
+           />
+         </div>
+         
+         {isBloodDonors && (
+            <div className="flex flex-wrap justify-center gap-2">
+               <button 
+                 onClick={() => setSelectedBloodGroup('all')}
+                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedBloodGroup === 'all' ? 'bg-red-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-100 hover:border-red-200'}`}
+               >
+                 {t('all_groups')}
+               </button>
+               {bloodGroups.map(group => (
+                 <button 
+                   key={`filter-bg-${group}`}
+                   onClick={() => setSelectedBloodGroup(group)}
+                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedBloodGroup === group ? 'bg-red-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-100 hover:border-red-200'}`}
+                 >
+                   {group}
+                 </button>
+               ))}
+            </div>
+         )}
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -5404,7 +5439,7 @@ const EventsPage = () => {
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
         {Array.isArray(events) && events.map((e, index) => (
-          <motion.div key={e.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="bento-card !p-0 group cursor-pointer overflow-hidden flex flex-col ring-1 ring-bento-border hover:ring-bento-primary transition shadow-xl">
+          <motion.div key={`public-event-${e.id}`} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} className="bento-card !p-0 group cursor-pointer overflow-hidden flex flex-col ring-1 ring-bento-border hover:ring-bento-primary transition shadow-xl">
             <div className="h-64 overflow-hidden"><img src={e.image_url || `https://picsum.photos/seed/ev${e.id}/800/600`} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerPolicy="no-referrer" /></div>
             <div className="p-6 md:p-8 space-y-4 flex-grow flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-accent bg-[rgba(39,174,96,0.1)] px-3 py-1.5 rounded-full w-fit">{new Date(e.date).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
@@ -5452,7 +5487,7 @@ const ShopPage = () => {
     
     return (
       <motion.div 
-        key={p.id}
+        key={`card-product-${p.id}`}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -5551,7 +5586,7 @@ const ShopPage = () => {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 pb-20">
            {products.map((p, i) => (
-             <ProductCard key={p.id} p={p} i={i} navigate={navigate} t={t} />
+             <ProductCard key={`product-card-${p.id}`} p={p} i={i} navigate={navigate} t={t} />
            ))}
            {products.length === 0 && (
               <div className="col-span-full py-32 text-center space-y-10 border-2 border-dashed border-bento-border rounded-[3rem] bg-gray-50/50">
@@ -6024,7 +6059,7 @@ const DonationsPage = () => {
                 <h3 className="text-3xl font-serif italic text-bento-dark">{t('recent_feed')}</h3>
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
                    {Array.isArray(donations) && donations.map((d, i) => (
-                      <div key={d.id} className="bento-card !p-6 flex justify-between items-center bg-gray-50/50 border-gray-100 italic transition hover:shadow-lg">
+                      <div key={`donor-${d.id}`} className="bento-card !p-6 flex justify-between items-center bg-gray-50/50 border-gray-100 italic transition hover:shadow-lg">
                          <div className="space-y-1">
                             <p className="font-bold text-bento-dark">{d.donor_name}</p>
                             <p className="text-[10px] text-bento-light uppercase tracking-widest">{new Date(d.date).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US')}</p>

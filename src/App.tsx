@@ -11,7 +11,7 @@ import {
   HeartHandshake, Gift, Sun,
   Bell, ExternalLink, ClipboardList,
   Instagram, Rss, Music, ShoppingBag, ShoppingCart, UserCheck, DollarSign,
-  AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock,
+  AlertCircle, CheckCircle, ShieldAlert, ShieldCheck, Clock, Scale,
   Eye, EyeOff, Plus, Minus, Image, Upload, Code, Terminal, Cpu, Database, Binary, Braces, Layers, Box,
   Workflow, Atom, Link2, Variable, Webhook, CircleEllipsis, Code2
 } from 'lucide-react';
@@ -1154,6 +1154,19 @@ const HomeOverview = () => {
                 <p className="text-4xl md:text-6xl font-serif font-black text-white leading-tight italic">
                   We Demand Truth. <br /> We Need <span className="text-red-500">Justice.</span>
                 </p>
+                <div className="pt-10">
+                  <motion.div whileHover={{ x: 10 }}>
+                    <Link 
+                      to="/justice" 
+                      className="inline-flex items-center gap-6 text-white hover:text-red-500 transition-all group/link"
+                    >
+                      <span className="text-3xl md:text-5xl font-black italic tracking-widest uppercase">Read Full Story</span>
+                      <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover/link:bg-white group-hover/link:scale-110 transition-all shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                        <ArrowRight className="w-8 h-8 group-hover/link:text-red-600 group-hover/link:translate-x-1 transition-all" />
+                      </div>
+                    </Link>
+                  </motion.div>
+                </div>
               </div>
             </div>
 
@@ -2387,6 +2400,119 @@ const ProfilePage = () => {
   );
 };
 
+const JusticeForHadiPage = () => {
+  const { t } = useLanguage();
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/justice-posts')
+      .then(r => r.json())
+      .then(data => {
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (loading) return <LoadingOverlay />;
+
+  return (
+    <div className="min-h-screen bg-[#0f172a] text-white py-20 px-6 sm:px-10">
+      <div className="max-w-6xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-24"
+        >
+          <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-12 uppercase font-black tracking-widest text-[10px]">
+            <ArrowRight className="rotate-180 w-4 h-4" /> Back to Home
+          </Link>
+          <br />
+          <motion.span 
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="inline-block px-10 py-4 bg-red-600 text-white rounded-full text-[12px] font-[1000] uppercase tracking-[0.8em] mb-12 shadow-[0_0_50px_rgba(220,38,38,0.5)]"
+          >
+            Unwavering Resolve
+          </motion.span>
+          <h1 className="text-7xl md:text-[10rem] font-serif font-black italic mb-10 leading-none tracking-tighter">
+            Justice for <br />
+            <span className="text-red-600 drop-shadow-[0_0_80px_rgba(220,38,38,0.6)]">Hadi Vai</span>
+          </h1>
+          <p className="text-2xl md:text-4xl text-gray-400 max-w-3xl mx-auto font-serif italic leading-relaxed">
+            "Ideas are bulletproof. The pursuit of truth is endless. We stand united for the justice he deserves."
+          </p>
+        </motion.div>
+
+        <div className="grid gap-20">
+          {posts.map((post, i) => (
+            <motion.div 
+              key={post.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-white/[0.02] rounded-[4rem] overflow-hidden border border-white/10 group hover:border-red-600/40 transition-all duration-700 hover:shadow-[0_40px_100px_-30px_rgba(220,38,38,0.15)] hover:bg-white/[0.04]"
+            >
+              <div className={`grid lg:grid-cols-2 gap-10 md:gap-20 ${i % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
+                <div className={`relative overflow-hidden aspect-[4/5] lg:aspect-auto ${i % 2 !== 0 ? 'lg:order-2' : ''}`}>
+                  {post.image_url ? (
+                    <img 
+                      src={post.image_url} 
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 scale-110 group-hover:scale-100 transition-all duration-1000 opacity-60 group-hover:opacity-100" 
+                      alt={post.title}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#1e1b4b] flex items-center justify-center">
+                      <Scale className="w-32 h-32 text-red-600 opacity-20" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-80"></div>
+                </div>
+                <div className="p-12 sm:p-20 flex flex-col justify-center">
+                  <div className="space-y-8">
+                    <h2 className="text-5xl md:text-7xl font-serif font-black mb-10 text-red-500 italic leading-tight">
+                      {post.title}
+                    </h2>
+                    <div className="h-2 w-32 bg-red-600 rounded-full mb-10"></div>
+                    <p className="text-gray-300 text-xl md:text-2xl leading-[1.8] font-serif italic whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                    <div className="pt-10 flex items-center gap-6 text-[11px] uppercase font-[1000] tracking-[0.6em] text-white/20">
+                       <Scale size={18} className="text-red-600" />
+                       Published: {new Date(post.created_at).toLocaleDateString('bn-BD')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          
+          {posts.length === 0 && (
+            <div className="text-center py-40 border-4 border-dashed border-white/5 rounded-[5rem] group hover:border-red-600/20 transition-colors">
+              <Scale size={100} className="mx-auto mb-10 text-white/5 group-hover:text-red-600/20 transition-colors" />
+              <p className="text-white/10 font-black italic text-5xl md:text-7xl tracking-tighter">Seeking Truth...</p>
+              <p className="text-white/5 uppercase tracking-[1em] mt-8 text-[10px]">Justice will be served</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-40 text-center border-t border-white/5 pt-20">
+           <p className="text-red-600 font-serif italic text-4xl mb-12">"Justice delayed is justice denied."</p>
+           <Link to="/" className="inline-block px-12 py-5 rounded-full border border-white/10 text-white font-black uppercase text-[10px] tracking-[0.5em] hover:bg-white hover:text-black transition-all">
+             Back To Main Site
+           </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const NavLink = ({ to, children, icon: Icon, location, onClick }: any) => {
     const isActive = location?.pathname === to;
     return (
@@ -2616,14 +2742,17 @@ const AdminDashboard = () => {
   const [notices, setNotices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [justicePosts, setJusticePosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', date: new Date().toISOString().split('T')[0] });
+  const [newJusticePost, setNewJusticePost] = useState({ title: '', content: '', image_url: '', order_index: 0 });
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingJusticePost, setEditingJusticePost] = useState<any>(null);
   const [newProduct, setNewProduct] = useState({ name: '', description: '', price: '', image_url: '', category: '', stock_status: 'available' });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'blood_donors' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'blood_donors' | 'pending' | 'notices' | 'events' | 'committee' | 'settings' | 'donations' | 'live' | 'shop' | 'orders' | 'justice'>('dashboard');
   const [logoInput, setLogoInput] = useState('');
   const [heroInput, setHeroInput] = useState('');
   const [committee, setCommittee] = useState<any[]>([]);
@@ -2649,14 +2778,15 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [u, e, c, d, n, p, o] = await Promise.all([
+      const [u, e, c, d, n, p, o, j] = await Promise.all([
         fetch('/api/admin/users').then(r => r.ok ? r.json() : []),
         fetch('/api/events').then(r => r.ok ? r.json() : []),
         fetch('/api/committee').then(r => r.ok ? r.json() : []),
         fetch('/api/donations').then(r => r.ok ? r.json() : []),
         fetch('/api/admin/notices').then(r => r.ok ? r.json() : []),
         fetch('/api/products').then(r => r.ok ? r.json() : []),
-        fetch('/api/admin/orders').then(r => r.ok ? r.json() : [])
+        fetch('/api/admin/orders').then(r => r.ok ? r.json() : []),
+        fetch('/api/justice-posts').then(r => r.ok ? r.json() : [])
       ]);
       setUsers(Array.isArray(u) ? u : []);
       setEvents(Array.isArray(e) ? e : []);
@@ -2665,6 +2795,7 @@ const AdminDashboard = () => {
       setNotices(Array.isArray(n) ? n : []);
       setProducts(Array.isArray(p) ? p : []);
       setOrders(Array.isArray(o) ? o : []);
+      setJusticePosts(Array.isArray(j) ? j : []);
     } finally {
       setLoading(false);
     }
@@ -3048,6 +3179,65 @@ const AdminDashboard = () => {
     }
   };
 
+  const createJusticePost = async () => {
+    if (!newJusticePost.title || !newJusticePost.content) {
+      showFeedback('error', 'Title and Content are required');
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/justice-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newJusticePost)
+      });
+      if (res.ok) {
+        showFeedback('success', 'পোস্ট সফলভাবে তৈরি করা হয়েছে');
+        setNewJusticePost({ title: '', content: '', image_url: '', order_index: 0 });
+        fetchData();
+      } else {
+        showFeedback('error', 'তৈরি করা সম্ভব হয়নি');
+      }
+    } catch (err) {
+      showFeedback('error', 'নেটওয়ার্ক ত্রুটি');
+    }
+  };
+
+  const updateJusticePost = async () => {
+    if (!editingJusticePost) return;
+    try {
+      const res = await fetch(`/api/admin/justice-posts/${editingJusticePost.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newJusticePost)
+      });
+      if (res.ok) {
+        showFeedback('success', 'পোস্ট সফলভাবে আপডেট করা হয়েছে');
+        setEditingJusticePost(null);
+        setNewJusticePost({ title: '', content: '', image_url: '', order_index: 0 });
+        fetchData();
+      } else {
+        showFeedback('error', 'আপডেট করা সম্ভব হয়নি');
+      }
+    } catch (err) {
+      showFeedback('error', 'নেটওয়ার্ক ত্রুটি');
+    }
+  };
+
+  const deleteJusticePost = async (id: number) => {
+    if (!window.confirm('আপনি কি নিশ্চিত যে এই পোস্টটি মুছে ফেলতে চান?')) return;
+    try {
+      const res = await fetch(`/api/admin/justice-posts/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'পোস্ট সফলভাবে মুছে ফেলা হয়েছে');
+        fetchData();
+      } else {
+        showFeedback('error', 'মুছে ফেলা সম্ভব হয়নি');
+      }
+    } catch (err) {
+      showFeedback('error', 'নেটওয়ার্ক ত্রুটি');
+    }
+  };
+
   const addCommitteeMember = async () => {
     if (!newMember.name || !newMember.role) return;
     try {
@@ -3272,6 +3462,7 @@ const AdminDashboard = () => {
               { id: 'events', label: t('admin_manage_events'), icon: Calendar },
               { id: 'committee', label: t('admin_manage_committee'), icon: UserCheck },
               { id: 'donations', label: t('admin_manage_donations'), icon: DollarSign },
+              { id: 'justice', label: 'Justice Section', icon: Scale },
               { id: 'settings', label: t('admin_site_settings'), icon: Settings },
               { id: 'live', label: t('admin_manage_live'), icon: Tv }
             ].map(item => (
@@ -3320,6 +3511,7 @@ const AdminDashboard = () => {
                     {activeTab === 'events' && t('admin_manage_events')}
                     {activeTab === 'committee' && t('admin_manage_committee')}
                     {activeTab === 'donations' && t('admin_manage_donations')}
+                    {activeTab === 'justice' && 'Justice Section Management'}
                     {activeTab === 'settings' && t('admin_site_settings')}
                     {activeTab === 'live' && t('admin_manage_live')}
                   </h2>
@@ -4242,6 +4434,72 @@ const AdminDashboard = () => {
                   </div>
                </div>
             </motion.div>
+          </div>
+        )}
+
+        {activeTab === 'justice' && (
+          <div className="space-y-8">
+            <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-bento-border">
+              <h3 className="text-2xl font-black italic mb-8 flex items-center gap-3">
+                <Plus className="text-red-500" /> নতুন পোস্ট যোগ করুন
+              </h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                <input 
+                  type="text" placeholder="Title" 
+                  className="w-full px-6 py-4 rounded-xl bg-gray-50 border border-bento-border focus:ring-2 focus:ring-red-500 transition-all font-serif italic text-lg"
+                  value={newJusticePost.title}
+                  onChange={(e) => setNewJusticePost({ ...newJusticePost, title: e.target.value })}
+                />
+                <input 
+                  type="text" placeholder="Image URL (Optional)" 
+                  className="w-full px-6 py-4 rounded-xl bg-gray-50 border border-bento-border focus:ring-2 focus:ring-red-500 transition-all font-mono text-sm"
+                  value={newJusticePost.image_url}
+                  onChange={(e) => setNewJusticePost({ ...newJusticePost, image_url: e.target.value })}
+                />
+                <div className="md:col-span-2">
+                  <textarea 
+                    placeholder="Content" rows={5}
+                    className="w-full px-6 py-4 rounded-xl bg-gray-50 border border-bento-border focus:ring-2 focus:ring-red-500 transition-all font-serif italic text-lg"
+                    value={newJusticePost.content}
+                    onChange={(e) => setNewJusticePost({ ...newJusticePost, content: e.target.value })}
+                  />
+                </div>
+                <div className="md:col-span-2 flex justify-end gap-4">
+                  {editingJusticePost ? (
+                    <>
+                      <button onClick={() => { setEditingJusticePost(null); setNewJusticePost({ title: '', content: '', image_url: '', order_index: 0 }); }} className="px-8 py-4 rounded-xl bg-gray-100 text-gray-600 font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition">Cancel</button>
+                      <button onClick={updateJusticePost} className="px-8 py-4 rounded-xl bg-red-600 text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-red-200 hover:scale-105 active:scale-95 transition">Update Post</button>
+                    </>
+                  ) : (
+                    <button onClick={createJusticePost} className="px-8 py-4 rounded-xl bg-red-600 text-white font-black uppercase text-xs tracking-widest shadow-lg shadow-red-200 hover:scale-105 active:scale-95 transition">Create Post</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-bento-border overflow-hidden">
+               <h3 className="text-2xl font-black italic mb-8">বিদ্যমান পোস্টসমূহ ({justicePosts.length})</h3>
+               <div className="grid gap-6">
+                {justicePosts.map((post) => (
+                  <div key={post.id} className="flex flex-col md:flex-row gap-8 bg-gray-50 p-8 rounded-[2rem] border border-bento-border group hover:border-red-200 transition-all">
+                    {post.image_url && (
+                      <div className="w-full md:w-48 h-32 rounded-xl overflow-hidden shadow-md">
+                        <img src={post.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h4 className="text-2xl font-serif font-black text-gray-900 mb-2 italic">{post.title}</h4>
+                      <p className="text-gray-500 text-sm line-clamp-2 md:line-clamp-3 font-serif italic mb-4">{post.content}</p>
+                      <div className="flex items-center gap-4">
+                         <button onClick={() => { setEditingJusticePost(post); setNewJusticePost({ title: post.title, content: post.content, image_url: post.image_url || '', order_index: post.order_index }); }} className="text-blue-600 hover:text-blue-700 font-bold text-[10px] uppercase tracking-widest">Edit</button>
+                         <button onClick={() => deleteJusticePost(post.id)} className="text-red-600 hover:text-red-700 font-bold text-[10px] uppercase tracking-widest">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {justicePosts.length === 0 && <div className="text-center py-20 text-gray-300 font-black italic">No posts found. Add one above.</div>}
+               </div>
+            </div>
           </div>
         )}
 
@@ -6235,6 +6493,7 @@ export default function App() {
                     <Route path="/" element={<HomeOverview />} />
                     <Route path="/live" element={<LiveStreamPage />} />
                     <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/justice" element={<JusticeForHadiPage />} />
                     <Route path="/committee" element={<CommitteePage />} />
                     <Route path="/members" element={<PublicMembersPage />} />
                     <Route path="/blood-donors" element={<PublicMembersPage />} />

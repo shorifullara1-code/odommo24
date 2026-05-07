@@ -113,11 +113,8 @@ app.post('/api/auth/login', async (req, res) => {
   if (error || !user) return res.status(400).json({ error: 'User not found' });
 
   const validPass = await bcrypt.compare(password, user.password);
-  // Temporary override for requested admin credentials
-  const isTargetAdmin = user.email === 'adomyo24@gmail.com';
-  const isTargetPassword = password === 'adomyo1@';
   
-  if (!validPass && !(isTargetAdmin && isTargetPassword)) return res.status(400).json({ error: 'Invalid password' });
+  if (!validPass) return res.status(400).json({ error: 'Invalid password' });
 
   const token = jwt.sign({ id: user.id, userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
   
@@ -737,6 +734,64 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (err: any) {
       console.error('Error deleting product:', err.message || err);
       res.status(500).json({ error: err.message || 'Failed to delete product' });
+    }
+  });
+  
+  // Justice Posts CRUD
+  app.get('/api/justice-posts', async (req, res) => {
+    try {
+      const { data: posts, error } = await supabase.from('justice_posts')
+        .select('*')
+        .order('order_index', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(posts || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/admin/justice-posts', authenticateToken, isAdmin, async (req, res) => {
+    const { title, content, image_url, order_index } = req.body;
+    try {
+      const { error } = await supabase.from('justice_posts').insert([{ 
+        title, 
+        content, 
+        image_url, 
+        order_index: order_index || 0 
+      }]);
+      if (error) throw error;
+      res.status(201).json({ message: 'Post created' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put('/api/admin/justice-posts/:id', authenticateToken, isAdmin, async (req, res) => {
+    const { title, content, image_url, order_index } = req.body;
+    try {
+      const { error } = await supabase.from('justice_posts')
+        .update({ title, content, image_url, order_index })
+        .eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Post updated' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/admin/justice-posts/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('justice_posts').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Post deleted' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 

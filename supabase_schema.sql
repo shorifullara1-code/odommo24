@@ -96,6 +96,16 @@ CREATE TABLE IF NOT EXISTS products (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 8. Justice Posts Table
+CREATE TABLE IF NOT EXISTS justice_posts (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  image_url TEXT,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Enable Row Level Security (RLS) - Optional but recommended
 -- For simplicity in a prototype, you can keep them public or add specific policies:
 -- ALTER TABLE users ENABLE ROW LEVEL SECURITY;

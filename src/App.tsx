@@ -2743,6 +2743,7 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [justicePosts, setJusticePosts] = useState<any[]>([]);
+  const [bloodDonors, setBloodDonors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', link: '' });
   const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', date: new Date().toISOString().split('T')[0] });
@@ -2778,7 +2779,7 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [u, e, c, d, n, p, o, j] = await Promise.all([
+      const [u, e, c, d, n, p, o, j, bd] = await Promise.all([
         fetch('/api/admin/users').then(r => r.ok ? r.json() : []),
         fetch('/api/events').then(r => r.ok ? r.json() : []),
         fetch('/api/committee').then(r => r.ok ? r.json() : []),
@@ -2786,7 +2787,8 @@ const AdminDashboard = () => {
         fetch('/api/admin/notices').then(r => r.ok ? r.json() : []),
         fetch('/api/products').then(r => r.ok ? r.json() : []),
         fetch('/api/admin/orders').then(r => r.ok ? r.json() : []),
-        fetch('/api/justice-posts').then(r => r.ok ? r.json() : [])
+        fetch('/api/justice-posts').then(r => r.ok ? r.json() : []),
+        fetch('/api/admin/blood-donors').then(r => r.ok ? r.json() : [])
       ]);
       setUsers(Array.isArray(u) ? u : []);
       setEvents(Array.isArray(e) ? e : []);
@@ -2796,8 +2798,22 @@ const AdminDashboard = () => {
       setProducts(Array.isArray(p) ? p : []);
       setOrders(Array.isArray(o) ? o : []);
       setJusticePosts(Array.isArray(j) ? j : []);
+      setBloodDonors(Array.isArray(bd) ? bd : []);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteBloodDonor = async (id: number) => {
+    if (!confirm('Are you sure you want to remove this donor?')) return;
+    try {
+      const res = await fetch(`/api/admin/blood-donors/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showFeedback('success', 'Donor removed');
+        fetchData();
+      }
+    } catch (err) {
+      showFeedback('error', 'Delete failed');
     }
   };
 
@@ -3602,82 +3618,82 @@ const AdminDashboard = () => {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm space-y-6">
                            <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-black italic flex items-center gap-2 italic uppercase tracking-tighter">
-                                 <Clock className="text-bento-primary" size={20} /> Recent Activity
-                              </h3>
-                              <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Live Feed</span>
-                           </div>
-                           <div className="space-y-6">
-                              {[
-                                { title: 'New Member Registered', time: '2m ago', desc: 'Samiul joined the community', icon: UserPlus },
-                                { title: 'Order Completed', time: '15m ago', desc: 'Order #8293 shipped', icon: CheckCircle },
-                                { title: 'Donation Received', time: '1h ago', desc: '৳৫০০ from Anonymous', icon: Heart }
-                              ].map((item, i) => (
-                                 <div key={i} className="flex gap-4 group">
-                                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-bento-primary/10 group-hover:text-bento-primary transition-colors">
-                                       <item.icon size={16} />
-                                    </div>
-                                    <div className="flex-grow border-b border-gray-50 pb-4">
-                                       <div className="flex justify-between items-start">
-                                          <p className="text-sm font-black italic">{item.title}</p>
-                                          <span className="text-[9px] font-mono text-gray-300 uppercase">{item.time}</span>
-                                       </div>
-                                       <p className="text-[10px] text-gray-400 font-mono mt-1">{item.desc}</p>
-                                    </div>
-                                 </div>
-                              ))}
-                           </div>
-                        </div>
+                               <h3 className="text-lg font-black italic flex items-center gap-2 italic uppercase tracking-tighter">
+                                  <Clock className="text-bento-primary" size={20} /> Recent Activity
+                               </h3>
+                               <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Live Feed</span>
+                            </div>
+                            <div className="space-y-6">
+                               {[
+                                 { title: 'New Member Registered', time: '2m ago', desc: 'Samiul joined the community', icon: UserPlus },
+                                 { title: 'Order Completed', time: '15m ago', desc: 'Order #8293 shipped', icon: CheckCircle },
+                                 { title: 'Donation Received', time: '1h ago', desc: '৳৫০০ from Anonymous', icon: Heart }
+                               ].map((item, i) => (
+                                  <div key={i} className="flex gap-4 group">
+                                     <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-bento-primary/10 group-hover:text-bento-primary transition-colors">
+                                        <item.icon size={16} />
+                                     </div>
+                                     <div className="flex-grow border-b border-gray-50 pb-4">
+                                        <div className="flex justify-between items-start">
+                                           <p className="text-sm font-black italic">{item.title}</p>
+                                           <span className="text-[9px] font-mono text-gray-300 uppercase">{item.time}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 font-mono mt-1">{item.desc}</p>
+                                     </div>
+                                  </div>
+                               ))}
+                            </div>
+                         </div>
 
-                        <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm flex flex-col justify-between">
-                           <div className="space-y-2">
-                              <h3 className="text-lg font-black italic uppercase tracking-tighter">Community Reach</h3>
-                              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-[0.2em] mb-4">Database Engagement</p>
-                           </div>
-                           <div className="flex-grow flex items-center justify-center py-6">
-                              <div className="relative w-32 h-32">
-                                 <svg className="w-full h-full -rotate-90">
-                                    <circle cx="64" cy="64" r="58" fill="transparent" stroke="#f3f4f6" strokeWidth="12" />
-                                    <circle cx="64" cy="64" r="58" fill="transparent" stroke="#ff0000" strokeWidth="12" strokeDasharray="364.4" strokeDashoffset="100" strokeLinecap="round" />
-                                 </svg>
-                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-2xl font-black italic">85%</span>
-                                    <span className="text-[8px] font-mono text-gray-400 uppercase tracking-[0.1em]">Target</span>
-                                 </div>
-                              </div>
-                           </div>
-                           <p className="text-[10px] text-center text-gray-400 font-mono italic">সংগঠনের এই মাসের লক্ষ্যমাত্রার ৮৫% পূরণ হয়েছে।</p>
-                        </div>
-                     </div>
-                  </div>
+                         <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm flex flex-col justify-between">
+                            <div className="space-y-2">
+                               <h3 className="text-lg font-black italic uppercase tracking-tighter">Community Reach</h3>
+                               <p className="text-[10px] font-mono text-gray-400 uppercase tracking-[0.2em] mb-4">Database Engagement</p>
+                            </div>
+                            <div className="flex-grow flex items-center justify-center py-6">
+                               <div className="relative w-32 h-32">
+                                  <svg className="w-full h-full -rotate-90">
+                                     <circle cx="64" cy="64" r="58" fill="transparent" stroke="#f3f4f6" strokeWidth="12" />
+                                     <circle cx="64" cy="64" r="58" fill="transparent" stroke="#ff0000" strokeWidth="12" strokeDasharray="364.4" strokeDashoffset="100" strokeLinecap="round" />
+                                  </svg>
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                     <span className="text-2xl font-black italic">85%</span>
+                                     <span className="text-[8px] font-mono text-gray-400 uppercase tracking-[0.1em]">Target</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <p className="text-[10px] text-center text-gray-400 font-mono italic">সংগঠনের এই মাসের লক্ষ্যমাত্রার ৮৫% পূরণ হয়েছে।</p>
+                         </div>
+                      </div>
+                   </div>
 
-                  <div className="lg:col-span-4 space-y-8">
-                     <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm">
-                        <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 decoration-bento-primary decoration-2 underline-offset-8 underline">System Status</h3>
-                        <div className="space-y-4">
-                           {[
-                             { label: 'Database', status: 'Optimal', active: true },
-                             { label: 'Auth Service', status: 'Online', active: true },
-                             { label: 'Cloud Store', status: 'Active', active: true },
-                             { label: 'Live Stream', status: 'Idle', active: false }
-                           ].map((s, i) => (
-                              <div key={i} className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                 <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">{s.label}</span>
-                                 <div className="flex items-center gap-2">
-                                    <span className={`w-1.5 h-1.5 rounded-full ${s.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
-                                    <span className="text-[10px] font-black italic">{s.status}</span>
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-                     </div>
+                   <div className="lg:col-span-4 space-y-8">
+                      <div className="bg-white rounded-[2.5rem] p-8 border border-gray-200 shadow-sm">
+                         <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 decoration-bento-primary decoration-2 underline-offset-8 underline">System Status</h3>
+                         <div className="space-y-4">
+                            {[
+                              { label: 'Database', status: 'Optimal', active: true },
+                              { label: 'Auth Service', status: 'Online', active: true },
+                              { label: 'Cloud Store', status: 'Active', active: true },
+                              { label: 'Live Stream', status: 'Idle', active: false }
+                            ].map((s, i) => (
+                               <div key={i} className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                  <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">{s.label}</span>
+                                  <div className="flex items-center gap-2">
+                                     <span className={`w-1.5 h-1.5 rounded-full ${s.active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-300'}`}></span>
+                                     <span className="text-[10px] font-black italic">{s.status}</span>
+                                  </div>
+                               </div>
+                            ))}
+                         </div>
+                      </div>
 
-                     <div className="bg-gradient-to-br from-bento-primary to-red-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-bento-primary/20">
-                        <h3 className="text-xl font-black italic mb-4">সংরক্ষণ করুন</h3>
-                        <p className="text-[10px] text-white/60 leading-relaxed font-mono italic uppercase mb-6 tracking-widest">সকল ডাটা নিয়মিত ডাউনলোড করে রাখুন যাতে নিরাপত্তার কোনো ঘাটতি না হয়।</p>
-                        <button className="w-full bg-white text-black py-4 rounded-2xl font-mono text-[10px] uppercase tracking-widest font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all">Download Full Backup</button>
-                     </div>
-                  </div>
+                      <div className="bg-gradient-to-br from-bento-primary to-red-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-bento-primary/20">
+                         <h3 className="text-xl font-black italic mb-4">সংরক্ষণ করুন</h3>
+                         <p className="text-[10px] text-white/60 leading-relaxed font-mono italic uppercase mb-6 tracking-widest">সকল ডাটা নিয়মিত ডাউনলোড করে রাখুন যাতে নিরাপত্তার কোনো ঘাটতি না হয়।</p>
+                         <button className="w-full bg-white text-black py-4 rounded-2xl font-mono text-[10px] uppercase tracking-widest font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all">Download Full Backup</button>
+                      </div>
+                   </div>
                 </motion.div>
               )}
 
@@ -3722,74 +3738,62 @@ const AdminDashboard = () => {
 
                        <div className="flex-grow">
                          <div className="grid grid-cols-12 px-10 py-5 bg-white border-b border-gray-100 hidden md:grid">
-                            <div className="col-span-5 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Member Identity</div>
-                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
-                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Role Status</div>
-                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
+                            <div className="col-span-12 md:col-span-5 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Member Identity</div>
+                            <div className="col-span-12 md:col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Contact & ID</div>
+                            <div className="col-span-12 md:col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Role Status</div>
+                            <div className="col-span-12 md:col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
                          </div>
-                         <div className="divide-y divide-gray-50">
+                         <div className="divide-y divide-gray-100">
                             {filteredUsers.filter(u => u.status === 'approved').map(u => (
                                <motion.div 
                                   layout
-                                  key={u.id} 
-                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/80 transition-all group"
+                                  key={`member-${u.id}`} 
+                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/50 transition-all group"
                                >
                                   <div className="col-span-12 md:col-span-5 flex items-center gap-5">
-                                     <div className="relative group/avatar cursor-pointer">
-                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover/avatar:border-bento-primary/30 transition-colors relative">
-                                           {u.profile_image ? (
-                                              <img src={u.profile_image} className="w-full h-full object-cover" />
-                                           ) : (
-                                              <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
-                                           )}
-                                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                                              <span className="text-[8px] font-black uppercase text-white tracking-widest text-center">Update</span>
-                                           </div>
-                                           <input type="file" accept="image/*" onChange={(e) => {
-                                              if (e.target.files?.[0]) handleUpdateUserImage(u.id, e.target.files[0]);
-                                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                                     <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-200 overflow-hidden shadow-inner flex items-center justify-center">
+                                         {u.profile_image ? (
+                                            <img src={u.profile_image} className="w-full h-full object-cover" />
+                                         ) : (
+                                            <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
+                                         )}
                                      </div>
                                      <div>
                                         <p className="font-black text-lg italic text-gray-900 group-hover:text-bento-primary transition-colors">{u.name}</p>
                                         <div className="flex items-center gap-2">
-                                           <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                           <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined Member</p>
                                            {u.is_blood_donor && <span className="bg-red-50 text-red-500 text-[8px] font-black uppercase px-2 py-0.5 rounded border border-red-100 flex items-center gap-1"><Heart size={8} fill="currentColor" /> Donor</span>}
                                         </div>
                                      </div>
                                   </div>
-                                  
-                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0">
                                      <div className="inline-flex flex-col items-center">
-                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+                                        <span className="text-sm font-black italic text-gray-700">@{u.userId || 'N/A'}</span>
                                         <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
-                                     </div>
+                                      </div>
                                   </div>
-
                                   <div className="col-span-6 md:col-span-2 flex justify-center">
                                      <button 
                                        onClick={() => toggleRole(u.id, u.role)}
-                                       className={`px-4 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] border transition-all active:scale-95 ${u.role === 'admin' ? 'bg-bento-primary/10 text-bento-primary border-bento-primary/20 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-gray-300'}`}
+                                       className={`px-4 py-1 rounded-lg text-[8px] font-mono uppercase tracking-widest border transition-all ${u.role === 'admin' ? 'bg-bento-primary/10 text-bento-primary border-bento-primary/20' : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-gray-300'}`}
                                      >
                                         {u.role}
                                      </button>
                                   </div>
-
                                   <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
-                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-bento-primary hover:border-bento-primary hover:shadow-lg hover:shadow-bento-primary/5 transition-all"><Info size={16} /></button>
-                                     <button onClick={() => handleDeleteUser(u.id)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Trash2 size={16} /></button>
+                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-bento-primary transition-all shadow-sm"><Info size={14} /></button>
+                                     <button onClick={() => handleDeleteUser(u.id)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 transition-all shadow-sm"><Trash2 size={14} /></button>
                                   </div>
                                </motion.div>
                             ))}
                             {filteredUsers.filter(u => u.status === 'approved').length === 0 && (
                                <div className="flex flex-col items-center justify-center py-32 text-center">
                                   <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-6 border border-dashed border-gray-300"><Users size={32} /></div>
-                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching records found in database</p>
+                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching records found</p>
                                </div>
                             )}
                          </div>
-                      </div>
+                       </div>
                    </div>
                 </motion.div>
               )}
@@ -3801,29 +3805,18 @@ const AdminDashboard = () => {
                    animate={{ opacity: 1, y: 0 }} 
                    exit={{ opacity: 0, y: -20 }}
                    transition={{ duration: 0.3 }}
-                   className="space-y-8"
+                   className="space-y-12"
                 >
-                   <div className="bg-white rounded-[2.5rem] border border-red-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
-                      <div className="p-8 border-b border-red-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-red-50/30">
+                   {/* Organization Donors */}
+                   <div className="bg-white rounded-[2.5rem] border border-red-100 shadow-sm overflow-hidden flex flex-col">
+                      <div className="p-8 border-b border-red-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-red-50/10">
                          <div>
                             <h2 className="text-xl font-black italic text-gray-900 flex items-center gap-3">
-                               <Heart className="text-red-500" size={24} /> 
-                               অদম্য ব্লাড ডোনার
+                               <ShieldCheck className="text-red-500" size={24} /> 
+                               সংগঠনের রক্তদাতা তালিকা
                             </h2>
-                            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Verified Blood Donors Database</p>
+                            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">Verified Member Donors</p>
                          </div>
-                          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                             <div className="relative w-full md:w-80">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input 
-                                   type="text" 
-                                   placeholder="Phone বা Name বা Blood Group দিয়ে খুঁজুন..." 
-                                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-red-100 rounded-2xl focus:border-red-500 focus:ring-4 focus:ring-red-500/5 outline-none transition text-sm font-medium"
-                                   value={searchTerm}
-                                   onChange={e => setSearchTerm(e.target.value)}
-                                />
-                             </div>
-                          </div>
                        </div>
 
                        <div className="flex-grow">
@@ -3837,54 +3830,90 @@ const AdminDashboard = () => {
                             {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).map(u => (
                                <motion.div 
                                   layout
-                                  key={u.id} 
-                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-red-50/50 transition-all group"
+                                  key={`org-donor-${u.id}`} 
+                                  className="grid grid-cols-12 px-10 py-6 items-center hover:bg-red-50/20 transition-all group"
                                >
                                   <div className="col-span-12 md:col-span-5 flex items-center gap-5">
-                                     <div className="relative group/avatar cursor-pointer">
-                                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 shadow-inner group-hover/avatar:border-red-500/30 transition-colors relative">
-                                           {u.profile_image ? (
-                                              <img src={u.profile_image} className="w-full h-full object-cover" />
-                                           ) : (
-                                              <span className="font-serif text-2xl text-gray-300 font-bold">{u.name ? u.name[0] : '?'}</span>
-                                           )}
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full shadow-sm flex items-center justify-center text-[8px] text-white">
-                                           <Heart size={10} fill="currentColor" />
-                                        </div>
+                                     <div className="w-14 h-14 rounded-2xl bg-white border border-gray-100 overflow-hidden shadow-inner flex items-center justify-center text-red-200">
+                                         {u.profile_image ? (
+                                            <img src={u.profile_image} className="w-full h-full object-cover" />
+                                         ) : (
+                                            <Heart size={20} fill="currentColor" />
+                                         )}
                                      </div>
                                      <div>
                                         <p className="font-black text-lg italic text-gray-900 group-hover:text-red-500 transition-colors">{u.name}</p>
-                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined: {new Date().toLocaleDateString()}</p>
+                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Joined Member</p>
                                      </div>
                                   </div>
-                                  
-                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0 border-y md:border-none border-gray-50 my-4 md:my-0">
+                                  <div className="col-span-12 md:col-span-3 text-center py-4 md:py-0">
                                      <div className="inline-flex flex-col items-center">
-                                        <span className="text-sm font-black italic text-gray-700 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">@{u.userId || 'N/A'}</span>
+                                        <span className="text-sm font-black italic text-gray-700">@{u.userId || 'N/A'}</span>
                                         <span className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-widest">{u.phone}</span>
-                                     </div>
+                                      </div>
                                   </div>
-
                                   <div className="col-span-6 md:col-span-2 flex justify-center">
-                                     <span className="px-4 py-1.5 rounded-lg text-sm font-black text-red-500 bg-red-50 border border-red-100 shadow-sm">
+                                     <span className="px-4 py-1.5 rounded-lg text-sm font-black text-red-500 bg-red-50 border border-red-100">
                                         {u.blood_group || 'N/A'}
                                      </span>
                                   </div>
-
                                   <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
-                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-500 hover:shadow-lg hover:shadow-red-500/5 transition-all"><Info size={16} /></button>
+                                     <button onClick={() => setSelectedUser(u)} className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-red-500 transition-all"><Info size={14} /></button>
                                   </div>
                                </motion.div>
                             ))}
-                            {users.filter(u => u.is_blood_donor && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.phone.includes(searchTerm) || (u.blood_group && u.blood_group.toLowerCase().includes(searchTerm.toLowerCase())))).length === 0 && (
-                               <div className="flex flex-col items-center justify-center py-32 text-center">
-                                  <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center text-red-200 mb-6 border border-dashed border-red-200"><Heart size={32} /></div>
-                                  <p className="text-gray-400 font-mono text-xs uppercase tracking-widest">No matching donors found</p>
-                               </div>
-                            )}
                          </div>
-                      </div>
+                       </div>
+                   </div>
+
+                   {/* Public Donors */}
+                   <div className="bg-white rounded-[2.5rem] border border-red-100 shadow-sm overflow-hidden flex flex-col">
+                      <div className="p-8 border-b border-red-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-red-50/20">
+                         <div>
+                            <h2 className="text-xl font-black italic text-gray-900 flex items-center gap-3">
+                               <Heart className="text-red-500" size={24} fill="currentColor" /> 
+                               ব্লাড ডোনার তালিকা (পাবলিক)
+                            </h2>
+                            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-1">External Public Donor Submissions</p>
+                         </div>
+                       </div>
+
+                       <div className="flex-grow">
+                         <div className="grid grid-cols-12 px-10 py-5 bg-white border-b border-red-50 hidden md:grid">
+                            <div className="col-span-4 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic">Donor Information</div>
+                            <div className="col-span-2 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Group</div>
+                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-center">Address & Age</div>
+                            <div className="col-span-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest italic text-right">Actions</div>
+                         </div>
+                         <div className="divide-y divide-red-50">
+                            {bloodDonors.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.phone.includes(searchTerm) || d.blood_group.toLowerCase().includes(searchTerm.toLowerCase())).map(donor => (
+                               <div key={`admin-public-donor-${donor.id}`} className="grid grid-cols-12 px-10 py-6 items-center hover:bg-gray-50/80 transition-all group">
+                                  <div className="col-span-12 md:col-span-4 flex items-center gap-5">
+                                     <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 border border-red-100 shadow-sm">
+                                        <Heart size={18} fill="currentColor" />
+                                     </div>
+                                     <div>
+                                        <p className="font-black text-lg italic text-gray-900">{donor.name}</p>
+                                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{donor.phone}</p>
+                                     </div>
+                                  </div>
+                                  <div className="col-span-12 md:col-span-2 text-center py-4 md:py-0">
+                                     <span className="text-2xl font-black text-red-500 italic uppercase drop-shadow-sm">{donor.blood_group}</span>
+                                  </div>
+                                  <div className="col-span-12 md:col-span-3 text-center">
+                                     <div className="space-y-1">
+                                        <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest">Age: {donor.age || 'N/A'}</p>
+                                        <p className="text-xs font-serif italic text-gray-600 line-clamp-1">{donor.address || 'No Address'}</p>
+                                     </div>
+                                  </div>
+                                  <div className="col-span-12 md:col-span-3 flex justify-end gap-2">
+                                     <button onClick={() => deleteBloodDonor(donor.id)} className="p-2.5 bg-red-50 border border-red-100 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm"><Trash2 size={14} /></button>
+                                  </div>
+                               </div>
+                            ))}
+                            {bloodDonors.length === 0 && <p className="text-center py-40 text-red-200/50 italic font-mono text-[10px] uppercase tracking-widest">কোন পাবলিক ডোনার পাওয়া যায়নি...</p>}
+                         </div>
+                       </div>
                    </div>
                 </motion.div>
               )}
@@ -5057,35 +5086,102 @@ const DetailGroup = ({ label, items }: { label: string, items: { label: string, 
 const PublicMembersPage = () => {
   const { t, lang } = useLanguage();
   const [members, setMembers] = useState<any[]>(globalCache.members || []);
+  const [publicDonors, setPublicDonors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(!globalCache.members);
   const location = useLocation();
   const isBloodDonors = location.pathname === '/blood-donors';
+  
+  const [showRegModal, setShowRegModal] = useState(false);
+  const [regData, setRegData] = useState({ name: '', phone: '', blood_group: '', age: '', address: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [regSuccess, setRegSuccess] = useState(false);
 
   useEffect(() => {
-    fetch('/api/members')
+    // Cache check for members
+    const fetchMembers = fetch('/api/members')
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         globalCache.members = Array.isArray(data) ? data : [];
         setMembers(globalCache.members);
-        setLoading(false);
       });
+
+    // Fetch public donors if on donor page
+    const fetchPublicDonors = fetch('/api/blood-donors')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setPublicDonors(Array.isArray(data) ? data : []);
+      });
+
+    Promise.all([fetchMembers, fetchPublicDonors]).finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   const filteredMembers = useMemo(() => {
     let result = members;
     if (isBloodDonors) {
-      result = result.filter(m => m.is_blood_donor === 1 || m.is_blood_donor === true || String(m.is_blood_donor) === 'true');
+      // Merge verified members who are donors with public donors
+      const memberDonors = members.filter(m => m.is_blood_donor === 1 || m.is_blood_donor === true || String(m.is_blood_donor) === 'true');
+      const mappedPublicDonors = publicDonors.map(d => ({
+        ...d,
+        is_public_donor: true,
+        member_id_number: 'Public Donor'
+      }));
+      result = [...memberDonors, ...mappedPublicDonors];
     }
+    
     if (!searchTerm) return result;
-    return result.filter(m => m.name?.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [members, searchTerm, isBloodDonors]);
+    return result.filter(m => 
+      m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      m.blood_group?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [members, publicDonors, searchTerm, isBloodDonors]);
+
+  const handleRegisterDonor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/blood-donors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(regData)
+      });
+      if (res.ok) {
+        setRegSuccess(true);
+        setRegData({ name: '', phone: '', blood_group: '', age: '', address: '' });
+        // Refresh list
+        fetch('/api/blood-donors').then(r => r.json()).then(setPublicDonors);
+        setTimeout(() => {
+          setShowRegModal(false);
+          setRegSuccess(false);
+        }, 2000);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Registration failed');
+      }
+    } catch (err) {
+      alert('Failed to register');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) return <LoadingOverlay />;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-24 min-h-screen">
-      <div className="text-center space-y-4 mb-20">
+      <div className="text-center space-y-4 mb-20 relative">
+         {isBloodDonors && (
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowRegModal(true)}
+              className="absolute top-0 right-0 hidden md:flex items-center gap-2 bg-red-500 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20"
+            >
+              <Heart size={16} fill="currentColor" /> {t('donor_register_btn')}
+            </motion.button>
+         )}
          <h1 className="text-5xl md:text-8xl font-serif text-bento-dark italic">
            {isBloodDonors ? (lang === 'bn' ? 'অদম্য ব্লাড ডোনার' : 'Blood Donors') : (lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Members')}
          </h1>
@@ -5093,13 +5189,23 @@ const PublicMembersPage = () => {
          <p className="text-sm font-black uppercase tracking-[0.5em] text-bento-light">
            {isBloodDonors ? (lang === 'bn' ? 'আমাদের রক্তদাতা সদস্যবৃন্দ' : 'Our Bold Blood Donors') : 'Our Growing Community'}
          </p>
+         {isBloodDonors && (
+            <div className="md:hidden pt-8">
+              <button 
+                onClick={() => setShowRegModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-500/20"
+              >
+                <Heart size={16} fill="currentColor" /> {t('donor_register_btn')}
+              </button>
+            </div>
+         )}
       </div>
 
       <div className="max-w-xl mx-auto mb-16 relative">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-bento-light" size={20} />
          <input 
            type="text" 
-           placeholder={lang === 'bn' ? 'সদস্যের নাম দিয়ে খুঁজুন...' : 'Search members by name...'}
+           placeholder={isBloodDonors ? (lang === 'bn' ? 'রক্তের গ্রুপ বা নাম দিয়ে খুঁজুন...' : 'Search by blood group or name...') : (lang === 'bn' ? 'সদস্যের নাম দিয়ে খুঁজুন...' : 'Search members by name...')}
            className="w-full pl-16 pr-8 py-5 bg-white border-2 border-bento-border rounded-[2rem] shadow-xl focus:border-bento-primary outline-none transition text-base italic"
            value={searchTerm}
            onChange={e => setSearchTerm(e.target.value)}
@@ -5114,16 +5220,55 @@ const PublicMembersPage = () => {
              whileInView={{ opacity: 1, scale: 1 }}
              viewport={{ once: true }}
              transition={{ delay: index * 0.05 }}
-             className="bento-card border border-bento-border hover:border-bento-primary hover:shadow-2xl transition duration-500 group text-center"
+             className="bento-card border-2 border-bento-border hover:border-bento-primary hover:shadow-2xl transition duration-500 group relative overflow-hidden"
            >
-              <h3 className="text-xl font-serif italic text-bento-dark mb-2">{member.name}</h3>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-bento-primary">
-                {isBloodDonors ? (lang === 'bn' ? 'অদম্য ব্লাড ডোনার' : 'Blood Donor') : (member.role === 'admin' ? 'এডমিন' : (lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Member'))}
-              </p>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-light">Member ID: @{member.member_id_number || member.userId || 'N/A'}</p>
-              {isBloodDonors && member.blood_group && (
-                 <p className="mt-4 text-[12px] font-bold text-red-500 bg-red-50 py-1.5 px-3 rounded-xl inline-block">Group: {member.blood_group}</p>
-              )}
+              <div className="flex flex-col items-center text-center space-y-4">
+                 <div className="w-24 h-24 bg-gray-50 rounded-2xl overflow-hidden border border-bento-border group-hover:scale-105 transition duration-500 flex items-center justify-center">
+                    {member.profile_image ? (
+                       <img src={member.profile_image} className="w-full h-full object-cover" alt={member.name} />
+                    ) : (
+                       <div className={`p-4 rounded-full ${member.blood_group ? 'bg-red-50 text-red-400' : 'bg-gray-100 text-gray-400'}`}>
+                          {member.blood_group ? <Heart size={40} fill="currentColor" /> : <UserIcon size={40} />}
+                       </div>
+                    )}
+                 </div>
+                 
+                 <div>
+                    <h3 className="text-xl font-serif italic text-bento-dark">{member.name}</h3>
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-bento-primary mt-1">
+                      {isBloodDonors ? (lang === 'bn' ? 'স্বেচ্ছাসেবী রক্তদাতা' : 'Volunteer Donor') : (member.role === 'admin' ? 'এডমিন' : (lang === 'bn' ? 'অনলাইন সদস্য' : 'Online Member'))}
+                    </p>
+                 </div>
+
+                 {isBloodDonors ? (
+                   <div className="w-full space-y-4 pt-4 border-t border-dashed border-bento-border">
+                      <div className="flex justify-between items-center px-2">
+                         <span className="text-[10px] font-black uppercase text-bento-light">{t('donor_blood_group')}</span>
+                         <span className="text-xl font-black text-red-500 italic uppercase">{member.blood_group}</span>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                         <a 
+                           href={`tel:${member.phone}`}
+                           className="flex items-center justify-center gap-2 w-full py-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                         >
+                            <Phone size={14} /> {member.phone}
+                         </a>
+                         {member.address && (
+                            <div className="flex items-center justify-center gap-2 text-[10px] text-bento-light italic font-serif">
+                               <MapPin size={12} className="text-bento-primary" /> {member.address}
+                            </div>
+                         )}
+                         {member.age && (
+                            <div className="text-[10px] text-bento-light font-black uppercase tracking-widest">
+                               Age: {member.age}
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                 ) : (
+                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bento-light">Member ID: @{member.member_id_number || member.userId || 'N/A'}</p>
+                 )}
+              </div>
            </motion.div>
          ))}
       </div>
@@ -5132,6 +5277,105 @@ const PublicMembersPage = () => {
             {lang === 'bn' ? 'কোন সদস্য পাওয়া যায়নি...' : 'No members found...'}
          </div>
       )}
+
+      {/* Registration Modal */}
+      <AnimatePresence>
+         {showRegModal && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+               <motion.div 
+                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                 onClick={() => setShowRegModal(false)}
+                 className="absolute inset-0 bg-bento-dark/80 backdrop-blur-md"
+               />
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                 className="relative w-full max-w-xl bg-white rounded-[2.5rem] p-10 shadow-2xl overflow-hidden"
+                 onClick={e => e.stopPropagation()}
+               >
+                  {/* Decorative stuff */}
+                  <div className="absolute top-0 right-0 p-8 opacity-5"><Heart size={200} /></div>
+                  
+                  <div className="relative space-y-8">
+                     <div className="space-y-2">
+                        <h2 className="text-3xl font-serif italic text-bento-dark leading-tight">{t('donor_register_title')}</h2>
+                        <p className="text-sm text-bento-light font-serif italic">{t('donor_register_desc')}</p>
+                     </div>
+
+                     {regSuccess ? (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                          className="py-20 text-center space-y-6"
+                        >
+                           <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
+                              <CheckCircle size={48} />
+                           </div>
+                           <p className="text-xl font-bold italic text-bento-dark">{t('donor_register_success')}</p>
+                        </motion.div>
+                     ) : (
+                        <form onSubmit={handleRegisterDonor} className="space-y-6">
+                           <div className="grid sm:grid-cols-2 gap-6">
+                              <InputField 
+                                label={t('donor_name')} icon={UserIcon} required
+                                value={regData.name} onChange={(e:any) => setRegData({...regData, name: e.target.value})} 
+                              />
+                              <InputField 
+                                label={t('donor_phone')} icon={Phone} required
+                                value={regData.phone} onChange={(e:any) => setRegData({...regData, phone: e.target.value})} 
+                              />
+                           </div>
+                           <div className="grid sm:grid-cols-2 gap-6">
+                              <div className="space-y-1.5">
+                                 <label className="text-[10px] font-black uppercase tracking-widest pl-1 text-bento-light flex items-center gap-2">
+                                    <Activity size={12} className="text-red-500" /> {t('donor_blood_group')} *
+                                 </label>
+                                 <select 
+                                   required
+                                   value={regData.blood_group}
+                                   onChange={e => setRegData({...regData, blood_group: e.target.value})}
+                                   className="w-full px-5 py-4 rounded-2xl border-2 border-bento-border bg-gray-50 focus:border-bento-primary outline-none transition text-sm font-medium"
+                                 >
+                                    <option value="">সিলেক্ট করুন</option>
+                                    {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(g => <option key={g} value={g}>{g}</option>)}
+                                 </select>
+                              </div>
+                              <InputField 
+                                label={t('donor_age')} icon={Calendar} 
+                                type="number"
+                                value={regData.age} onChange={(e:any) => setRegData({...regData, age: e.target.value})} 
+                              />
+                           </div>
+                           <InputField 
+                                label={t('donor_address')} icon={MapPin} 
+                                value={regData.address} onChange={(e:any) => setRegData({...regData, address: e.target.value})} 
+                           />
+                           
+                           <div className="pt-4 flex gap-4">
+                              <button 
+                                type="button" onClick={() => setShowRegModal(false)}
+                                className="flex-1 py-5 rounded-2xl font-black text-xs uppercase tracking-widest text-bento-light hover:bg-gray-50 transition"
+                              >
+                                {lang === 'bn' ? 'বাতিল' : 'Cancel'}
+                              </button>
+                              <button 
+                                type="submit" disabled={isSubmitting}
+                                className="flex-[2] bg-red-500 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-red-500/20 active:scale-95 transition flex items-center justify-center gap-3 disabled:opacity-50"
+                              >
+                                {isSubmitting ? (
+                                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                   <><Heart size={16} fill="currentColor" /> {t('donor_register_btn')}</>
+                                )}
+                              </button>
+                           </div>
+                        </form>
+                     )}
+                  </div>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
     </div>
   );
 };

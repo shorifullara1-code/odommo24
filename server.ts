@@ -642,6 +642,78 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
+  // --- Blood Donors CRUD ---
+  app.get('/api/blood-donors', async (req, res) => {
+    try {
+      const { data: donors, error } = await supabase.from('blood_donors')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        if (error.code === '42P01' || (error.message && error.message.includes('Could not find the table'))) {
+          return res.json([]);
+        }
+        throw error;
+      }
+      res.json(donors || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/blood-donors', async (req, res) => {
+    try {
+      const { name, phone, blood_group, age, address } = req.body;
+      if (!name || !phone || !blood_group) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const { data, error } = await supabase.from('blood_donors').insert([{
+        name,
+        phone,
+        blood_group,
+        age: parseInt(age) || null,
+        address,
+        status: 'approved', // Auto-approved for now as per "pasa pasi page eo thakbe"
+        created_at: new Date().toISOString()
+      }]).select().single();
+
+      if (error) {
+        if (error.code === '42P01') {
+          return res.status(404).json({ error: 'Blood Donors table does not exist. Please notify admin.' });
+        }
+        throw error;
+      }
+
+      res.status(201).json({ message: 'Registration successful', donor: data });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/admin/blood-donors', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { data: donors, error } = await supabase.from('blood_donors')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      res.json(donors || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete('/api/admin/blood-donors/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+      const { error } = await supabase.from('blood_donors').delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.json({ message: 'Donor removed' });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Admin: Update user picture
   app.patch('/api/admin/users/:id/picture', authenticateToken, isAdmin, async (req, res) => {
     const { profile_image } = req.body;
